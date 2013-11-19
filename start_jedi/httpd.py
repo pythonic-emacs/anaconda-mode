@@ -1,17 +1,10 @@
-#!/usr/bin/env python3
+import start_jedi.jedi as jedi
 
 import http.server as server
 import json
 import logging
 
-
-logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
-
-
-def do_jedi(req):
-    """Process Jedi operation correspond to request."""
-    return req
 
 
 class JediHandler(server.BaseHTTPRequestHandler):
@@ -27,7 +20,7 @@ class JediHandler(server.BaseHTTPRequestHandler):
         request = self.rfile.read(content_len).decode()
         logger.debug('Accepted content: %s', request)
 
-        result = do_jedi(json.loads(request))
+        result = jedi.do_jedi(json.loads(request))
         logger.debug('Jedi result: %s', result)
 
         message = json.dumps(result).encode()
@@ -40,13 +33,9 @@ class JediHandler(server.BaseHTTPRequestHandler):
         return
 
 
-def main(port=8000):
+def start_jedi(port=8000):
     """Start Jedi node."""
 
     address = ('', port)
     httpd = server.HTTPServer(address, JediHandler)
     httpd.serve_forever()
-
-
-if __name__ == '__main__':
-    main()
