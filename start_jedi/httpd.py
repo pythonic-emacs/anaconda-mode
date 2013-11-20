@@ -1,6 +1,5 @@
-import start_jedi.jedi as jedi
-
-import http.server as server
+from start_jedi import jedi
+from http import server
 import json
 import logging
 
@@ -16,10 +15,10 @@ class JediHandler(server.BaseHTTPRequestHandler):
 
         try:
 
-            content_len = int(self.headers['content-length'])
+            content_len = self.headers['content-length']
             logger.debug('Content length: %s', content_len)
 
-            request = self.rfile.read(content_len).decode()
+            request = self.rfile.read(int(content_len)).decode()
             logger.debug('Accepted content: %s', request)
 
             result = jedi.do_jedi(json.loads(request))
@@ -31,6 +30,7 @@ class JediHandler(server.BaseHTTPRequestHandler):
         except (TypeError, ValueError):
 
             logger.exception('Request processing error', exc_info=True)
+            self.send_error(400)
 
         else:
 
@@ -41,10 +41,11 @@ class JediHandler(server.BaseHTTPRequestHandler):
         return
 
 
-def start_jedi(port=8000):
-    """Start Jedi node."""
+class JediServer(server.HTTPServer):
+    """Jedi HTTP server."""
 
-    address = ('', port)
-    httpd = server.HTTPServer(address, JediHandler)
-    logger.info('Starting server...')
-    httpd.serve_forever()
+    def start(self):
+        """Start Jedi server."""
+
+        logger.info('Starting Jedi server...')
+        self.serve_forever()
