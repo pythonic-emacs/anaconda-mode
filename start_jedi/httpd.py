@@ -27,7 +27,7 @@ class JediHandler(server.BaseHTTPRequestHandler):
             message = json.dumps(result).encode()
             logger.debug('Send message to host: %s', message)
 
-        except (TypeError, ValueError):
+        except (TypeError, KeyError, ValueError):
 
             logger.exception('Request processing error', exc_info=True)
             self.send_error(400)

@@ -26,6 +26,11 @@ class HandlerMock():
 
         pass
 
+    def send_error(self, code):
+        """Save error code as response."""
+
+        self.response_code = code
+
 
 class FileMock():
 
@@ -48,9 +53,27 @@ class FileMock():
 class TestDoPUSH(TestCase):
 
     def test_correct_post_request(self):
-        """Test correct post request with its body."""
+        """Need status 200 on correct post request with its body."""
+
         mock_handler = HandlerMock(
             headers={'content-length': '20'},
             body='{"aaa": 1, "bbb": 2}')
-        self.assertIsNone(do_POST(mock_handler))
+        do_POST(mock_handler)
         self.assertEqual(200, mock_handler.response_code)
+
+    def test_missing_content_length(self):
+        """Need send status 400 on missing body."""
+
+        mock_handler = HandlerMock(
+            body='{"aaa": 1, "bbb": 2}')
+        do_POST(mock_handler)
+        self.assertEqual(400, mock_handler.response_code)
+
+    def test_broken_content(self):
+        """Need send status 400 on invalid Json body."""
+
+        mock_handler = HandlerMock(
+            headers={'content-length': '14'},
+            body='{"aaa": 1, "bb')
+        do_POST(mock_handler)
+        self.assertEqual(400, mock_handler.response_code)
