@@ -12,23 +12,31 @@ class JediHandler(server.BaseHTTPRequestHandler):
     def do_POST(self):
         """Process client POST request."""
 
-        logger.debug('Processing request...')
+        logger.info('Processing request...')
 
-        content_len = int(self.headers['content-length'])
-        logger.debug('Content length: %s', content_len)
+        try:
 
-        request = self.rfile.read(content_len).decode()
-        logger.debug('Accepted content: %s', request)
+            content_len = int(self.headers['content-length'])
+            logger.debug('Content length: %s', content_len)
 
-        result = jedi.do_jedi(json.loads(request))
-        logger.debug('Jedi result: %s', result)
+            request = self.rfile.read(content_len).decode()
+            logger.debug('Accepted content: %s', request)
 
-        message = json.dumps(result).encode()
-        logger.debug('Send message to host: %s', message)
+            result = jedi.do_jedi(json.loads(request))
+            logger.debug('Jedi result: %s', result)
 
-        self.send_response(200)
-        self.end_headers()
-        self.wfile.write(message)
+            message = json.dumps(result).encode()
+            logger.debug('Send message to host: %s', message)
+
+        except (TypeError, ValueError):
+
+            logger.exception('Request processing error', exc_info=True)
+
+        else:
+
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(message)
 
         return
 
@@ -38,4 +46,5 @@ def start_jedi(port=8000):
 
     address = ('', port)
     httpd = server.HTTPServer(address, JediHandler)
+    logger.info('Starting server...')
     httpd.serve_forever()
