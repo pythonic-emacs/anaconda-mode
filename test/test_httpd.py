@@ -1,3 +1,5 @@
+import test.helper
+
 from unittest import TestCase
 from start_jedi import httpd
 
