@@ -69,14 +69,22 @@ class Headers(dict):
         return result
 
 
-class TestDoPUSH(TestCase):
+class TestPush(TestCase):
 
     def test_correct_post_request(self):
         """Need status 200 on correct post request with its body."""
 
         mock_handler = HandlerMock(
-            headers={'content-length': '20'},
-            body='{"aaa": 1, "bbb": 2}')
+            headers={'content-length': '105'},
+            body=('{'
+                  ' "command": "candidates",'
+                  ' "args": {'
+                  '     "source": "2",'
+                  '     "line": 1,'
+                  '     "column": 1,'
+                  '     "path": ""'
+                  ' }'
+                  '}'))
         post(mock_handler)
         self.assertEqual(200, mock_handler.response_code)
 
@@ -94,5 +102,15 @@ class TestDoPUSH(TestCase):
         mock_handler = HandlerMock(
             headers={'content-length': '14'},
             body='{"aaa": 1, "bb')
+        post(mock_handler)
+        self.assertEqual(400, mock_handler.response_code)
+
+    def test_incomplete_content(self, ):
+        """Need send 400 on valid json without necessary keys."""
+
+        mock_handler = HandlerMock(
+            headers={'content-length': '20'},
+            body='{"aaa": 1, "bbb": 2}')
+
         post(mock_handler)
         self.assertEqual(400, mock_handler.response_code)

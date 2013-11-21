@@ -1,5 +1,6 @@
 from start_jedi import jedi
 from http import server
+
 import json
 import logging
 
@@ -21,7 +22,8 @@ class JediHandler(server.BaseHTTPRequestHandler):
             request = self.rfile.read(int(content_len)).decode()
             logger.debug('Accepted content: %s', request)
 
-            result = jedi.do_jedi(json.loads(request))
+            data = json.loads(request)
+            result = jedi.process(**data)
             logger.debug('Jedi result: %s', result)
 
             message = json.dumps(result).encode()
@@ -29,7 +31,7 @@ class JediHandler(server.BaseHTTPRequestHandler):
 
         except (TypeError, ValueError):
 
-            logger.exception('Request processing error', exc_info=True)
+            logger.exception('Request processing error')
             self.send_error(400)
 
         else:
