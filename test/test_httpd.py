@@ -12,7 +12,7 @@ class HandlerMock():
     def __init__(self, headers={}, body=''):
         """Create fake handler object with request attribute."""
 
-        self.headers = headers
+        self.headers = Headers(headers)
         self.rfile = FileMock(body)
         self.wfile = FileMock()
 
@@ -48,6 +48,25 @@ class FileMock():
         """Write new file content."""
 
         self.content += message.decode()
+
+
+class Headers(dict):
+    """Fail tolerant dictionary."""
+
+    def __init__(self, dictionary):
+        """Save internal dictionary."""
+
+        self.dictionary = dictionary
+
+    def __getitem__(self, key):
+        """Return item or None."""
+
+        if key in self.dictionary:
+            result = self.dictionary[key]
+        else:
+            result = None
+
+        return result
 
 
 class TestDoPUSH(TestCase):
