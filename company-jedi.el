@@ -57,7 +57,10 @@ BODY mast be a json compatible structure."
         (url-request-extra-headers `(("Content-Type" . "application/json")))
         (url-request-data body))
     (with-current-buffer (url-retrieve-synchronously url)
-      (buffer-string))))
+      (when (eq url-http-response-status 200)
+        (goto-char url-http-end-of-headers)
+        (let ((json-array-type 'list))
+          (json-read))))))
 
 (provide 'company-jedi)
 
