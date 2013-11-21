@@ -4,7 +4,7 @@ from unittest import TestCase
 from start_jedi import httpd
 
 
-do_POST = httpd.JediHandler.do_POST
+post = httpd.JediHandler.do_POST
 
 
 class HandlerMock():
@@ -77,7 +77,7 @@ class TestDoPUSH(TestCase):
         mock_handler = HandlerMock(
             headers={'content-length': '20'},
             body='{"aaa": 1, "bbb": 2}')
-        do_POST(mock_handler)
+        post(mock_handler)
         self.assertEqual(200, mock_handler.response_code)
 
     def test_missing_content_length(self):
@@ -85,7 +85,7 @@ class TestDoPUSH(TestCase):
 
         mock_handler = HandlerMock(
             body='{"aaa": 1, "bbb": 2}')
-        do_POST(mock_handler)
+        post(mock_handler)
         self.assertEqual(400, mock_handler.response_code)
 
     def test_broken_content(self):
@@ -94,5 +94,5 @@ class TestDoPUSH(TestCase):
         mock_handler = HandlerMock(
             headers={'content-length': '14'},
             body='{"aaa": 1, "bb')
-        do_POST(mock_handler)
+        post(mock_handler)
         self.assertEqual(400, mock_handler.response_code)
