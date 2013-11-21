@@ -23,6 +23,42 @@
 
 ;;; Code:
 
+(require 'url)
+(require 'json)
+
+(defvar company-jedi-host "localhost"
+  "Target host with jedi server.")
+
+(defvar company-jedi-port 24970
+  "Port for start_jedi connection.")
+
+(defvar company-jedi-command
+  "python3 -m start_jedi"
+  "Command to run start_jedi server.")
+
+(defun company-jedi-running-p ()
+  "Check for running start_jedi server.")
+
+(defun company-jedi-start ()
+  "Start remote jedi server."
+  (interactive)
+  (unless (company-jedi-running-p)
+    (company-jedi-bootstrap)))
+
+(defun company-jedi-bootstrap ()
+  "Run company-jedi-command process.")
+
+(defun company-jedi-request (body)
+  "Make POST Request to jedi server.
+
+BODY mast be a json compatible structure."
+  (let ((url (format "http://%s:%s" company-jedi-host company-jedi-port))
+        (url-request-method "POST")
+        (url-request-extra-headers `(("Content-Type" . "application/json")))
+        (url-request-data body))
+    (with-current-buffer (url-retrieve-synchronously url)
+      (buffer-string))))
+
 (provide 'company-jedi)
 
 ;;; company-jedi ends here
