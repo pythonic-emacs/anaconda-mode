@@ -2,8 +2,9 @@
 
 ;; Copyright (C) 2013 by Malyshev Artem
 
-;; Authors: Malyshev Artem <proofit404@gmail.com>
+;; Author: Malyshev Artem <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/company-jedi
+;; Version: 0.0.1
 ;; Package-Requires: ((company "0.6.12"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -72,6 +73,7 @@ BODY mast be a encoded json string."
         (url-request-extra-headers `(("Content-Type" . "application/json")))
         (url-request-data body))
     (with-current-buffer (url-retrieve-synchronously url)
+      (error url-http-response-status)
       (when (eq url-http-response-status 200)
         (goto-char url-http-end-of-headers)
         (let ((json-array-type 'list))
@@ -107,4 +109,4 @@ See `company-backends' for more info about COMMAND and ARG."
 
 (provide 'company-jedi)
 
-;;; company-jedi ends here
+;;; company-jedi.el ends here

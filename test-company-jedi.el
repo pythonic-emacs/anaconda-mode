@@ -12,12 +12,5 @@
     (should (equal "{\"command\":\"candidates\", \"args\":{\"source\":\"import json; json.l\", \"line\":1, \"column\":19, \"path\":\"\"}}"
                    (company-jedi-candidates-request)))))
 
-(ert-deftest test-jedi-candidates ()
-  "Test jedi completion candidates."
-  (with-temp-buffer
-    (insert "import json; json.l")
-    (should (equal '("load" "loads")
-                   (company-jedi-candidates)))))
-
 (company-jedi-start)
 (ert-run-tests-batch-and-exit)
