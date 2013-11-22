@@ -23,6 +23,8 @@
 
 ;;; Code:
 
+(require 'company)
+(eval-when-compile (require 'cl))
 (require 'url)
 (require 'json)
 
@@ -54,6 +56,7 @@
     (setq company-jedi-process
           (start-process-shell-command "start_jedi" nil company-jedi-command))))
 
+;;;###autoload
 (defun company-jedi-start ()
   "Start remote jedi server."
   (interactive)
@@ -88,6 +91,19 @@ BODY mast be a encoded json string."
 (defun company-jedi-candidates ()
   "Request completion candidates from jedi."
   (company-jedi-do-request (company-jedi-candidates-request)))
+
+;;;###autoload
+(defun company-jedi (command &optional arg)
+  "Jedi backend for company-mode.
+
+See `company-backends' for more info about COMMAND and ARG."
+  (interactive (list 'interactive))
+  (case command
+    (interactive (company-begin-backend 'company-jedi))
+    (prefix (and (memq major-mode '(python-mode inferior-python-mode))
+                 (company-jedi-running-p)
+                 (company-grab-symbol)))
+    (candidates (company-jedi-candidates))))
 
 (provide 'company-jedi)
 
