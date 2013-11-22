@@ -1,11 +1,3 @@
-from start_jedi import httpd
-import logging
+import start_jedi
 
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-port = 8000
-address = ('', port)
-node = httpd.JediServer(address, httpd.JediHandler)
-
-node.start()
+start_jedi.run()
