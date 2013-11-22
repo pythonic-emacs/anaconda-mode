@@ -33,20 +33,32 @@
   "Port for start_jedi connection.")
 
 (defvar company-jedi-command
-  "python3 -m start_jedi"
+  (format "venv/bin/python3 -m start_jedi -p %s" company-jedi-port)
   "Command to run start_jedi server.")
 
+(defvar company-jedi-dir
+  (file-name-directory load-file-name)
+  "Directory containing start_jedi package.")
+
+(defvar company-jedi-process nil
+  "Currently running start_jedi process.")
+
 (defun company-jedi-running-p ()
-  "Check for running start_jedi server.")
+  "Check for running start_jedi server."
+  (and company-jedi-process
+       (not (null (process-live-p company-jedi-process)))))
+
+(defun company-jedi-bootstrap ()
+  "Run company-jedi-command process."
+  (let ((default-directory company-jedi-dir))
+    (setq company-jedi-process
+          (start-process-shell-command "start_jedi" nil company-jedi-command))))
 
 (defun company-jedi-start ()
   "Start remote jedi server."
   (interactive)
   (unless (company-jedi-running-p)
     (company-jedi-bootstrap)))
-
-(defun company-jedi-bootstrap ()
-  "Run company-jedi-command process.")
 
 (defun company-jedi-request (body)
   "Make POST Request to jedi server.
