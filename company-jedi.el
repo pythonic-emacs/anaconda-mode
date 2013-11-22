@@ -60,10 +60,10 @@
   (unless (company-jedi-running-p)
     (company-jedi-bootstrap)))
 
-(defun company-jedi-request (body)
+(defun company-jedi-do-request (body)
   "Make POST Request to jedi server.
 
-BODY mast be a json compatible structure."
+BODY mast be a encoded json string."
   (let ((url (format "http://%s:%s" company-jedi-host company-jedi-port))
         (url-request-method "POST")
         (url-request-extra-headers `(("Content-Type" . "application/json")))
@@ -73,6 +73,21 @@ BODY mast be a json compatible structure."
         (goto-char url-http-end-of-headers)
         (let ((json-array-type 'list))
           (json-read))))))
+
+(defun company-jedi-candidates-request ()
+  "Generate json request for candidates request."
+  (let ((json-array-type 'list))
+    (json-encode
+     (list (cons "command" "candidates")
+           (cons "args"
+                 (list (cons "source" (buffer-substring-no-properties (point-min) (point-max)))
+                       (cons "line" (line-number-at-pos (point)))
+                       (cons "column" (current-column))
+                       (cons "path" (or (buffer-file-name) ""))))))))
+
+(defun company-jedi-candidates ()
+  "Request completion candidates from jedi."
+  (company-jedi-do-request (company-jedi-candidates-request)))
 
 (provide 'company-jedi)
 
