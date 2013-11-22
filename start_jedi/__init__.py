@@ -1,4 +1,5 @@
-from start_jedi import httpd
+import start_jedi.httpd
+import start_jedi.cli
 
 
 def run(port):
@@ -6,6 +7,8 @@ def run(port):
 
     address = ('', port)
 
-    node = httpd.JediServer(address, httpd.JediHandler)
+    handler = start_jedi.httpd.JediHandler
+
+    node = start_jedi.httpd.JediServer(address, handler)
 
     node.start()

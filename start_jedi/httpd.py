@@ -9,6 +9,8 @@ logger = logging.getLogger(__name__)
 
 class JediHandler(server.BaseHTTPRequestHandler):
 
+    error_message_format = ''
+
     def do_POST(self):
         """Process client POST request."""
 
@@ -29,9 +31,19 @@ class JediHandler(server.BaseHTTPRequestHandler):
             message = json.dumps(result).encode()
             logger.debug('Send message to host: %s', message)
 
-        except (TypeError, ValueError):
+        except jedi.AdjectiveOperation:
 
-            logger.exception('Request processing error')
+            logger.exception('Request call unsupported API interface')
+            self.send_error(400)
+
+        except TypeError:
+
+            logger.exception('Request send wrong keywords combination')
+            self.send_error(400)
+
+        except ValueError:
+
+            logger.exception('Request send broken json string')
             self.send_error(400)
 
         else:

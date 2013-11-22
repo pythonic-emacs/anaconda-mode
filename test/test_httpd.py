@@ -69,7 +69,7 @@ class Headers(dict):
         return result
 
 
-class TestPush(TestCase):
+class TestPost(TestCase):
 
     def test_correct_post_request(self):
         """Need status 200 on correct post request with its body."""
@@ -87,6 +87,18 @@ class TestPush(TestCase):
                   '}'))
         post(mock_handler)
         self.assertEqual(200, mock_handler.response_code)
+
+    def test_handle_jedi_exceptions(self):
+        """Need status 400 on jedi exceptions."""
+
+        mock_handler = HandlerMock(
+            headers={'content-length': '47'},
+            body=('{'
+                  ' "command": "unsupported_command",'
+                  ' "args": {}'
+                  '}'))
+        post(mock_handler)
+        self.assertEqual(400, mock_handler.response_code)
 
     def test_missing_content_length(self):
         """Need send status 400 on missing body."""
