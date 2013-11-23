@@ -19,3 +19,6 @@ default: $(VENV)
 
 clean:
 	rm -rf .cask $(VENV)
+
+emacs:
+	cask exec emacs -Q -L $(CURDIR) -l script/init.el
