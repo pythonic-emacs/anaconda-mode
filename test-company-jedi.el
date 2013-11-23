@@ -9,7 +9,7 @@
   "Test jedi completion json request string generator."
   (with-temp-buffer
     (insert "import json; json.l")
-    (should (equal "{\"command\":\"candidates\", \"args\":{\"source\":\"import json; json.l\", \"line\":1, \"column\":19, \"path\":\"\"}}"
+    (should (equal "{\"command\":\"candidates\", \"attributes\":{\"source\":\"import json; json.l\", \"line\":1, \"column\":19, \"path\":\"\"}}"
                    (company-jedi-candidates-request)))))
 
 (company-jedi-start)

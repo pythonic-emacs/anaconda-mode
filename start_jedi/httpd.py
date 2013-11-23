@@ -36,6 +36,11 @@ class JediHandler(server.BaseHTTPRequestHandler):
             logger.exception('Request call unsupported API interface')
             self.send_error(400)
 
+        except jedi.MissingSource:
+
+            logger.exception('Request send incomplete source code.')
+            self.send_error(400)
+
         except TypeError:
 
             logger.exception('Request send wrong keywords combination')

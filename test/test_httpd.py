@@ -75,10 +75,10 @@ class TestPost(TestCase):
         """Need status 200 on correct post request with its body."""
 
         mock_handler = HandlerMock(
-            headers={'content-length': '105'},
+            headers={'content-length': '111'},
             body=('{'
                   ' "command": "candidates",'
-                  ' "args": {'
+                  ' "attributes": {'
                   '     "source": "2",'
                   '     "line": 1,'
                   '     "column": 1,'
@@ -95,7 +95,7 @@ class TestPost(TestCase):
             headers={'content-length': '47'},
             body=('{'
                   ' "command": "unsupported_command",'
-                  ' "args": {}'
+                  ' "attributes": {}'
                   '}'))
         post(mock_handler)
         self.assertEqual(400, mock_handler.response_code)

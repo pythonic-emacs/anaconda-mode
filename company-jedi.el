@@ -84,7 +84,7 @@ BODY mast be a encoded json string."
   (let ((json-array-type 'list))
     (json-encode
      (list (cons "command" "candidates")
-           (cons "args"
+           (cons "attributes"
                  (list (cons "source" (buffer-substring-no-properties (point-min) (point-max)))
                        (cons "line" (line-number-at-pos (point)))
                        (cons "column" (current-column))
