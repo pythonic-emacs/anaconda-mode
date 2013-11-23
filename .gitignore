@@ -1,7 +1,6 @@
 __pycache__
-[#]*[#]
-*~
-venv
-log
-*.elc
 .cask
+log
+[#]*[#]
+*.elc
+*~

@@ -1,9 +1,11 @@
-venv:
-	virtualenv venv
-	venv/bin/pip install -r requirements.txt
+VENV = $(HOME)/.emacs.d/jedi_virtualenv
 
-unittest: venv
-	venv/bin/python3 -m unittest discover
+$(VENV):
+	virtualenv $(VENV)
+	$(VENV)/bin/pip install -r requirements.txt
+
+unittest: $(VENV)
+	$(VENV)/bin/python3 -m unittest discover
 
 .cask:
 	cask install
@@ -13,7 +15,7 @@ ert: .cask
 
 check: unittest ert
 
-default: venv
+default: $(VENV)
 
 clean:
-	rm -rf .cask venv
+	rm -rf .cask $(VENV)

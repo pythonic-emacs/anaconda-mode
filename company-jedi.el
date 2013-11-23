@@ -36,7 +36,9 @@
   "Port for start_jedi connection.")
 
 (defvar company-jedi-command
-  (format "venv/bin/python3 -m start_jedi -p %s" company-jedi-port)
+  (format "%s/jedi_virtualenv/bin/python3 -m start_jedi -p %s"
+          user-emacs-directory
+          company-jedi-port)
   "Command to run start_jedi server.")
 
 (defvar company-jedi-dir
@@ -73,7 +75,6 @@ BODY mast be a encoded json string."
         (url-request-extra-headers `(("Content-Type" . "application/json")))
         (url-request-data body))
     (with-current-buffer (url-retrieve-synchronously url)
-      (error url-http-response-status)
       (when (eq url-http-response-status 200)
         (goto-char url-http-end-of-headers)
         (let ((json-array-type 'list))
