@@ -4,8 +4,6 @@
 
 ![screenshot](screenshots/snapshot1.png)
 
-**Warning:** poor english below, sorry for this...
-
 ## Requirements
 
 * emacs 24.3
@@ -14,61 +12,60 @@
 
 ## Features
 
-* In buffer auto-completion for python
+* Context-sensitive code completion for Python
 
 ## Future work
 
 * jump to definition
 * find references
 * view documentation
-* asynchronous tasks processing
+* asynchronous task processing
 * python2 support
 
 ## Install
 
-Set up company-jedi package isn't such trivial as elisp only packages due to python dependencies.
-First of all you need obtain package sources with [Melpa](http://melpa.milkbox.net/).
+Setting up `company-jedi` isn't as simple as with Elisp-only packages, due to Python dependencies.
+First of all you need to install the package from [Melpa](http://melpa.milkbox.net/).
 
     M-x package-install RET company-jedi RET
 
-Now you need resolve jedi dependencies with python's [PyPI](https://pypi.python.org/pypi).
+Now you need resolve Jedi dependencies with Python's [PyPI](https://pypi.python.org/pypi).
 By default you need virtualenv installed before you get company-jedi frontend to work.
 
     cd $HOME/.emacs.d/elpa/company-jedi-*
     make
 
-But use company-jedi without virtualenv is still possible with extra settings required. For now you need to run
-following command from the package directly
+But using `company-jedi` without virtualenv is still possible with additional setup.
+For now you need to run the following command from the package directory:
 
     pip install -r requirements.txt
 
-For now company-jedi run on the python3 only. But jedi work with any python sources. So you need install properly
-python version for you virtual environment.
+For now `company-jedi` runs on Python 3 only. But Jedi work with any Python sources. So you'll need to
+install the Python versions corresponding to your projects in your virtual environment.
 
-You must perform actions above on each company-jedi package update because it appears in the new location each time.
+You must perform the above actions after each `company-jedi` package update because it appears in a new location each time.
 
 ## Usage
 
-By default company-jedi start HTTP server on `24970` port for emacs-python interaction. You may want to close
-it for incoming network connection. It dosen't read any data on your pc except parsing python sources.
+By default `company-jedi` starts its HTTP server on port `24970` for interaction with Python process.
+You may want to close this port for incoming network connections.
 
-For automatically start server when you open any python buffer add following code to your emacs configuration
+To automatically start the server when you open any python-mode buffer, add the following code to your emacs configuration:
 
 ```lisp
 (add-to-list 'company-backends 'company-jedi)
 (add-hook 'python-mode-hook 'company-jedi-start)
 ```
 
-If you install python dependencies with pip's method so you need some additional customizations. Mainly for server
-starting command
+If you've installed Python dependencies without virtualenv, you need to customize the command that starts the server:
 
 ```lisp
 (setq company-jedi-command (format "python3 -m start_jedi -p %s" company-jedi-port))
 ```
 
-## Contribution
+## Contributions
 
-Much welcome. But you must write all necessary tests for any significant change.
-Both for emacs lisp and python code.
+Are very welcome. But any significant change has to be accompanied with tests, both for Emacs Lisp and Python code.
+To run the test suite, call:
 
     make check
