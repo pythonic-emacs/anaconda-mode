@@ -40,10 +40,8 @@ For now you need to run the following command from the package directory:
 
     pip install -r requirements.txt
 
-For now `company-jedi` runs on Python 3 only. But Jedi work with any Python sources. So you'll need to
-install the Python versions corresponding to your projects in your virtual environment.
-
-You must perform the above actions after each `company-jedi` package update because it appears in a new location each time.
+Jedi works with any Python sources, but `company-jedi` currently runs on Python 3 only.
+So you'll need to install that version in your virtual environment.
 
 ## Usage
 
