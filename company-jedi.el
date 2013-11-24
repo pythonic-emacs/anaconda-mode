@@ -36,9 +36,9 @@
   "Port for start_jedi connection.")
 
 (defvar company-jedi-command
-  (format "%s/jedi_virtualenv/bin/python3 -m start_jedi -p %s"
-          user-emacs-directory
-          company-jedi-port)
+  (concat (file-name-as-directory user-emacs-directory)
+          "jedi/venv/bin/python3 -m start_jedi -p "
+          (number-to-string company-jedi-port))
   "Command to run start_jedi server.")
 
 (defvar company-jedi-dir

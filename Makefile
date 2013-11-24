@@ -1,4 +1,4 @@
-VENV = $(HOME)/.emacs.d/jedi_virtualenv
+VENV = $(HOME)/.emacs.d/jedi/venv
 
 $(VENV):
 	virtualenv $(VENV)
