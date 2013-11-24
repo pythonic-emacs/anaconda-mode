@@ -25,21 +25,12 @@ class JediHandler(server.BaseHTTPRequestHandler):
             logger.debug('Accepted content: %s', request)
 
             data = json.loads(request)
-            result = jedi.process(**data)
-            logger.debug('Jedi result: %s', result)
 
-            message = json.dumps(result).encode()
-            logger.debug('Send message to host: %s', message)
+            response = jedi.process(**data)
+            logger.debug('Jedi result: %s', response.result)
+            logger.debug('Jedi error: %s', response.error)
 
-        except jedi.AdjectiveOperation:
-
-            logger.exception('Request call unsupported API interface')
-            self.send_error(400)
-
-        except jedi.MissingSource:
-
-            logger.exception('Request send incomplete source code.')
-            self.send_error(400)
+            message = json.dumps(response.result).encode()
 
         except TypeError:
 
@@ -53,7 +44,14 @@ class JediHandler(server.BaseHTTPRequestHandler):
 
         else:
 
-            self.send_response(200)
+            logger.debug('Send message to host: %s', message)
+
+            if response.error:
+                code = 500
+            else:
+                code = 200
+
+            self.send_response(code)
             self.end_headers()
             self.wfile.write(message)
 

@@ -32,18 +32,6 @@ class CompanyJedi():
         return [details(name) for name in self.script.goto_assignments()]
 
 
-class AdjectiveOperation(Exception):
-    """Exception raised on requesting adjective operation."""
-
-    pass
-
-
-class MissingSource(Exception):
-    """Exception raised on incomplete source file parameters."""
-
-    pass
-
-
 def process(attributes, command):
     """Process Jedi operation correspond to request.
 
@@ -52,23 +40,34 @@ def process(attributes, command):
     command -- method name called from CompanyJedi backend
     """
 
+    class Result():
+        pass
+
     try:
+
+        obj = Result()
+
         company = CompanyJedi(**attributes)
         logger.debug('Start jedi processing')
 
         company_method = getattr(company, command)
         logger.debug('Select company method: %s', company_method)
 
-        result = company_method()
+        obj.result = company_method()
+        obj.error = None
 
     except AttributeError:
 
-        logger.exception('Call unsupported operation: %s', command)
-        raise AdjectiveOperation
+        message = 'Call unsupported operation: {}'.format(command)
+        logger.exception(message)
+        obj.result = None
+        obj.error = message
 
     except TypeError:
 
-        logger.exception('Missing parameters for Jedi object: %s', attributes)
-        raise MissingSource
+        message = 'Missing parameters for Jedi object: {}'.format(attributes)
+        logger.exception(message)
+        obj.result = None
+        obj.error = message
 
-    return result
+    return obj

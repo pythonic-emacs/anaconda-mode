@@ -20,7 +20,7 @@ class TestJedi(TestCase):
             }
         }
 
-        self.assertRaises(jedi.AdjectiveOperation, jedi.process, **request)
+        self.assertIsNotNone(jedi.process(**request).error)
 
     def test_missing_attributes(self):
         """Should raise exception on incomplete source code."""
@@ -30,7 +30,7 @@ class TestJedi(TestCase):
             'attributes': {}
         }
 
-        self.assertRaises(jedi.MissingSource, jedi.process, **request)
+        self.assertIsNotNone(jedi.process(**request).error)
 
     def test_autocomplete(self):
         """Jedi must complete correct sources."""
@@ -47,7 +47,7 @@ class TestJedi(TestCase):
 
         response = ['date', 'datetime', 'datetime_CAPI']
 
-        self.assertEqual(response, jedi.process(**request))
+        self.assertEqual(response, jedi.process(**request).result)
 
     def test_definition_search(self):
         """Jedi must find correct definitions."""
@@ -76,4 +76,4 @@ inception()''',
             'column': 0
         }]
 
-        self.assertEqual(response, jedi.process(**request))
+        self.assertEqual(response, jedi.process(**request).result)
