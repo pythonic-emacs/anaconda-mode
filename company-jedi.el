@@ -75,25 +75,41 @@ BODY mast be a encoded json string."
         (url-request-extra-headers `(("Content-Type" . "application/json")))
         (url-request-data body))
     (with-current-buffer (url-retrieve-synchronously url)
-      (when (eq url-http-response-status 200)
-        (goto-char url-http-end-of-headers)
-        (let ((json-array-type 'list))
-          (json-read))))))
+      (case url-http-response-status
+        (200 (progn
+               (goto-char url-http-end-of-headers)
+               (let ((json-array-type 'list))
+                 (json-read))))
+        (500 (error (buffer-string)))))))
 
-(defun company-jedi-candidates-request ()
-  "Generate json request for candidates request."
+(defun company-jedi-point ()
+  "Return json compatible buffer point description."
+  (list (cons "source" (buffer-substring-no-properties (point-min) (point-max)))
+                       (cons "line" (line-number-at-pos (point)))
+                       (cons "column" (current-column))
+                       (cons "path" (or (buffer-file-name) ""))))
+
+(defun company-jedi-candidates-json ()
+  "Generate json for candidates request."
   (let ((json-array-type 'list))
     (json-encode
      (list (cons "command" "candidates")
-           (cons "attributes"
-                 (list (cons "source" (buffer-substring-no-properties (point-min) (point-max)))
-                       (cons "line" (line-number-at-pos (point)))
-                       (cons "column" (current-column))
-                       (cons "path" (or (buffer-file-name) ""))))))))
+           (cons "attributes" (company-jedi-point))))))
 
 (defun company-jedi-candidates ()
   "Request completion candidates from jedi."
-  (company-jedi-do-request (company-jedi-candidates-request)))
+  (company-jedi-do-request (company-jedi-candidates-json)))
+
+(defun company-jedi-location-json ()
+  "Generate json for location request."
+  (let ((json-array-type 'list))
+    (json-encode
+     (list (cons "command" "location")
+           (cons "attributes" (company-jedi-point))))))
+
+(defun company-jedi-location ()
+  "Request completion location from jedi."
+  (company-jedi-do-request (company-jedi-location-request)))
 
 ;;;###autoload
 (defun company-jedi (command &optional arg)
@@ -106,7 +122,8 @@ See `company-backends' for more info about COMMAND and ARG."
     (prefix (and (memq major-mode '(python-mode inferior-python-mode))
                  (company-jedi-running-p)
                  (company-grab-symbol)))
-    (candidates (company-jedi-candidates))))
+    (candidates (company-jedi-candidates))
+    (location (company-jedi-location))))
 
 (provide 'company-jedi)
 
