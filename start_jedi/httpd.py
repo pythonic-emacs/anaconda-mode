@@ -30,7 +30,12 @@ class JediHandler(server.BaseHTTPRequestHandler):
             logger.debug('Jedi result: %s', response.result)
             logger.debug('Jedi error: %s', response.error)
 
-            message = json.dumps(response.result).encode()
+            if response.error:
+                code = 500
+                message = response.error
+            else:
+                code = 200
+                message = json.dumps(response.result).encode()
 
         except TypeError:
 
@@ -45,11 +50,6 @@ class JediHandler(server.BaseHTTPRequestHandler):
         else:
 
             logger.debug('Send message to host: %s', message)
-
-            if response.error:
-                code = 500
-            else:
-                code = 200
 
             self.send_response(code)
             self.end_headers()
