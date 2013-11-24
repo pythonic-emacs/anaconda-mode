@@ -1,7 +1,11 @@
+import os
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('start_jedi')
+
+if not os.path.isdir("log"):
+    os.mkdir("log")
 
 handler = logging.FileHandler('log/tests.log')
 handler.setLevel(logging.DEBUG)
