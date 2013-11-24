@@ -12,5 +12,11 @@
     (should (equal "{\"command\":\"candidates\", \"attributes\":{\"source\":\"import json; json.l\", \"line\":1, \"column\":19, \"path\":\"\"}}"
                    (company-jedi-candidates-request)))))
 
+(ert-deftest test-jedi-request-function ()
+  "Completion request must return candidates."
+  (sleep-for 5) ;; Wait for start_jedi server will ready to work.
+  (should (equal '("load" "loads")
+                 (company-jedi-do-request "{\"command\":\"candidates\", \"attributes\":{\"source\":\"import json; json.l\", \"line\":1, \"column\":19, \"path\":\"\"}}"))))
+
 (company-jedi-start)
 (ert-run-tests-batch-and-exit)
