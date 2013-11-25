@@ -81,12 +81,14 @@ BODY mast be a encoded json string."
                (company-jedi-decode)))
         (500 (error (buffer-string)))))))
 
-(defun company-jedi-point ()
+(defun company-jedi-point (&optional arg)
   "Return json compatible buffer point description."
   (list (cons "source" (buffer-substring-no-properties (point-min) (point-max)))
                        (cons "line" (line-number-at-pos (point)))
                        (cons "column" (current-column))
-                       (cons "path" (or (buffer-file-name) ""))))
+                       (cons "path" (or (buffer-file-name) ""))
+                       (cons "company_prefix" (or company-prefix ""))
+                       (cons "company_arg" (or arg ""))))
 
 (defun company-jedi-encode (arg)
   "Encode ARG to JSON."
@@ -113,15 +115,19 @@ BODY mast be a encoded json string."
   "Request completion candidates from jedi."
   (company-jedi-do-request (company-jedi-candidates-json)))
 
-(defun company-jedi-location-json ()
-  "Generate json for location request."
+(defun company-jedi-location-json (&optional arg)
+  "Generate json for location request.
+
+ARG may come from `company-call-backend' function."
   (company-jedi-encode
      (list (cons "command" "location")
-           (cons "attributes" (company-jedi-point)))))
+           (cons "attributes" (company-jedi-point arg)))))
 
-(defun company-jedi-location ()
-  "Request completion location from jedi."
-  (let ((definition (car (company-jedi-do-request (company-jedi-location-json))))
+(defun company-jedi-location (&optional arg)
+  "Request completion location from jedi.
+
+ARG may come from `company-call-backend' function."
+  (let ((definition (car (company-jedi-do-request (company-jedi-location-json arg))))
         module_path line)
     (dolist (description definition)
       (case (car description)
@@ -141,7 +147,7 @@ See `company-backends' for more info about COMMAND and ARG."
                  (company-jedi-running-p)
                  (company-grab-symbol)))
     (candidates (company-jedi-candidates))
-    (location (company-jedi-location))))
+    (location (company-jedi-location arg))))
 
 (provide 'company-jedi)
 
