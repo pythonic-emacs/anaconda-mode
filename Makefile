@@ -1,4 +1,5 @@
 VENV = $(HOME)/.emacs.d/jedi/venv
+BATCH = --batch
 
 $(VENV):
 	virtualenv $(VENV)
@@ -11,7 +12,7 @@ unittest: $(VENV)
 	cask install
 
 ert: .cask
-	cask exec emacs -Q --batch --directory $(CURDIR) --load test-company-jedi.el
+	cask exec emacs -Q $(BATCH) --directory $(CURDIR) --load test-company-jedi.el
 
 check: unittest ert
 

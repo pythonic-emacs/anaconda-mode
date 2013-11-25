@@ -78,8 +78,7 @@ BODY mast be a encoded json string."
       (case url-http-response-status
         (200 (progn
                (goto-char url-http-end-of-headers)
-               (let ((json-array-type 'list))
-                 (json-read))))
+               (company-jedi-decode)))
         (500 (error (buffer-string)))))))
 
 (defun company-jedi-point ()
@@ -89,12 +88,26 @@ BODY mast be a encoded json string."
                        (cons "column" (current-column))
                        (cons "path" (or (buffer-file-name) ""))))
 
+(defun company-jedi-encode (arg)
+  "Encode ARG to JSON."
+  (let ((json-array-type 'list))
+    (json-encode arg)))
+
+(defun company-jedi-decode ()
+  "Decode JSON at point."
+  (let ((json-array-type 'list))
+    (json-read)))
+
+(defun company-jedi-decode-from-string (arg)
+  "Decode JSON from ARG."
+  (let ((json-array-type 'list))
+    (json-read-from-string arg)))
+
 (defun company-jedi-candidates-json ()
   "Generate json for candidates request."
-  (let ((json-array-type 'list))
-    (json-encode
+  (company-jedi-encode
      (list (cons "command" "candidates")
-           (cons "attributes" (company-jedi-point))))))
+           (cons "attributes" (company-jedi-point)))))
 
 (defun company-jedi-candidates ()
   "Request completion candidates from jedi."
@@ -102,10 +115,9 @@ BODY mast be a encoded json string."
 
 (defun company-jedi-location-json ()
   "Generate json for location request."
-  (let ((json-array-type 'list))
-    (json-encode
+  (company-jedi-encode
      (list (cons "command" "location")
-           (cons "attributes" (company-jedi-point))))))
+           (cons "attributes" (company-jedi-point)))))
 
 (defun company-jedi-location ()
   "Request completion location from jedi."

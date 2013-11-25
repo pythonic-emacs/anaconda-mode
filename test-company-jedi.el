@@ -38,15 +38,23 @@ inception()")
 
 (ert-deftest test-jedi-request-location ()
   "Location request must return location pairs."
-  (should (equal (list
-                  (list
-                   (cons 'module_path (expand-file-name "log/simple.py" default-directory))
-                   (cons 'line 6)
-                   (cons 'column 0)))
-                 (company-jedi-do-request
-                  "{\"command\":\"location\", \"attributes\":{\"source\":\"def my_func():\\n    print 'called'\\n\\nalias = my_func\\nmy_list = [1, None, alias]\\ninception = my_list[2]\\n\\ninception()\", \"line\":8, \"column\":1, \"path\":\"log\\/simple.py\"}}"))))
+  (should (equal (sort
+                   (list
+                    (cons 'module_path (expand-file-name "log/simple.py" default-directory))
+                    (cons 'line 6)
+                    (cons 'column 0))
+                   'alist<)
+                 (sort
+                  (car (company-jedi-do-request
+                        "{\"command\":\"location\", \"attributes\":{\"source\":\"def my_func():\\n    print 'called'\\n\\nalias = my_func\\nmy_list = [1, None, alias]\\ninception = my_list[2]\\n\\ninception()\", \"line\":8, \"column\":1, \"path\":\"log\\/simple.py\"}}"))
+                  'alist<))))
 
 (company-jedi-start)
+
+(defun alist< (a b)
+  "Compare A and B alists by it key name."
+  (string< (symbol-name (car a))
+           (symbol-name (car b))))
 
 (when noninteractive
   (sleep-for 5) ;; Wait for start_jedi server will ready to work.
