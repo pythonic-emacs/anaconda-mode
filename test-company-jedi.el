@@ -14,9 +14,8 @@
 
 (ert-deftest test-jedi-location-json ()
   "Test doto_definition json generator."
-  (with-temp-buffer
-    (setq buffer-file-name (concat default-directory "log/simple.py")) ;; Kids, don't try this at home :D
-    (insert "def my_func():
+  (find-file (concat root-directory "log/simple.py"))
+  (insert "def my_func():
     print 'called'
 
 alias = my_func
@@ -24,12 +23,12 @@ my_list = [1, None, alias]
 inception = my_list[2]
 
 inception()")
-    (beginning-of-line)
-    (forward-char)
-    (should (equal (concat "{\"command\":\"location\", \"attributes\":{\"source\":\"def my_func():\\n    print 'called'\\n\\nalias = my_func\\nmy_list = [1, None, alias]\\ninception = my_list[2]\\n\\ninception()\", \"line\":8, \"column\":1, \"path\":\""
-                           (replace-regexp-in-string "/" "\\\\/" default-directory)
-                           "log\\/simple.py\"}}")
-                   (company-jedi-location-json)))))
+  (beginning-of-line)
+  (forward-char)
+  (should (equal (concat "{\"command\":\"location\", \"attributes\":{\"source\":\"def my_func():\\n    print 'called'\\n\\nalias = my_func\\nmy_list = [1, None, alias]\\ninception = my_list[2]\\n\\ninception()\", \"line\":8, \"column\":1, \"path\":\""
+                         (replace-regexp-in-string "/" "\\\\/" root-directory)
+                         "log\\/simple.py\"}}")
+                 (company-jedi-location-json))))
 
 (ert-deftest test-jedi-request-candidates ()
   "Completion request must return candidates list."
@@ -39,15 +38,33 @@ inception()")
 (ert-deftest test-jedi-request-location ()
   "Location request must return location pairs."
   (should (equal (sort
-                   (list
-                    (cons 'module_path (expand-file-name "log/simple.py" default-directory))
-                    (cons 'line 6)
-                    (cons 'column 0))
-                   'alist<)
+                  (list
+                   (cons 'module_path (expand-file-name "log/simple.py" root-directory))
+                   (cons 'line 6)
+                   (cons 'column 0))
+                  'alist<)
                  (sort
                   (car (company-jedi-do-request
                         "{\"command\":\"location\", \"attributes\":{\"source\":\"def my_func():\\n    print 'called'\\n\\nalias = my_func\\nmy_list = [1, None, alias]\\ninception = my_list[2]\\n\\ninception()\", \"line\":8, \"column\":1, \"path\":\"log\\/simple.py\"}}"))
                   'alist<))))
+
+(ert-deftest test-jedi-location ()
+  "Test find definition at point."
+  (find-file (concat root-directory "log/simple.py"))
+  (insert "def my_func():
+    print 'called'
+
+alias = my_func
+my_list = [1, None, alias]
+inception = my_list[2]
+
+inception()")
+  (beginning-of-line)
+  (forward-char)
+  (should (equal (company-jedi-location)
+                 (cons (expand-file-name "log/simple.py" root-directory) 6))))
+
+(defvar root-directory (file-name-directory load-file-name))
 
 (company-jedi-start)
 

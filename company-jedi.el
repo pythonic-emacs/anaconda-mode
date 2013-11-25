@@ -121,7 +121,13 @@ BODY mast be a encoded json string."
 
 (defun company-jedi-location ()
   "Request completion location from jedi."
-  (company-jedi-do-request (company-jedi-location-request)))
+  (let ((definition (car (company-jedi-do-request (company-jedi-location-json))))
+        module_path line)
+    (dolist (description definition)
+      (case (car description)
+        (module_path (setq module_path (cdr description)))
+        (line (setq line (cdr description)))))
+    (cons module_path line)))
 
 ;;;###autoload
 (defun company-jedi (command &optional arg)
