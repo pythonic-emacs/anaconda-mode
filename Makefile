@@ -23,3 +23,6 @@ clean:
 
 emacs:
 	cask exec emacs -Q -L $(CURDIR) -l script/init.el
+
+start_jedi:
+	$(VENV)/bin/python3 -m start_jedi -d
