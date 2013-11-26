@@ -81,6 +81,12 @@ inception()")
   (goto-line (or line default-line))
   (move-to-column (or column default-column)))
 
+(setq company-jedi-port 8000)
+
+(setq company-jedi-command
+      (concat (file-name-as-directory user-emacs-directory)
+              "jedi/venv/bin/python3 -m start_jedi --debug"))
+
 (company-jedi-start)
 
 (when noninteractive
