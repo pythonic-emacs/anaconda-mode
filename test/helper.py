@@ -7,10 +7,10 @@ logger = logging.getLogger('start_jedi')
 if not os.path.isdir("log"):
     os.mkdir("log")
 
-handler = logging.FileHandler('log/tests.log')
+handler = logging.FileHandler('log/test.log')
 handler.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+formatter = logging.Formatter(logging.BASIC_FORMAT)
 handler.setFormatter(formatter)
 
 logger.addHandler(handler)
