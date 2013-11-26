@@ -28,6 +28,7 @@
 (eval-when-compile (require 'cl))
 (require 'url)
 (require 'json)
+(require 'etags)
 
 (defvar company-jedi-host "localhost"
   "Target host with jedi server.")
@@ -149,6 +150,18 @@ See `company-backends' for more info about COMMAND and ARG."
                  (company-grab-symbol)))
     (candidates (company-jedi-candidates))
     (location (company-jedi-location arg))))
+
+;;;###autoload
+(defun company-jedi-goto-definition ()
+  "Jump to definition at point.
+
+Save current position in `find-tag-marker-ring'."
+  (interactive)
+  (let ((location (company-jedi-location)))
+    (ring-insert find-tag-marker-ring (point-marker))
+    (find-file (car location))
+    (goto-line (cdr location))
+    (back-to-indentation)))
 
 (provide 'company-jedi)
 

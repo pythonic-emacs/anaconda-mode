@@ -10,4 +10,9 @@
 (add-to-list 'company-backends 'company-jedi)
 (add-hook 'python-mode-hook 'company-jedi-start)
 
+(eval-after-load "python"
+  '(progn
+     (define-key python-mode-map (kbd "M-.") 'company-jedi-goto-definition)
+     (define-key python-mode-map (kbd "M-,") 'pop-tag-mark)))
+
 (global-company-mode)

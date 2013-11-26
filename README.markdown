@@ -12,11 +12,11 @@
 
 ## Features
 
-* Context-sensitive code completion for Python
+* context-sensitive code completion for Python
+* jump to definition
 
 ## Future work
 
-* jump to definition
 * find references
 * view documentation
 * asynchronous task processing
@@ -59,6 +59,20 @@ If you've installed Python dependencies without virtualenv, you need to customiz
 
 ```lisp
 (setq company-jedi-command (format "python3 -m start_jedi -p %s" company-jedi-port))
+```
+
+## Sample Configuration
+
+```lisp
+(add-to-list 'company-backends 'company-jedi)
+(add-hook 'python-mode-hook 'company-jedi-start)
+
+(eval-after-load "python"
+  '(progn
+     (define-key python-mode-map (kbd "M-.") 'company-jedi-goto-definition)
+     (define-key python-mode-map (kbd "M-,") 'pop-tag-mark)))
+
+(global-company-mode)
 ```
 
 ## Contributions
