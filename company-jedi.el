@@ -86,6 +86,7 @@ BODY mast be a encoded json string."
   (list (cons "source" (buffer-substring-no-properties (point-min) (point-max)))
                        (cons "line" (line-number-at-pos (point)))
                        (cons "column" (current-column))
+                       (cons "point" (1- (point)))  ;; For python strings index compatibility.
                        (cons "path" (or (buffer-file-name) ""))
                        (cons "company_prefix" (or company-prefix ""))
                        (cons "company_arg" (or arg ""))))
