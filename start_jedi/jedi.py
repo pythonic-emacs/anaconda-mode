@@ -7,10 +7,16 @@ logger = logging.getLogger(__name__)
 class CompanyJedi():
     """Jedi library interaction."""
 
-    def __init__(self, source, line, column, path):
+    def __init__(self, source, line, column, point, path,
+                 company_prefix, company_arg):
         """Initialize Jedi with source."""
 
-        self.script = jedi.Script(source, line, column, path)
+        suffix = company_arg[len(company_prefix):]
+        context = source[:point] + suffix + source[point:]
+
+        logger.debug('Imply jedi context: \n%s', context)
+
+        self.script = jedi.Script(context, line, column, path)
 
     def candidates(self):
         """Select auto-complete candidates for source position."""

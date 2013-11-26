@@ -16,7 +16,10 @@ class TestJedi(TestCase):
                 'source': '''\nimport datetime\ndatetime.da''',
                 'line': 3,
                 'column': 14,
-                'path': ''
+                'point': 28,
+                'path': '',
+                'company_prefix': '',
+                'company_arg': ''
             }
         }
 
@@ -41,7 +44,10 @@ class TestJedi(TestCase):
                 'source': '''\nimport datetime\ndatetime.da''',
                 'line': 3,
                 'column': 14,
-                'path': ''
+                'point': 28,
+                'path': '',
+                'company_prefix': '',
+                'company_arg': ''
             }
         }
 
@@ -66,7 +72,10 @@ inception = my_list[2]
 inception()''',
                 'line': 9,
                 'column': 1,
-                'path': 'example.py'
+                'point': 104,
+                'path': 'example.py',
+                'company_prefix': '',
+                'company_arg': ''
             }
         }
 

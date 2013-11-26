@@ -32,7 +32,7 @@ class JediHandler(server.BaseHTTPRequestHandler):
 
             if response.error:
                 code = 500
-                message = response.error
+                message = response.error.encode()
             else:
                 code = 200
                 message = json.dumps(response.result).encode()

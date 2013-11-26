@@ -11,7 +11,7 @@ unittest: $(VENV)
 .cask:
 	cask install
 
-ert: .cask
+ert: .cask $(VENV)
 	cask exec emacs -Q $(BATCH) --directory $(CURDIR) --load test-company-jedi.el
 
 check: unittest ert

@@ -74,17 +74,22 @@ class TestPost(TestCase):
     def test_correct_post_request(self):
         """Need status 200 on correct post request with its body."""
 
+        json = ('{'
+                ' "command": "candidates",'
+                ' "attributes": {'
+                '     "source": "2",'
+                '     "line": 1,'
+                '     "column": 1,'
+                '     "point": 1,'
+                '     "path": "",'
+                '     "company_prefix": "",'
+                '     "company_arg": ""'
+                ' }'
+                '}')
+
         mock_handler = HandlerMock(
-            headers={'content-length': '111'},
-            body=('{'
-                  ' "command": "candidates",'
-                  ' "attributes": {'
-                  '     "source": "2",'
-                  '     "line": 1,'
-                  '     "column": 1,'
-                  '     "path": ""'
-                  ' }'
-                  '}'))
+            headers={'content-length': len(json)},
+            body=json)
         post(mock_handler)
         self.assertEqual(200, mock_handler.response_code)
 
