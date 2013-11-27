@@ -2,7 +2,9 @@
 
 [Jedi](https://github.com/davidhalter/jedi) backend for [company-mode](https://github.com/company-mode/company-mode).
 
-![screenshot](screenshots/snapshot1.png)
+![screenshot1](screenshots/snapshot1.png)
+
+![screenshot2](screenshots/snapshot2.png)
 
 ## Requirements
 
