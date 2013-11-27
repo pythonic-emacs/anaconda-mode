@@ -1,5 +1,6 @@
 import jedi
 import logging
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,13 @@ class CompanyJedi():
                 'column': name.column
             }
 
-        return [details(name) for name in self.script.goto_assignments()]
+        def is_py(name):
+            pattern = re.compile('^.*\\.py$')
+            return pattern.match(name.module_path)
+
+        assignments = self.script.goto_assignments
+
+        return [details(name) for name in assignments() if is_py(name)]
 
 
 def process(attributes, command):

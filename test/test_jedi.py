@@ -86,3 +86,23 @@ inception()''',
         }]
 
         self.assertEqual(response, jedi.process(**request).result)
+
+    def test_definition_filter(self):
+        """Jedi must filter non python sources."""
+
+        request = {
+            'command': 'location',
+            'attributes': {
+                'source': '''
+import datetime
+datetime.date''',
+                'line': 3,
+                'column': 13,
+                'point': 30,
+                'path': 'example.py',
+                'company_prefix': '',
+                'company_arg': ''
+            }
+        }
+
+        self.assertEqual(1, len(jedi.process(**request).result))
