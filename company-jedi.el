@@ -42,6 +42,20 @@
           (number-to-string company-jedi-port))
   "Command to run start_jedi server.")
 
+(defvar company-jedi-completing-read-function
+  (if (or (featurep 'helm) (locate-library "helm"))
+      'helm-comp-read
+    'ido-completing-read)
+  "Completing read function used in company-jedi.")
+
+(defun company-jedi-completing-read (prompt collection)
+  "Call completing engine with PROMPT on COLLECTION."
+  (cond
+    ((eq (length collection) 1)
+     (car collection))
+    ((> (length collection) 1)
+     (funcall company-jedi-completing-read-function prompt collection))))
+
 (defvar company-jedi-dir
   (file-name-directory load-file-name)
   "Directory containing start_jedi package.")
@@ -85,12 +99,12 @@ BODY mast be a encoded json string."
 (defun company-jedi-point (&optional arg)
   "Return json compatible buffer point description."
   (list (cons "source" (buffer-substring-no-properties (point-min) (point-max)))
-                       (cons "line" (line-number-at-pos (point)))
-                       (cons "column" (current-column))
-                       (cons "point" (1- (point)))  ;; For python strings index compatibility.
-                       (cons "path" (or (buffer-file-name) ""))
-                       (cons "company_prefix" (or company-prefix ""))
-                       (cons "company_arg" (or arg ""))))
+        (cons "line" (line-number-at-pos (point)))
+        (cons "column" (current-column))
+        (cons "point" (1- (point)))  ;; For python strings index compatibility.
+        (cons "path" (or (buffer-file-name) ""))
+        (cons "company_prefix" (or company-prefix ""))
+        (cons "company_arg" (or arg ""))))
 
 (defun company-jedi-encode (arg)
   "Encode ARG to JSON."
@@ -99,19 +113,23 @@ BODY mast be a encoded json string."
 
 (defun company-jedi-decode ()
   "Decode JSON at point."
-  (let ((json-array-type 'list))
+  (let ((json-array-type 'list)
+        (json-object-type 'hash-table)
+        (json-key-type 'keyword))
     (json-read)))
 
 (defun company-jedi-decode-from-string (arg)
   "Decode JSON from ARG."
-  (let ((json-array-type 'list))
+  (let ((json-array-type 'list)
+        (json-object-type 'hash-table)
+        (json-key-type 'keyword))
     (json-read-from-string arg)))
 
 (defun company-jedi-candidates-json ()
   "Generate json for candidates request."
   (company-jedi-encode
-     (list (cons "command" "candidates")
-           (cons "attributes" (company-jedi-point)))))
+   (list (cons "command" "candidates")
+         (cons "attributes" (company-jedi-point)))))
 
 (defun company-jedi-candidates ()
   "Request completion candidates from jedi."
@@ -122,20 +140,20 @@ BODY mast be a encoded json string."
 
 ARG may come from `company-call-backend' function."
   (company-jedi-encode
-     (list (cons "command" "location")
-           (cons "attributes" (company-jedi-point arg)))))
+   (list (cons "command" "location")
+         (cons "attributes" (company-jedi-point arg)))))
 
 (defun company-jedi-location (&optional arg)
   "Request completion location from jedi.
 
 ARG may come from `company-call-backend' function."
-  (let ((definition (car (company-jedi-do-request (company-jedi-location-json arg))))
-        module_path line)
-    (dolist (description definition)
-      (case (car description)
-        (module_path (setq module_path (cdr description)))
-        (line (setq line (cdr description)))))
-    (cons module_path line)))
+  (let* ((definitions (company-jedi-do-request (company-jedi-location-json arg)))
+         (locations (mapcar (lambda (l) (format "%s:%s"(gethash :module_path l)  (gethash :line l))) definitions))
+         (user-chose (company-jedi-completing-read "Location: " locations)))
+    (if user-chose
+        (let ((chose-list (split-string user-chose ":")))
+          (cons (car chose-list) (string-to-number (cadr chose-list))))
+      (error "Can't find definition."))))
 
 ;;;###autoload
 (defun company-jedi (command &optional arg)

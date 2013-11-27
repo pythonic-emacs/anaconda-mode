@@ -53,6 +53,17 @@
   (should (equal (company-jedi-location)
                  (cons default-path 6))))
 
+(ert-deftest test-jedi-multiple-location ()
+  "Test non determined locations."
+  (make-test-file "if True:
+    a = 1
+else:
+    a = \"a\"
+
+a" 6 1)
+  (should (equal (company-jedi-location)
+                 (cons default-path 2))))
+
 ;; Helper functions.
 
 (defvar root-directory (file-name-directory load-file-name))
@@ -80,6 +91,12 @@ inception()")
   (insert (or content default-content))
   (goto-line (or line default-line))
   (move-to-column (or column default-column)))
+
+(defun mock-completing-read (prompt collection)
+  "Emulate user chose."
+  (car collection))
+
+(setq company-jedi-completing-read-function 'mock-completing-read)
 
 (setq company-jedi-port 8000)
 
