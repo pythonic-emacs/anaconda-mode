@@ -173,6 +173,15 @@ ARG may come from `company-call-backend' function."
    (company-jedi-do-request
     (company-jedi-request-json "reference"))))
 
+(defun company-jedi-doc-buffer (&optional arg)
+  "Request document buffer for thing at point.
+
+Allow user to chose what doc he want to read."
+  (let ((docs (company-jedi-do-request (company-jedi-request-json "doc" arg))))
+    (cond
+     ((eq 1 (length docs)) (company-doc-buffer (car docs)))
+     ((> 1 (length docs)) (error "FIXME")))))
+
 ;;;###autoload
 (defun company-jedi (command &optional arg)
   "Jedi backend for company-mode.
@@ -185,7 +194,9 @@ See `company-backends' for more info about COMMAND and ARG."
                  (company-jedi-running-p)
                  (company-grab-symbol)))
     (candidates (company-jedi-candidates))
-    (location (company-jedi-location arg))))
+    (location (company-jedi-location arg))
+    (doc-buffer (company-jedi-doc-buffer arg))
+    (sorted t)))
 
 (defun company-jedi-find-file (file)
   "Find FILE at specified line.
