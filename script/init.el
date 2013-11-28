@@ -12,6 +12,7 @@
 
 (eval-after-load "python"
   '(progn
+     (define-key python-mode-map (kbd "M-r") 'company-jedi-find-references)
      (define-key python-mode-map (kbd "M-.") 'company-jedi-goto-definition)
      (define-key python-mode-map (kbd "M-,") 'pop-tag-mark)))
 
