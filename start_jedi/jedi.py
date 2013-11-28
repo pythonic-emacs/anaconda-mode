@@ -9,7 +9,8 @@ def details(name):
     return {
         'module_path': name.module_path,
         'line': name.line,
-        'column': name.column
+        'column': name.column,
+        'description': name.description
     }
 
 
@@ -51,11 +52,11 @@ class CompanyJedi():
 
         usages = self.script.usages()
 
-        assignments = self.location()
+        assignments = self.script.goto_assignments()
 
-        references = [details(name) for name in usages if is_py(name)]
+        references = [name for name in usages if name not in assignments]
 
-        return [name for name in references if name not in assignments]
+        return [details(name) for name in references if is_py(name)]
 
 
 def process(attributes, command):

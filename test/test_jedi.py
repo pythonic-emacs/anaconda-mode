@@ -82,7 +82,8 @@ inception()''',
         response = [{
             'module_path': os.getcwd() + '/example.py',
             'line': 7,
-            'column': 0
+            'column': 0,
+            'description': 'inception = my_list[2]'
         }]
 
         self.assertEqual(response, jedi.process(**request).result)
@@ -132,12 +133,14 @@ v = a('b')''',
             {
                 'module_path': os.getcwd() + '/example.py',
                 'line': 5,
-                'column': 4
+                'column': 4,
+                'description': 'a@5,4'
             },
             {
                 'module_path': os.getcwd() + '/example.py',
                 'line': 6,
-                'column': 4
+                'column': 4,
+                'description': 'a@6,4'
             }
         ]
 

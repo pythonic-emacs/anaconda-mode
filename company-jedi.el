@@ -145,7 +145,11 @@ ARG may come from `company-call-backend' function."
 Return cons of file name and line.
 
 PROMPT will used for completing read function."
-  (let* ((format-module (lambda (m) (format "%s:%s" (gethash :module_path m)  (gethash :line m))))
+  (let* ((format-module (lambda (m)
+                          (format "%s:%s: %s"
+                                  (gethash :module_path m)
+                                  (gethash :line m)
+                                  (gethash :description m))))
          (modules (mapcar format-module mod-list))
          (user-chose (company-jedi-completing-read prompt modules)))
     (if user-chose
