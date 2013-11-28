@@ -4,6 +4,7 @@
 
 ![screenshot1](screenshots/snapshot1.png)
 ![screenshot2](screenshots/snapshot2.png)
+![screenshot3](screenshots/snapshot3.png)
 
 ## Requirements
 
@@ -15,10 +16,10 @@
 
 * context-sensitive code completion for Python
 * jump to definition
+* find references
 
 ## Future work
 
-* find references
 * view documentation
 * asynchronous task processing
 * python2 support
@@ -71,6 +72,7 @@ If you've installed Python dependencies without virtualenv, you need to customiz
 
 (eval-after-load "python"
   '(progn
+     (define-key python-mode-map (kbd "M-r") 'company-jedi-find-references)
      (define-key python-mode-map (kbd "M-.") 'company-jedi-goto-definition)
      (define-key python-mode-map (kbd "M-,") 'pop-tag-mark)))
 
