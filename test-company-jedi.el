@@ -10,7 +10,7 @@
 (ert-deftest test-jedi-candidates-json ()
   "Test jedi completion json request string generator."
   (make-test-file "import json; json.l" 1 19)
-  (should (equal (company-jedi-candidates-json)
+  (should (equal (company-jedi-request-json "candidates")
                  (concat "{"
                          ""    "\"command\":\"candidates\", "
                          ""    "\"attributes\":{"
@@ -33,7 +33,7 @@
 (ert-deftest test-jedi-location-json ()
   "Test doto_definition json generator."
   (make-test-file)
-  (should (equal (company-jedi-location-json)
+  (should (equal (company-jedi-request-json "location")
                  (concat "{"
                          ""    "\"command\":\"location\", "
                          ""    "\"attributes\":{"

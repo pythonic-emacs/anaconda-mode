@@ -96,6 +96,16 @@ BODY mast be a encoded json string."
                (company-jedi-decode)))
         (500 (error (buffer-string)))))))
 
+(defun company-jedi-request-json (command &optional arg)
+  "Generate json request for COMMAND.
+
+COMMAND must be one of Jedi command string.
+
+ARG may come from `company-call-backend' function."
+  (company-jedi-encode
+   (list (cons "command" command)
+         (cons "attributes" (company-jedi-point arg)))))
+
 (defun company-jedi-point (&optional arg)
   "Return json compatible buffer point description."
   (list (cons "source" (buffer-substring-no-properties (point-min) (point-max)))
@@ -125,29 +135,15 @@ BODY mast be a encoded json string."
         (json-key-type 'keyword))
     (json-read-from-string arg)))
 
-(defun company-jedi-candidates-json ()
-  "Generate json for candidates request."
-  (company-jedi-encode
-   (list (cons "command" "candidates")
-         (cons "attributes" (company-jedi-point)))))
-
 (defun company-jedi-candidates ()
   "Request completion candidates from jedi."
-  (company-jedi-do-request (company-jedi-candidates-json)))
-
-(defun company-jedi-location-json (&optional arg)
-  "Generate json for location request.
-
-ARG may come from `company-call-backend' function."
-  (company-jedi-encode
-   (list (cons "command" "location")
-         (cons "attributes" (company-jedi-point arg)))))
+  (company-jedi-do-request (company-jedi-request-json "candidates")))
 
 (defun company-jedi-location (&optional arg)
   "Request completion location from jedi.
 
 ARG may come from `company-call-backend' function."
-  (let* ((definitions (company-jedi-do-request (company-jedi-location-json arg)))
+  (let* ((definitions (company-jedi-do-request (company-jedi-request-json "location" arg)))
          (locations (mapcar (lambda (l) (format "%s:%s"(gethash :module_path l)  (gethash :line l))) definitions))
          (user-chose (company-jedi-completing-read "Location: " locations)))
     (if user-chose
