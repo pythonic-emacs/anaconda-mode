@@ -145,3 +145,26 @@ v = a('b')''',
         ]
 
         self.assertEqual(response, jedi.process(**request).result)
+
+    def test_documentation_search(self):
+        """Jedi must find all assignments documentation."""
+
+        request = {
+            'command': 'doc',
+            'attributes': {
+                'source': '''
+def f(a, b=1):
+    "Document for function f."
+    pass''',
+                'line': 2,
+                'column': 4,
+                'point': 5,
+                'path': 'example.py',
+                'company_prefix': '',
+                'company_arg': ''
+            }
+        }
+
+        response = ['Document for function f.']
+
+        self.assertEqual(response, jedi.process(**request).result)

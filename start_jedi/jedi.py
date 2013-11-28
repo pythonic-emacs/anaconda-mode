@@ -43,9 +43,9 @@ class CompanyJedi():
     def location(self):
         """Find names assignment place."""
 
-        assignments = self.script.goto_assignments
+        assignments = self.script.goto_assignments()
 
-        return [details(name) for name in assignments() if is_py(name)]
+        return [details(name) for name in assignments if is_py(name)]
 
     def reference(self):
         """Find name reference places."""
@@ -57,6 +57,13 @@ class CompanyJedi():
         references = [name for name in usages if name not in assignments]
 
         return [details(name) for name in references if is_py(name)]
+
+    def doc(self):
+        """Documentations list for all assignments at point."""
+
+        assignments = self.script.goto_assignments()
+
+        return [name.raw_doc for name in assignments if is_py(name)]
 
 
 def process(attributes, command):
