@@ -5,6 +5,19 @@ import re
 logger = logging.getLogger(__name__)
 
 
+def details(name):
+    return {
+        'module_path': name.module_path,
+        'line': name.line,
+        'column': name.column
+    }
+
+
+def is_py(name):
+    pattern = re.compile('^.*\\.py$')
+    return pattern.match(name.module_path)
+
+
 class CompanyJedi():
     """Jedi library interaction."""
 
@@ -26,23 +39,23 @@ class CompanyJedi():
 
         return completions
 
-    def location(self, ):
+    def location(self):
         """Find names assignment place."""
-
-        def details(name):
-            return {
-                'module_path': name.module_path,
-                'line': name.line,
-                'column': name.column
-            }
-
-        def is_py(name):
-            pattern = re.compile('^.*\\.py$')
-            return pattern.match(name.module_path)
 
         assignments = self.script.goto_assignments
 
         return [details(name) for name in assignments() if is_py(name)]
+
+    def reference(self):
+        """Find name reference places."""
+
+        usages = self.script.usages()
+
+        assignments = self.location()
+
+        references = [details(name) for name in usages if is_py(name)]
+
+        return [name for name in references if name not in assignments]
 
 
 def process(attributes, command):
