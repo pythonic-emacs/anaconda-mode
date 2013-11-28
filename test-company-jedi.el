@@ -64,6 +64,16 @@ a" 6 1)
   (should (equal (company-jedi-location)
                  (cons default-path 2))))
 
+(ert-deftest test-jedi-reference ()
+  "Test fund references."
+  (make-test-file "def a():
+    pass
+
+v = a(1)
+m = a('t')" 1 4)
+  (should (equal (company-jedi-reference)
+                 (cons default-path 4))))
+
 ;; Helper functions.
 
 (defvar root-directory (file-name-directory load-file-name))
@@ -87,7 +97,7 @@ inception()")
 (defun make-test-file (&optional content line column path)
   "Create test file."
   (find-file (or path default-path))
-  (erase-buffer)                        ; Remove side effect from multiple open-file operations.
+  (erase-buffer)  ;; Remove side effect from multiple open-file operations.
   (insert (or content default-content))
   (goto-line (or line default-line))
   (move-to-column (or column default-column)))

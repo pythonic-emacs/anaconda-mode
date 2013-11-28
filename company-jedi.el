@@ -139,17 +139,35 @@ ARG may come from `company-call-backend' function."
   "Request completion candidates from jedi."
   (company-jedi-do-request (company-jedi-request-json "candidates")))
 
+(defun company-jedi-chose-module (prompt mod-list)
+  "Chose module from MOD-LIST.
+
+Return cons of file name and line.
+
+PROMPT will used for completing read function."
+  (let* ((format-module (lambda (m) (format "%s:%s" (gethash :module_path m)  (gethash :line m))))
+         (modules (mapcar format-module mod-list))
+         (user-chose (company-jedi-completing-read prompt modules)))
+    (if user-chose
+        (let ((chose-list (split-string user-chose ":")))
+          (cons (car chose-list) (string-to-number (cadr chose-list))))
+      (error "Can't find module."))))
+
 (defun company-jedi-location (&optional arg)
   "Request completion location from jedi.
 
 ARG may come from `company-call-backend' function."
-  (let* ((definitions (company-jedi-do-request (company-jedi-request-json "location" arg)))
-         (locations (mapcar (lambda (l) (format "%s:%s"(gethash :module_path l)  (gethash :line l))) definitions))
-         (user-chose (company-jedi-completing-read "Location: " locations)))
-    (if user-chose
-        (let ((chose-list (split-string user-chose ":")))
-          (cons (car chose-list) (string-to-number (cadr chose-list))))
-      (error "Can't find definition."))))
+  (company-jedi-chose-module
+   "Location: "
+   (company-jedi-do-request
+    (company-jedi-request-json "location" arg))))
+
+(defun company-jedi-reference ()
+  "Request references from jedi."
+  (company-jedi-chose-module
+   "Reference: "
+   (company-jedi-do-request
+    (company-jedi-request-json "reference"))))
 
 ;;;###autoload
 (defun company-jedi (command &optional arg)
@@ -165,17 +183,26 @@ See `company-backends' for more info about COMMAND and ARG."
     (candidates (company-jedi-candidates))
     (location (company-jedi-location arg))))
 
-;;;###autoload
-(defun company-jedi-goto-definition ()
-  "Jump to definition at point.
+(defun company-jedi-find-file (file)
+  "Find FILE at specified line.
 
 Save current position in `find-tag-marker-ring'."
+  (ring-insert find-tag-marker-ring (point-marker))
+  (find-file (car file))
+  (goto-line (cdr file))
+  (back-to-indentation))
+
+;;;###autoload
+(defun company-jedi-goto-definition ()
+  "Jump to definition at point."
   (interactive)
-  (let ((location (company-jedi-location)))
-    (ring-insert find-tag-marker-ring (point-marker))
-    (find-file (car location))
-    (goto-line (cdr location))
-    (back-to-indentation)))
+  (company-jedi-find-file (company-jedi-location)))
+
+;;;###autoload
+(defun company-jedi-find-references ()
+  "Jump to reference at point."
+  (interactive)
+  (company-jedi-find-file (company-jedi-reference)))
 
 (provide 'company-jedi)
 
