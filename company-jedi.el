@@ -56,6 +56,20 @@
     ((> (length collection) 1)
      (funcall company-jedi-completing-read-function prompt collection))))
 
+(defun key-list (hash)
+  "Return key list of HASH."
+  (let (klist)
+    (maphash
+     (lambda (k v) (add-to-list 'klist k t))
+     hash)
+    klist))
+
+(defun company-jedi-user-chose (prompt hash)
+  "With PROMPT ask user for HASH value."
+  (gethash
+   (company-jedi-completing-read prompt (key-list hash))
+   hash))
+
 (defvar company-jedi-dir
   (file-name-directory load-file-name)
   "Directory containing start_jedi package.")
@@ -125,14 +139,14 @@ ARG may come from `company-call-backend' function."
   "Decode JSON at point."
   (let ((json-array-type 'list)
         (json-object-type 'hash-table)
-        (json-key-type 'keyword))
+        (json-key-type 'string))
     (json-read)))
 
 (defun company-jedi-decode-from-string (arg)
   "Decode JSON from ARG."
   (let ((json-array-type 'list)
         (json-object-type 'hash-table)
-        (json-key-type 'keyword))
+        (json-key-type 'string))
     (json-read-from-string arg)))
 
 (defun company-jedi-candidates ()
@@ -147,9 +161,9 @@ Return cons of file name and line.
 PROMPT will used for completing read function."
   (let* ((format-module (lambda (m)
                           (format "%s:%s: %s"
-                                  (gethash :module_path m)
-                                  (gethash :line m)
-                                  (gethash :description m))))
+                                  (gethash "module_path" m)
+                                  (gethash "line" m)
+                                  (gethash "description" m))))
          (modules (mapcar format-module mod-list))
          (user-chose (company-jedi-completing-read prompt modules)))
     (if user-chose
@@ -177,10 +191,13 @@ ARG may come from `company-call-backend' function."
   "Request document buffer for thing at point.
 
 Allow user to chose what doc he want to read."
-  (let ((docs (company-jedi-do-request (company-jedi-request-json "doc" arg))))
-    (cond
-     ((eq 1 (length docs)) (company-doc-buffer (car docs)))
-     ((> 1 (length docs)) (error "FIXME")))))
+  (let ((doc
+         (company-jedi-user-chose
+          "Doc: "
+          (company-jedi-do-request
+           (company-jedi-request-json "doc" arg)))))
+  (when doc
+    (company-doc-buffer doc))))
 
 ;;;###autoload
 (defun company-jedi (command &optional arg)

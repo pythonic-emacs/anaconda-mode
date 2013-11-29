@@ -74,6 +74,23 @@ m = a('t')" 1 4)
   (should (equal (company-jedi-reference)
                  (cons default-path 4))))
 
+(ert-deftest test-jedi-doc ()
+  "Test found documentation string."
+  (make-test-file "def f(a, b=1):
+    \"Document for function f.\"
+    pass" 1 4)
+  (should (equal "Document for function f."
+                 (with-current-buffer (company-jedi-doc-buffer)
+                   (buffer-string)))))
+
+(ert-deftest test-key-list ()
+  "Should obtain keys from hash."
+  (should (equal '("a" "b")
+                 (let ((hash (make-hash-table)))
+                   (puthash "a" "bar" hash)
+                   (puthash "b" "foo" hash)
+                   (key-list hash)))))
+
 ;; Helper functions.
 
 (defvar root-directory (file-name-directory load-file-name))
