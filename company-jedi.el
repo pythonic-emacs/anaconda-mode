@@ -152,23 +152,14 @@ ARG may come from `company-call-backend' function."
   "Request completion candidates from jedi."
   (company-jedi-do-request (company-jedi-request-json "candidates")))
 
-(defun company-jedi-chose-module (prompt mod-list)
+(defun company-jedi-chose-module (prompt modules)
   "Chose module from MOD-LIST.
 
 Return cons of file name and line.
 
 PROMPT will used for completing read function."
-  (let* ((format-module (lambda (m)
-                          (format "%s:%s: %s"
-                                  (gethash "module_path" m)
-                                  (gethash "line" m)
-                                  (gethash "description" m))))
-         (modules (mapcar format-module mod-list))
-         (user-chose (company-jedi-completing-read prompt modules)))
-    (if user-chose
-        (let ((chose-list (split-string user-chose ":")))
-          (cons (car chose-list) (string-to-number (cadr chose-list))))
-      (error "Can't find module."))))
+  (let ((user-chose (company-jedi-user-chose prompt modules)))
+    (cons (gethash "module_path" user-chose) (gethash "line" user-chose))))
 
 (defun company-jedi-location (&optional arg)
   "Request completion location from jedi.

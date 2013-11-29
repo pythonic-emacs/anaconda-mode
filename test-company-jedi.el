@@ -127,7 +127,7 @@ inception()")
 
 (defun mock-completing-read (prompt collection)
   "Emulate user chose."
-  (car collection))
+  (car (sort collection 'string<)))
 
 (setq company-jedi-completing-read-function 'mock-completing-read)
 

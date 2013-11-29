@@ -14,6 +14,12 @@ def details(name):
     }
 
 
+def summary(name):
+    """Format string from base definition."""
+
+    return '{}:{} - {}'.format(name.module_path, name.line, name.description)
+
+
 def is_py(name):
     pattern = re.compile('^.*\\.py$')
     return pattern.match(name.module_path)
@@ -51,18 +57,20 @@ class CompanyJedi():
 
         assignments = self.script.goto_assignments()
 
-        return [details(name) for name in assignments if is_py(name)]
+        locations = [name for name in assignments if is_py(name)]
+
+        return {summary(name): details(name) for name in locations}
 
     def reference(self):
         """Find name reference places."""
 
-        usages = self.script.usages()
+        usages = [name for name in self.script.usages() if is_py(name)]
 
         assignments = self.script.goto_assignments()
 
         references = [name for name in usages if name not in assignments]
 
-        return [details(name) for name in references if is_py(name)]
+        return {summary(name): details(name) for name in references}
 
     def doc(self):
         """Documentations list for all assignments at point."""

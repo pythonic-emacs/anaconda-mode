@@ -79,12 +79,14 @@ inception()''',
             }
         }
 
-        response = [{
-            'module_path': os.getcwd() + '/example.py',
-            'line': 7,
-            'column': 0,
-            'description': 'inception = my_list[2]'
-        }]
+        response = {
+            os.getcwd() + '/example.py:7 - inception = my_list[2]': {
+                'module_path': os.getcwd() + '/example.py',
+                'line': 7,
+                'column': 0,
+                'description': 'inception = my_list[2]'
+            }
+        }
 
         self.assertEqual(response, jedi.process(**request).result)
 
@@ -129,20 +131,20 @@ v = a('b')''',
             }
         }
 
-        response = [
-            {
+        response = {
+            os.getcwd() + '/example.py:5 - a@5,4': {
                 'module_path': os.getcwd() + '/example.py',
                 'line': 5,
                 'column': 4,
                 'description': 'a@5,4'
             },
-            {
+            os.getcwd() + '/example.py:6 - a@6,4': {
                 'module_path': os.getcwd() + '/example.py',
                 'line': 6,
                 'column': 4,
                 'description': 'a@6,4'
             }
-        ]
+        }
 
         self.assertEqual(response, jedi.process(**request).result)
 
