@@ -195,3 +195,25 @@ Here is long f function description."""
         response = 'Document for function f.'
 
         self.assertEqual(response, jedi.process(**request).result)
+
+    def test_eldoc(self):
+        """Should return signature string."""
+
+        request = {
+            'command': 'eldoc',
+            'attributes': {
+                'source': '''
+import json
+json.dump()''',
+                'line': 3,
+                'column': 10,
+                'point': 25,
+                'path': 'example.py',
+                'company_prefix': '',
+                'company_arg': ''
+                }
+        }
+
+        response = "dump(obj, fp, skipkeys=False, ensure_ascii=True, check_circular=True, allow_nan=True, cls=None, indent=None, separators=None, default=None, sort_keys=False, **kw)"
+
+        self.assertEqual(response, jedi.process(**request).result)
