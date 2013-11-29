@@ -17,10 +17,10 @@
 * context-sensitive code completion for Python
 * jump to definition
 * find references
+* view documentation
 
 ## Future work
 
-* view documentation
 * asynchronous task processing
 * python2 support
 * eldoc
@@ -72,6 +72,7 @@ If you've installed Python dependencies without virtualenv, you need to customiz
 
 (eval-after-load "python"
   '(progn
+     (define-key python-mode-map (kbd "C-c C-d") 'company-jedi-show-doc)
      (define-key python-mode-map (kbd "M-r") 'company-jedi-find-references)
      (define-key python-mode-map (kbd "M-.") 'company-jedi-goto-definition)
      (define-key python-mode-map (kbd "M-,") 'pop-tag-mark)))

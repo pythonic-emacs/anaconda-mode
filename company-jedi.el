@@ -66,9 +66,8 @@
 
 (defun company-jedi-user-chose (prompt hash)
   "With PROMPT ask user for HASH value."
-  (gethash
-   (company-jedi-completing-read prompt (key-list hash))
-   hash))
+  (or (gethash (company-jedi-completing-read prompt (key-list hash)) hash)
+      (error "Jedi can't answer.")))
 
 (defvar company-jedi-dir
   (file-name-directory load-file-name)
@@ -191,13 +190,11 @@ ARG may come from `company-call-backend' function."
   "Request document buffer for thing at point.
 
 Allow user to chose what doc he want to read."
-  (let ((doc
-         (company-jedi-user-chose
-          "Doc: "
-          (company-jedi-do-request
-           (company-jedi-request-json "doc" arg)))))
-  (when doc
-    (company-doc-buffer doc))))
+  (company-doc-buffer
+   (company-jedi-user-chose
+    "Doc: "
+    (company-jedi-do-request
+     (company-jedi-request-json "doc" arg)))))
 
 ;;;###autoload
 (defun company-jedi (command &optional arg)
@@ -235,6 +232,12 @@ Save current position in `find-tag-marker-ring'."
   "Jump to reference at point."
   (interactive)
   (company-jedi-find-file (company-jedi-reference)))
+
+;;;###autoload
+(defun company-jedi-show-doc ()
+  "Show documentation context at point."
+  (interactive)
+  (display-buffer (company-jedi-doc-buffer)))
 
 (provide 'company-jedi)
 
