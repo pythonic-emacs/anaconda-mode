@@ -19,6 +19,12 @@ def is_py(name):
     return pattern.match(name.module_path)
 
 
+def first_line(string):
+    """Return first line from string."""
+
+    return string.split('\n', 1)[0]
+
+
 class CompanyJedi():
     """Jedi library interaction."""
 
@@ -63,7 +69,9 @@ class CompanyJedi():
 
         assignments = self.script.goto_assignments()
 
-        return [name.raw_doc for name in assignments if is_py(name)]
+        documents = [name.raw_doc for name in assignments if is_py(name)]
+
+        return {first_line(doc): doc for doc in documents}
 
 
 def process(attributes, command):

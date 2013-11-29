@@ -165,6 +165,6 @@ def f(a, b=1):
             }
         }
 
-        response = ['Document for function f.']
+        response = {'Document for function f.': 'Document for function f.'}
 
         self.assertEqual(response, jedi.process(**request).result)
