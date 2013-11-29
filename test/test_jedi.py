@@ -168,3 +168,28 @@ def f(a, b=1):
         response = {'Document for function f.': 'Document for function f.'}
 
         self.assertEqual(response, jedi.process(**request).result)
+
+    def test_short_documentation_search(self):
+        """Jedi must find all short documentations."""
+
+        request = {
+            'command': 'meta',
+            'attributes': {
+                'source': '''
+def f(a, b=1):
+    """Document for function f.
+
+Here is long f function description."""
+    pass''',
+                'line': 2,
+                'column': 4,
+                'point': 5,
+                'path': 'example.py',
+                'company_prefix': '',
+                'company_arg': ''
+            }
+        }
+
+        response = 'Document for function f.'
+
+        self.assertEqual(response, jedi.process(**request).result)
