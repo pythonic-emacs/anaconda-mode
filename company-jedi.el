@@ -196,6 +196,11 @@ Allow user to chose what doc he want to read."
     (company-jedi-do-request
      (company-jedi-request-json "doc" arg)))))
 
+(defun company-jedi-meta (&optional arg)
+  "Request short documentation for current context."
+  (company-jedi-do-request
+   (company-jedi-request-json "meta" arg)))
+
 ;;;###autoload
 (defun company-jedi (command &optional arg)
   "Jedi backend for company-mode.
@@ -210,6 +215,7 @@ See `company-backends' for more info about COMMAND and ARG."
     (candidates (company-jedi-candidates))
     (location (company-jedi-location arg))
     (doc-buffer (company-jedi-doc-buffer arg))
+    (meta (company-jedi-meta arg))
     (sorted t)))
 
 (defun company-jedi-find-file (file)

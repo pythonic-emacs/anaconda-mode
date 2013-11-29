@@ -91,6 +91,12 @@ m = a('t')" 1 4)
                    (puthash "b" "foo" hash)
                    (key-list hash)))))
 
+(ert-deftest test-jedi-meta ()
+  "Company must ignore empty doc strings."
+  (make-test-file "def f(a, b=1):
+    pass" 1 4)
+  (should (equal "" (company-jedi-meta))))
+
 ;; Helper functions.
 
 (defvar root-directory (file-name-directory load-file-name))
