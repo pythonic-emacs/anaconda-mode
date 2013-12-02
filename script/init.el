@@ -17,7 +17,7 @@
      (define-key python-mode-map (kbd "M-.") 'company-jedi-goto-definition)
      (define-key python-mode-map (kbd "M-,") 'pop-tag-mark)))
 
-(add-hook 'python-mode-hook 'company-jedi-start)
+(add-hook 'python-mode-hook 'company-jedi-eldoc-setup)
 
 (setq company-jedi-port 8000)
 

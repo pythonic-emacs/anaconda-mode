@@ -192,6 +192,12 @@ Allow user to chose what doc he want to read."
   (company-jedi-do-request
    (company-jedi-request-json "meta" arg)))
 
+(defun company-jedi-eldoc ()
+  "Show eldoc for context at point."
+  (interactive)
+  (company-jedi-do-request
+   (company-jedi-request-json "eldoc")))
+
 ;;;###autoload
 (defun company-jedi (command &optional arg)
   "Jedi backend for company-mode.
@@ -232,9 +238,18 @@ Save current position in `find-tag-marker-ring'."
 
 ;;;###autoload
 (defun company-jedi-show-doc ()
-  "Show documentation context at point."
+  "Show documentation for context at point."
   (interactive)
   (display-buffer (company-jedi-doc-buffer)))
+
+;;;###autoload
+(defun company-jedi-eldoc-setup ()
+  "Setup eldoc mode properly for python buffer."
+  (interactive)
+  (set (make-local-variable 'eldoc-documentation-function)
+       'company-jedi-eldoc)
+  (turn-on-eldoc-mode)
+  (company-jedi-start))
 
 (provide 'company-jedi)
 
