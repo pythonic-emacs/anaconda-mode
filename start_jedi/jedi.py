@@ -91,6 +91,26 @@ class CompanyJedi():
 
         return answer
 
+    def eldoc(self):
+        """Return eldoc format documentation string or None."""
+
+        signatures = self.script.call_signatures()
+
+        if len(signatures) == 1:
+
+            call_name = signatures[0].call_name
+
+            params = signatures[0].params
+            call_params = [param.get_code(new_line=False) for param in params]
+
+            answer = '{}({})'.format(call_name, ', '.join(call_params))
+
+        else:
+
+            answer = None
+
+        return answer
+
 
 def process(attributes, command):
     """Process Jedi operation correspond to request.
