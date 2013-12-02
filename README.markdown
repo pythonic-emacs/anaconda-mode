@@ -5,6 +5,7 @@
 ![screenshot1](screenshots/snapshot1.png)
 ![screenshot2](screenshots/snapshot2.png)
 ![screenshot3](screenshots/snapshot3.png)
+![screenshot4](screenshots/snapshot4.png)
 
 ## Requirements
 
@@ -18,12 +19,12 @@
 * jump to definition
 * find references
 * view documentation
+* eldoc
 
 ## Future work
 
 * asynchronous task processing
 * python2 support
-* eldoc
 
 ## Install
 
@@ -67,8 +68,9 @@ If you've installed Python dependencies without virtualenv, you need to customiz
 ## Sample Configuration
 
 ```lisp
-(add-to-list 'company-backends 'company-jedi)
-(add-hook 'python-mode-hook 'company-jedi-start)
+(eval-after-load "company"
+  '(progn
+     (add-to-list 'company-backends 'company-jedi)))
 
 (eval-after-load "python"
   '(progn
@@ -76,6 +78,8 @@ If you've installed Python dependencies without virtualenv, you need to customiz
      (define-key python-mode-map (kbd "M-r") 'company-jedi-find-references)
      (define-key python-mode-map (kbd "M-.") 'company-jedi-goto-definition)
      (define-key python-mode-map (kbd "M-,") 'pop-tag-mark)))
+
+(add-hook 'python-mode-hook 'company-jedi-eldoc-setup)
 
 (global-company-mode)
 ```
