@@ -81,6 +81,8 @@ If you've installed Python dependencies without virtualenv, you need to customiz
 
 (add-hook 'python-mode-hook 'company-jedi-eldoc-setup)
 
+(setq company-jedi-show-eldoc-as-single-line t)
+
 (global-company-mode)
 ```
 
