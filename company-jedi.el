@@ -30,6 +30,9 @@
 (require 'json)
 (require 'etags)
 
+(defvar company-jedi-show-eldoc-as-single-line nil
+  "If not nil, trim eldoc string to frame width.")
+
 (defvar company-jedi-host "localhost"
   "Target host with jedi server.")
 
@@ -195,8 +198,10 @@ Allow user to chose what doc he want to read."
 (defun company-jedi-eldoc ()
   "Show eldoc for context at point."
   (interactive)
-  (company-jedi-do-request
-   (company-jedi-request-json "eldoc")))
+  (let ((doc (company-jedi-do-request (company-jedi-request-json "eldoc"))))
+    (if (and doc company-jedi-show-eldoc-as-single-line)
+        (substring doc 0 (min (frame-width) (length doc)))
+      doc)))
 
 ;;;###autoload
 (defun company-jedi (command &optional arg)
