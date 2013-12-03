@@ -98,15 +98,10 @@
     (company-jedi-bootstrap)))
 
 (defun company-jedi-do-request (body)
-  "Make POST Request to jedi server.
+  "Make POST Request to jedi server with result processing.
 
-BODY mast be a encoded json string."
-  (let ((response (let ((url (format "http://%s:%s" company-jedi-host company-jedi-port))
-                        (url-request-method "POST")
-                        (url-request-extra-headers `(("Content-Type" . "application/json")))
-                        (url-request-data body)
-                        (message-log-max nil))
-                    (url-retrieve-synchronously url))))
+BODY mast be encoded json string."
+  (let ((response (company-jedi-retrive body)))
     (when response
       (prog1
           (with-current-buffer response
@@ -116,6 +111,17 @@ BODY mast be a encoded json string."
                        (company-jedi-decode)))
                 (500 (error (buffer-string)))))
         (kill-buffer response)))))
+
+(defun company-jedi-retrive (body)
+  "Make POST request to jedi server synchronously.
+
+BODY must be encoded json string."
+  (let ((url (format "http://%s:%s" company-jedi-host company-jedi-port))
+        (url-request-method "POST")
+        (url-request-extra-headers `(("Content-Type" . "application/json")))
+        (url-request-data body)
+        (url-show-status nil))
+    (url-retrieve-synchronously url)))
 
 (defun company-jedi-request-json (command &optional arg)
   "Generate json request for COMMAND.
