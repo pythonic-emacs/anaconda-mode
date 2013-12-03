@@ -54,10 +54,10 @@
 (defun company-jedi-completing-read (prompt collection)
   "Call completing engine with PROMPT on COLLECTION."
   (cond
-    ((eq (length collection) 1)
-     (car collection))
-    ((> (length collection) 1)
-     (funcall company-jedi-completing-read-function prompt collection))))
+   ((eq (length collection) 1)
+    (car collection))
+   ((> (length collection) 1)
+    (funcall company-jedi-completing-read-function prompt collection))))
 
 (defun key-list (hash)
   "Return key list of HASH."
@@ -101,16 +101,21 @@
   "Make POST Request to jedi server.
 
 BODY mast be a encoded json string."
-  (let ((url (format "http://%s:%s" company-jedi-host company-jedi-port))
-        (url-request-method "POST")
-        (url-request-extra-headers `(("Content-Type" . "application/json")))
-        (url-request-data body))
-    (with-current-buffer (url-retrieve-synchronously url)
-      (case url-http-response-status
-        (200 (progn
-               (goto-char url-http-end-of-headers)
-               (company-jedi-decode)))
-        (500 (error (buffer-string)))))))
+  (let ((response (let ((url (format "http://%s:%s" company-jedi-host company-jedi-port))
+                        (url-request-method "POST")
+                        (url-request-extra-headers `(("Content-Type" . "application/json")))
+                        (url-request-data body)
+                        (message-log-max nil))
+                    (url-retrieve-synchronously url))))
+    (when response
+      (prog1
+          (with-current-buffer response
+              (case url-http-response-status
+                (200 (progn
+                       (goto-char url-http-end-of-headers)
+                       (company-jedi-decode)))
+                (500 (error (buffer-string)))))
+        (kill-buffer response)))))
 
 (defun company-jedi-request-json (command &optional arg)
   "Generate json request for COMMAND.
