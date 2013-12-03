@@ -184,11 +184,11 @@ ARG may come from `company-call-backend' function."
   "Request document buffer for thing at point.
 
 Allow user to chose what doc he want to read."
-  (company-doc-buffer
-   (company-jedi-user-chose
-    "Doc: "
-    (company-jedi-do-request
-     (company-jedi-request-json "doc" arg)))))
+  (let* ((json (company-jedi-request-json "doc" arg))
+         (response (company-jedi-do-request json))
+         (doc (company-jedi-user-chose "Doc: " response)))
+    (when (> (length doc) 0)
+      (company-doc-buffer doc))))
 
 (defun company-jedi-meta (&optional arg)
   "Request short documentation for current context."
@@ -245,7 +245,9 @@ Save current position in `find-tag-marker-ring'."
 (defun company-jedi-show-doc ()
   "Show documentation for context at point."
   (interactive)
-  (display-buffer (company-jedi-doc-buffer)))
+  (let ((doc-buffer (company-jedi-doc-buffer)))
+    (when doc-buffer
+      (display-buffer doc-buffer))))
 
 ;;;###autoload
 (defun company-jedi-eldoc-setup ()
