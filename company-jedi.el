@@ -105,11 +105,9 @@ BODY mast be encoded json string."
     (when response
       (prog1
           (with-current-buffer response
-              (case url-http-response-status
-                (200 (progn
-                       (goto-char url-http-end-of-headers)
-                       (company-jedi-decode)))
-                (500 (error (buffer-string)))))
+            (goto-char url-http-end-of-headers)
+            (when (eq 200 url-http-response-status)
+              (company-jedi-decode)))
         (kill-buffer response)))))
 
 (defun company-jedi-retrive (body)
