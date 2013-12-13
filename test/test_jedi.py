@@ -110,6 +110,25 @@ datetime.date''',
 
         self.assertEqual(1, len(jedi.process(**request)))
 
+    def test_empty_definition(self):
+        """Strip unknown definitions."""
+
+        request = {
+            'command': 'location',
+            'attributes': {
+                'source': '''
+datetime.date''',
+                'line': 2,
+                'column': 13,
+                'point': 30,
+                'path': 'example.py',
+                'company_prefix': '',
+                'company_arg': ''
+            }
+        }
+
+        self.assertIsNone(jedi.process(**request))
+
     def test_references_search(self):
         """Jedi must find all references to object."""
 
@@ -149,7 +168,7 @@ v = a('b')''',
         self.assertEqual(response, jedi.process(**request))
 
     def test_empty_references(self):
-        """Jedi must find all references to object."""
+        """Strip unknown references."""
 
         request = {
             'command': 'reference',
