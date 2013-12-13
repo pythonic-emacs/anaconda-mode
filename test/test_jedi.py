@@ -23,7 +23,7 @@ class TestJedi(TestCase):
             }
         }
 
-        self.assertIsNotNone(jedi.process(**request).error)
+        self.assertIsNone(jedi.process(**request))
 
     def test_missing_attributes(self):
         """Should raise exception on incomplete source code."""
@@ -33,7 +33,7 @@ class TestJedi(TestCase):
             'attributes': {}
         }
 
-        self.assertIsNotNone(jedi.process(**request).error)
+        self.assertIsNone(jedi.process(**request))
 
     def test_autocomplete(self):
         """Jedi must complete correct sources."""
@@ -53,7 +53,7 @@ class TestJedi(TestCase):
 
         response = ['date', 'datetime', 'datetime_CAPI']
 
-        self.assertEqual(response, jedi.process(**request).result)
+        self.assertEqual(response, jedi.process(**request))
 
     def test_definition_search(self):
         """Jedi must find correct definitions."""
@@ -88,7 +88,7 @@ inception()''',
             }
         }
 
-        self.assertEqual(response, jedi.process(**request).result)
+        self.assertEqual(response, jedi.process(**request))
 
     def test_definition_filter(self):
         """Jedi must filter non python sources."""
@@ -108,7 +108,7 @@ datetime.date''',
             }
         }
 
-        self.assertEqual(1, len(jedi.process(**request).result))
+        self.assertEqual(1, len(jedi.process(**request)))
 
     def test_references_search(self):
         """Jedi must find all references to object."""
@@ -146,7 +146,7 @@ v = a('b')''',
             }
         }
 
-        self.assertEqual(response, jedi.process(**request).result)
+        self.assertEqual(response, jedi.process(**request))
 
     def test_documentation_search(self):
         """Jedi must find all assignments documentation."""
@@ -169,7 +169,7 @@ def f(a, b=1):
 
         response = {'Document for function f.': 'Document for function f.'}
 
-        self.assertEqual(response, jedi.process(**request).result)
+        self.assertEqual(response, jedi.process(**request))
 
     def test_short_documentation_search(self):
         """Jedi must find all short documentations."""
@@ -194,7 +194,7 @@ Here is long f function description."""
 
         response = 'Document for function f.'
 
-        self.assertEqual(response, jedi.process(**request).result)
+        self.assertEqual(response, jedi.process(**request))
 
     def test_eldoc(self):
         """Should return signature string."""
@@ -219,4 +219,4 @@ json.dump()''',
                     "indent = None, separators = None, default = None, "
                     "sort_keys = False, **kw)")
 
-        self.assertEqual(response, jedi.process(**request).result)
+        self.assertEqual(response, jedi.process(**request))

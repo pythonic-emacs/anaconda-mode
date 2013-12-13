@@ -120,12 +120,7 @@ def process(attributes, command):
     command -- method name called from CompanyJedi backend
     """
 
-    class Result():
-        pass
-
     try:
-
-        obj = Result()
 
         company = CompanyJedi(**attributes)
         logger.debug('Start jedi processing')
@@ -133,21 +128,18 @@ def process(attributes, command):
         company_method = getattr(company, command)
         logger.debug('Select company method: %s', company_method)
 
-        obj.result = company_method()
-        obj.error = None
+        result = company_method()
 
     except AttributeError:
 
         message = 'Call unsupported operation: {}'.format(command)
         logger.exception(message)
-        obj.result = None
-        obj.error = message
+        result = None
 
     except TypeError:
 
         message = 'Missing parameters for Jedi object: {}'.format(attributes)
         logger.exception(message)
-        obj.result = None
-        obj.error = message
+        result = None
 
-    return obj
+    return result

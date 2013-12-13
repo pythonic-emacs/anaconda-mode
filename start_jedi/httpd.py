@@ -27,15 +27,7 @@ class JediHandler(server.BaseHTTPRequestHandler):
             data = json.loads(request)
 
             response = jedi.process(**data)
-            logger.debug('Jedi result: %s', response.result)
-            logger.debug('Jedi error: %s', response.error)
-
-            if response.error:
-                code = 500
-                message = response.error.encode()
-            else:
-                code = 200
-                message = json.dumps(response.result).encode()
+            logger.debug('Jedi result: %s', response)
 
         except TypeError:
 
@@ -49,11 +41,18 @@ class JediHandler(server.BaseHTTPRequestHandler):
 
         else:
 
-            logger.debug('Send message to host: %s', message)
+            if response is not None:
 
-            self.send_response(code)
-            self.end_headers()
-            self.wfile.write(message)
+                message = json.dumps(response).encode()
+                logger.debug('Send message to host: %s', message)
+
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write(message)
+
+            else:
+
+                self.send_error(500)
 
         return
 
