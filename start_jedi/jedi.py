@@ -84,10 +84,15 @@ class CompanyJedi():
 
         documents = [name.raw_doc for name in self.script.goto_assignments()]
 
+        answer = None
+
         if len(documents) == 1:
-            answer = first_line(documents[0])
-        else:
-            answer = None
+
+            doc = documents[0]
+
+            if doc:
+
+                answer = first_line(doc)
 
         return answer
 

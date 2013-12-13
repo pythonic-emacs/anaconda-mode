@@ -196,6 +196,27 @@ Here is long f function description."""
 
         self.assertEqual(response, jedi.process(**request))
 
+    def test_empty_meta(self):
+        """Ignore docless functions."""
+
+        request = {
+            'command': 'meta',
+            'attributes': {
+                'source': """def ttt(a, b, c):
+    pass
+
+ttt""",
+                'line': 4,
+                'column': 3,
+                'point': 31,
+                'path': 'simple.py',
+                'company_prefix': '',
+                'company_arg': ''
+            }
+        }
+
+        self.assertIsNone(jedi.process(**request))
+
     def test_eldoc(self):
         """Should return signature string."""
 
@@ -211,7 +232,7 @@ json.dump()''',
                 'path': 'example.py',
                 'company_prefix': '',
                 'company_arg': ''
-                }
+            }
         }
 
         response = ("dump(obj, fp, skipkeys = False, ensure_ascii = True, "
@@ -225,17 +246,19 @@ json.dump()''',
         """Don't answer eldoc on unknown functions."""
 
         request = {
-            "command": "eldoc",
-            "attributes": {
-                "source": """def a:
+            'command': 'eldoc',
+            'attributes': {
+                'source': """def a:
     pass
 
 z = a()""",
-                "line": 4,
-                "column": 6,
-                "point": 23,
-                "path": "example.py",
-                "company_prefix": "",
-                "company_arg": ""}}
+                'line': 4,
+                'column': 6,
+                'point': 23,
+                'path': 'example.py',
+                'company_prefix': '',
+                'company_arg': ''
+            }
+        }
 
         self.assertIsNone(jedi.process(**request))
