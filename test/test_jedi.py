@@ -171,6 +171,27 @@ def f(a, b=1):
 
         self.assertEqual(response, jedi.process(**request))
 
+    def test_empty_documentation(self):
+        """Ignore docless functions."""
+
+        request = {
+            'command': 'doc',
+            'attributes': {
+                'source': """def ttt(a, b, c):
+    pass
+
+ttt""",
+                'line': 4,
+                'column': 3,
+                'point': 31,
+                'path': 'simple.py',
+                'company_prefix': '',
+                'company_arg': ''
+            }
+        }
+
+        self.assertIsNone(jedi.process(**request))
+
     def test_short_documentation_search(self):
         """Jedi must find all short documentations."""
 

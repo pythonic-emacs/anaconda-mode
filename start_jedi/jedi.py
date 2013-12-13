@@ -75,9 +75,16 @@ class CompanyJedi():
     def doc(self):
         """Documentations list for all assignments at point."""
 
-        documents = [name.raw_doc for name in self.script.goto_assignments()]
+        raw_docs = [name.raw_doc for name in self.script.goto_assignments()]
 
-        return {first_line(doc): doc for doc in documents}
+        documents = {first_line(doc): doc for doc in raw_docs if doc}
+
+        answer = None
+
+        if documents:
+            answer = documents
+
+        return answer
 
     def meta(self):
         """Return single line documentation string or None."""
