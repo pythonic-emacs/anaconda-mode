@@ -197,10 +197,10 @@ def f(a, b=1):
         request = {
             'command': 'doc',
             'attributes': {
-                'source': """def ttt(a, b, c):
+                'source': '''def ttt(a, b, c):
     pass
 
-ttt""",
+ttt''',
                 'line': 4,
                 'column': 3,
                 'point': 31,
@@ -243,10 +243,10 @@ Here is long f function description."""
         request = {
             'command': 'meta',
             'attributes': {
-                'source': """def ttt(a, b, c):
+                'source': '''def ttt(a, b, c):
     pass
 
-ttt""",
+ttt''',
                 'line': 4,
                 'column': 3,
                 'point': 31,
@@ -289,10 +289,10 @@ json.dump()''',
         request = {
             'command': 'eldoc',
             'attributes': {
-                'source': """def a:
+                'source': '''def a:
     pass
 
-z = a()""",
+z = a()''',
                 'line': 4,
                 'column': 6,
                 'point': 23,

@@ -77,31 +77,16 @@ class CompanyJedi():
 
         raw_docs = [name.raw_doc for name in self.script.goto_assignments()]
 
-        documents = {first_line(doc): doc for doc in raw_docs if doc}
-
-        answer = None
-
-        if documents:
-            answer = documents
-
-        return answer
+        return {first_line(doc): doc for doc in raw_docs if doc}
 
     def meta(self):
         """Return single line documentation string or None."""
 
         documents = [name.raw_doc for name in self.script.goto_assignments()]
 
-        answer = None
-
         if len(documents) == 1:
 
-            doc = documents[0]
-
-            if doc:
-
-                answer = first_line(doc)
-
-        return answer
+            return first_line(documents[0])
 
     def eldoc(self):
         """Return eldoc format documentation string or None."""
@@ -117,13 +102,7 @@ class CompanyJedi():
             params = signatures[0].params
             call_params = [param.get_code(new_line=False) for param in params]
 
-            answer = '{}({})'.format(call_name, ', '.join(call_params))
-
-        else:
-
-            answer = None
-
-        return answer
+            return '{}({})'.format(call_name, ', '.join(call_params))
 
 
 def process(attributes, command):
@@ -156,4 +135,5 @@ def process(attributes, command):
         logger.exception(message)
         result = None
 
-    return result
+    if result:
+        return result
