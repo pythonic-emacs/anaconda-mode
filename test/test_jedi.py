@@ -148,6 +148,26 @@ v = a('b')''',
 
         self.assertEqual(response, jedi.process(**request))
 
+    def test_empty_references(self):
+        """Jedi must find all references to object."""
+
+        request = {
+            'command': 'reference',
+            'attributes': {
+                'source': '''
+def a(t):
+    return t''',
+                'line': 2,
+                'column': 4,
+                'point': 5,
+                'path': 'example.py',
+                'company_prefix': '',
+                'company_arg': ''
+            }
+        }
+
+        self.assertIsNone(jedi.process(**request))
+
     def test_documentation_search(self):
         """Jedi must find all assignments documentation."""
 
