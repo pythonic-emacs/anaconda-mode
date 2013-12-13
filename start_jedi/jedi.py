@@ -96,6 +96,8 @@ class CompanyJedi():
 
         signatures = self.script.call_signatures()
 
+        logger.debug('Call signatures: %s', signatures)
+
         if len(signatures) == 1:
 
             call_name = signatures[0].call_name

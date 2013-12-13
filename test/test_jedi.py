@@ -220,3 +220,22 @@ json.dump()''',
                     "sort_keys = False, **kw)")
 
         self.assertEqual(response, jedi.process(**request))
+
+    def test_empty_eldoc(self):
+        """Don't answer eldoc on unknown functions."""
+
+        request = {
+            "command": "eldoc",
+            "attributes": {
+                "source": """def a:
+    pass
+
+z = a()""",
+                "line": 4,
+                "column": 6,
+                "point": 23,
+                "path": "example.py",
+                "company_prefix": "",
+                "company_arg": ""}}
+
+        self.assertIsNone(jedi.process(**request))
