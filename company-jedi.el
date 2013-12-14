@@ -33,6 +33,12 @@
 (defvar company-jedi-show-eldoc-as-single-line nil
   "If not nil, trim eldoc string to frame width.")
 
+(defvar company-jedi-completing-read-function
+  (if (or (featurep 'helm) (locate-library "helm"))
+      'helm-comp-read
+    'ido-completing-read)
+  "Completing read function used in company-jedi.")
+
 (defvar company-jedi-host "localhost"
   "Target host with jedi server.")
 
@@ -44,33 +50,6 @@
           "jedi/venv/bin/python3 -m start_jedi -p "
           (number-to-string company-jedi-port))
   "Command to run start_jedi server.")
-
-(defvar company-jedi-completing-read-function
-  (if (or (featurep 'helm) (locate-library "helm"))
-      'helm-comp-read
-    'ido-completing-read)
-  "Completing read function used in company-jedi.")
-
-(defun company-jedi-completing-read (prompt collection)
-  "Call completing engine with PROMPT on COLLECTION."
-  (cond
-   ((eq (length collection) 1)
-    (car collection))
-   ((> (length collection) 1)
-    (funcall company-jedi-completing-read-function prompt collection))))
-
-(defun key-list (hash)
-  "Return key list of HASH."
-  (let (klist)
-    (maphash
-     (lambda (k v) (add-to-list 'klist k t))
-     hash)
-    klist))
-
-(defun company-jedi-user-chose (prompt hash)
-  "With PROMPT ask user for HASH value."
-  (or (gethash (company-jedi-completing-read prompt (key-list hash)) hash)
-      (error "Jedi can't answer.")))
 
 (defvar company-jedi-dir
   (file-name-directory load-file-name)
@@ -160,9 +139,27 @@ ARG may come from `company-call-backend' function."
         (json-key-type 'string))
     (json-read-from-string arg)))
 
-(defun company-jedi-candidates ()
-  "Request completion candidates from jedi."
-  (company-jedi-do-request (company-jedi-request-json "candidates")))
+(defun company-jedi-completing-read (prompt collection)
+  "Call completing engine with PROMPT on COLLECTION."
+  (cond
+   ((eq (length collection) 1)
+    (car collection))
+   ((> (length collection) 1)
+    (funcall company-jedi-completing-read-function prompt collection))))
+
+(defun key-list (hash)
+  "Return key list of HASH."
+  (let (keys)
+    (maphash
+     (lambda (k v) (add-to-list 'keys k t))
+     hash)
+    keys))
+
+(defun company-jedi-user-chose (prompt hash)
+  "With PROMPT ask user for HASH value."
+  (when hash
+    (gethash (company-jedi-completing-read prompt (key-list hash))
+             hash)))
 
 (defun company-jedi-chose-module (prompt modules)
   "Chose module from MOD-LIST.
@@ -171,7 +168,13 @@ Return cons of file name and line.
 
 PROMPT will used for completing read function."
   (let ((user-chose (company-jedi-user-chose prompt modules)))
-    (cons (gethash "module_path" user-chose) (gethash "line" user-chose))))
+    (when user-chose
+      (cons (gethash "module_path" user-chose)
+            (gethash "line" user-chose)))))
+
+(defun company-jedi-candidates ()
+  "Request completion candidates from jedi."
+  (company-jedi-do-request (company-jedi-request-json "candidates")))
 
 (defun company-jedi-location (&optional arg)
   "Request completion location from jedi.
@@ -196,21 +199,13 @@ Allow user to chose what doc he want to read."
   (let* ((json (company-jedi-request-json "doc" arg))
          (response (company-jedi-do-request json))
          (doc (company-jedi-user-chose "Doc: " response)))
-    (when (> (length doc) 0)
+    (when doc
       (company-doc-buffer doc))))
 
 (defun company-jedi-meta (&optional arg)
   "Request short documentation for current context."
   (company-jedi-do-request
    (company-jedi-request-json "meta" arg)))
-
-(defun company-jedi-eldoc ()
-  "Show eldoc for context at point."
-  (interactive)
-  (let ((doc (company-jedi-do-request (company-jedi-request-json "eldoc"))))
-    (if (and doc company-jedi-show-eldoc-as-single-line)
-        (substring doc 0 (min (frame-width) (length doc)))
-      doc)))
 
 ;;;###autoload
 (defun company-jedi (command &optional arg)
@@ -225,38 +220,53 @@ See `company-backends' for more info about COMMAND and ARG."
                  (company-grab-symbol)))
     (candidates (company-jedi-candidates))
     (location (company-jedi-location arg))
+    (reference (company-jedi-reference))
     (doc-buffer (company-jedi-doc-buffer arg))
     (meta (company-jedi-meta arg))
+    (eldoc (company-jedi-do-request (company-jedi-request-json "eldoc")))
     (sorted t)))
 
-(defun company-jedi-find-file (file)
+(defun company-jedi-find-file (file line)
   "Find FILE at specified line.
 
 Save current position in `find-tag-marker-ring'."
   (ring-insert find-tag-marker-ring (point-marker))
-  (find-file (car file))
-  (goto-line (cdr file))
+  (find-file file)
+  (goto-line line)
   (back-to-indentation))
 
 ;;;###autoload
 (defun company-jedi-goto-definition ()
   "Jump to definition at point."
   (interactive)
-  (company-jedi-find-file (company-jedi-location)))
+  (let ((module (company-jedi 'location)))
+    (when module
+      (company-jedi-find-file (car module) (cdr module)))))
 
 ;;;###autoload
 (defun company-jedi-find-references ()
   "Jump to reference at point."
   (interactive)
-  (company-jedi-find-file (company-jedi-reference)))
+  (let ((module (company-jedi 'reference)))
+    (when module
+      (company-jedi-find-file (car module) (cdr module)))))
 
 ;;;###autoload
 (defun company-jedi-show-doc ()
   "Show documentation for context at point."
   (interactive)
-  (let ((doc-buffer (company-jedi-doc-buffer)))
-    (when doc-buffer
-      (display-buffer doc-buffer))))
+  (let ((doc-buffer (company-jedi 'doc-buffer)))
+    (if doc-buffer
+        (display-buffer doc-buffer)
+      (error "Can't find documentation at point."))))
+
+(defun company-jedi-eldoc ()
+  "Show eldoc for context at point."
+  (interactive)
+  (let ((doc (company-jedi 'eldoc)))
+    (if (and doc company-jedi-show-eldoc-as-single-line)
+        (substring doc 0 (min (frame-width) (length doc)))
+      doc)))
 
 ;;;###autoload
 (defun company-jedi-eldoc-setup ()

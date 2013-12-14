@@ -95,7 +95,7 @@ m = a('t')" 1 4)
   "Company must ignore empty doc strings."
   (make-test-file "def f(a, b=1):
     pass" 1 4)
-  (should (equal "" (company-jedi-meta))))
+  (should (null (company-jedi-meta))))
 
 ;; Helper functions.
 
