@@ -277,6 +277,13 @@ Save current position in `find-tag-marker-ring'."
   (turn-on-eldoc-mode)
   (company-jedi-start))
 
+;;;###autoload
+(defun company-jedi-complete-on-dot ()
+  "Call `company-jedi' after dot insertion."
+  (interactive)
+  (insert ".")
+  (company-jedi 'interactive))
+
 (provide 'company-jedi)
 
 ;;; company-jedi.el ends here
