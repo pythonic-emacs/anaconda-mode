@@ -55,9 +55,9 @@ class CompanyJedi():
     def location(self):
         """Find names assignment place."""
 
-        assignments = self.script.goto_assignments()
+        definitions = self.script.goto_definitions()
 
-        locations = [name for name in assignments if is_py(name)]
+        locations = [name for name in definitions if is_py(name)]
 
         return {summary(name): details(name) for name in locations}
 
@@ -66,23 +66,23 @@ class CompanyJedi():
 
         usages = [name for name in self.script.usages() if is_py(name)]
 
-        assignments = self.script.goto_assignments()
+        definitions = self.script.goto_definitions()
 
-        references = [name for name in usages if name not in assignments]
+        references = [name for name in usages if name not in definitions]
 
         return {summary(name): details(name) for name in references}
 
     def doc(self):
-        """Documentations list for all assignments at point."""
+        """Documentations list for all definitions at point."""
 
-        raw_docs = [name.raw_doc for name in self.script.goto_assignments()]
+        raw_docs = [name.raw_doc for name in self.script.goto_definitions()]
 
         return {first_line(doc): doc for doc in raw_docs if doc}
 
     def meta(self):
         """Return single line documentation string or None."""
 
-        documents = [name.raw_doc for name in self.script.goto_assignments()]
+        documents = [name.raw_doc for name in self.script.goto_definitions()]
 
         if len(documents) == 1:
 
