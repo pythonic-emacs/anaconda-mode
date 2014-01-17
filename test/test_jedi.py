@@ -78,11 +78,11 @@ inception()''',
         }
 
         response = {
-            os.getcwd() + '/example.py:7 - inception = my_list[2]': {
+            os.getcwd() + '/example.py:2 - def my_func': {
                 'module_path': os.getcwd() + '/example.py',
-                'line': 7,
+                'line': 2,
                 'column': 0,
-                'description': 'inception = my_list[2]'
+                'description': 'def my_func',
             }
         }
 
