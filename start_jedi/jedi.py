@@ -1,34 +1,40 @@
 import jedi
 import logging
-import re
 
 logger = logging.getLogger(__name__)
 
 
-def details(name):
+def details(definition):
+    """Make hash with definition details."""
+
     return {
-        'module_path': name.module_path,
-        'line': name.line,
-        'column': name.column,
-        'description': name.description
+        'module_path': definition.module_path,
+        'line': definition.line,
+        'column': definition.column,
+        'description': definition.description
     }
 
 
-def summary(name):
-    """Format string from base definition."""
+def summary(definition):
+    """Summarize definition into one string."""
 
-    return '{}:{} - {}'.format(name.module_path, name.line, name.description)
+    return '{}:{} - {}'.format(
+        definition.module_path,
+        definition.line,
+        definition.description
+    )
 
 
-def is_py(name):
-    pattern = re.compile('^.*\\.py$')
-    return pattern.match(name.module_path)
+def is_py(definition):
+    """Check if file name is a python source."""
+
+    return definition.module_path.endswith('.py')
 
 
-def first_line(string):
-    """Return first line from string."""
+def first_line(text):
+    """Return text first line."""
 
-    return string.split('\n', 1)[0]
+    return text.split('\n', 1)[0]
 
 
 class CompanyJedi():
