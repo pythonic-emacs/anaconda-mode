@@ -15,3 +15,32 @@ handler.setFormatter(formatter)
 
 logger.addHandler(handler)
 logger.propagate = False  # Not echo to console
+
+# Helper methods.
+
+
+def editor(path, line, column, command,
+           company_prefix='', company_arg=''):
+    """Emulate requests from user.
+
+    Return callable api for jedi."""
+
+    with open(path) as f:
+        lines = f.readlines()
+
+    source = ''.join(lines)
+
+    point = len(''.join(lines[:line-1]) + lines[line-1][:column])
+
+    return {
+        'command': command,
+        'attributes': {
+            'source': source,
+            'line': line,
+            'column': column,
+            'point': point,
+            'path': path,
+            'company_prefix': company_prefix,
+            'company_arg': company_arg,
+        }
+    }

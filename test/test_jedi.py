@@ -33,26 +33,6 @@ class TestJedi(TestCase):
 
         self.assertIsNone(jedi.process(**request))
 
-    def test_autocomplete(self):
-        """Jedi must complete correct sources."""
-
-        request = {
-            'command': 'candidates',
-            'attributes': {
-                'source': '''\nimport datetime\ndatetime.da''',
-                'line': 3,
-                'column': 14,
-                'point': 28,
-                'path': '',
-                'company_prefix': '',
-                'company_arg': ''
-            }
-        }
-
-        response = ['date', 'datetime', 'datetime_CAPI']
-
-        self.assertEqual(response, jedi.process(**request))
-
     def test_definition_search(self):
         """Jedi must find correct definitions."""
 
