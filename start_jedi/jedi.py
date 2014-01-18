@@ -64,11 +64,17 @@ class CompanyJedi():
     def reference(self):
         """Find name reference places."""
 
+        # Script.usages() and Script.goto_assignments() both call
+        # Script._goto() method for definition search. So each result
+        # will has equal _start_pos attribute. With
+        # Script.goto_definitions() we may optain different column
+        # position for the same definition.  So we use assignments
+        # here because of necessary filtration.
         usages = [name for name in self.script.usages() if is_py(name)]
 
-        definitions = self.script.goto_definitions()
+        assignments = self.script.goto_assignments()
 
-        references = [name for name in usages if name not in definitions]
+        references = [name for name in usages if name not in assignments]
 
         return {summary(name): details(name) for name in references}
 
