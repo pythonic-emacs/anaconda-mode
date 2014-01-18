@@ -33,50 +33,6 @@ class TestJedi(TestCase):
 
         self.assertIsNone(jedi.process(**request))
 
-    def test_documentation_search(self):
-        """Jedi must find all assignments documentation."""
-
-        request = {
-            'command': 'doc',
-            'attributes': {
-                'source': '''
-def f(a, b=1):
-    "Document for function f."
-    pass''',
-                'line': 2,
-                'column': 4,
-                'point': 5,
-                'path': 'example.py',
-                'company_prefix': '',
-                'company_arg': ''
-            }
-        }
-
-        response = {'Document for function f.': 'Document for function f.'}
-
-        self.assertEqual(response, jedi.process(**request))
-
-    def test_empty_documentation(self):
-        """Ignore docless functions."""
-
-        request = {
-            'command': 'doc',
-            'attributes': {
-                'source': '''def ttt(a, b, c):
-    pass
-
-ttt''',
-                'line': 4,
-                'column': 3,
-                'point': 31,
-                'path': 'simple.py',
-                'company_prefix': '',
-                'company_arg': ''
-            }
-        }
-
-        self.assertIsNone(jedi.process(**request))
-
     def test_short_documentation_search(self):
         """Jedi must find all short documentations."""
 
