@@ -33,64 +33,6 @@ class TestJedi(TestCase):
 
         self.assertIsNone(jedi.process(**request))
 
-    def test_references_search(self):
-        """Jedi must find all references to object."""
-
-        request = {
-            'command': 'reference',
-            'attributes': {
-                'source': '''
-def a(t):
-    return t
-
-m = a(1)
-v = a('b')''',
-                'line': 2,
-                'column': 4,
-                'point': 5,
-                'path': 'example.py',
-                'company_prefix': '',
-                'company_arg': ''
-            }
-        }
-
-        response = {
-            os.getcwd() + '/example.py:5 - a@5,4': {
-                'module_path': os.getcwd() + '/example.py',
-                'line': 5,
-                'column': 4,
-                'description': 'a@5,4'
-            },
-            os.getcwd() + '/example.py:6 - a@6,4': {
-                'module_path': os.getcwd() + '/example.py',
-                'line': 6,
-                'column': 4,
-                'description': 'a@6,4'
-            }
-        }
-
-        self.assertEqual(response, jedi.process(**request))
-
-    def test_empty_references(self):
-        """Strip unknown references."""
-
-        request = {
-            'command': 'reference',
-            'attributes': {
-                'source': '''
-def a(t):
-    return t''',
-                'line': 2,
-                'column': 4,
-                'point': 5,
-                'path': 'example.py',
-                'company_prefix': '',
-                'company_arg': ''
-            }
-        }
-
-        self.assertIsNone(jedi.process(**request))
-
     def test_documentation_search(self):
         """Jedi must find all assignments documentation."""
 
