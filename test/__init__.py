@@ -1,13 +1,16 @@
 import os
 import logging
 
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+ROOT = os.path.realpath(BASE_DIR) + os.path.sep
+
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger('start_jedi')
 
-if not os.path.isdir("log"):
-    os.mkdir("log")
+if not os.path.isdir(ROOT + 'log'):
+    os.mkdir(ROOT + 'log')
 
-handler = logging.FileHandler('log/test.log')
+handler = logging.FileHandler(ROOT + 'log/test.log')
 handler.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter(logging.BASIC_FORMAT)
