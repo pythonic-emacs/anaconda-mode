@@ -1,2 +1,2 @@
-jedi
-argparse
+jedi==0.7.0
+argparse==1.2.1
