@@ -12,7 +12,6 @@
 
 (eval-after-load "python"
   '(progn
-     (define-key python-mode-map (kbd ".") 'company-jedi-complete-on-dot)
      (define-key python-mode-map (kbd "<C-tab>") 'company-jedi)
      (define-key python-mode-map (kbd "M-?") 'company-jedi-show-doc)
      (define-key python-mode-map (kbd "M-r") 'company-jedi-find-references)

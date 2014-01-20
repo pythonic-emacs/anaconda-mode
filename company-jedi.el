@@ -33,6 +33,9 @@
 (defvar company-jedi-show-eldoc-as-single-line nil
   "If not nil, trim eldoc string to frame width.")
 
+(defvar company-jedi-complete-on-dot t
+  "If not nil, invoke jedi completion after dot inserting.")
+
 (defvar company-jedi-completing-read-function
   (if (or (featurep 'helm) (locate-library "helm"))
       'helm-comp-read
@@ -172,6 +175,21 @@ PROMPT will used for completing read function."
       (cons (gethash "module_path" user-chose)
             (gethash "line" user-chose)))))
 
+(defun company-jedi-prefix ()
+  "Grab prefix at point.
+
+ Properly detect strings, comments and attribute access."
+  (when (not (company-in-string-or-comment))
+    (let ((symbol (company-grab-symbol)))
+      (if symbol
+          (if (and company-jedi-complete-on-dot
+                   (save-excursion
+                     (forward-char (- (length symbol)))
+                     (looking-back "\\." (- (point) 1))))
+              (cons symbol t)
+            symbol)
+        'stop))))
+
 (defun company-jedi-candidates ()
   "Request completion candidates from jedi."
   (company-jedi-do-request (company-jedi-request-json "candidates")))
@@ -217,7 +235,7 @@ See `company-backends' for more info about COMMAND and ARG."
     (interactive (company-begin-backend 'company-jedi))
     (prefix (and (memq major-mode '(python-mode inferior-python-mode))
                  (company-jedi-running-p)
-                 (company-grab-symbol)))
+                 (company-jedi-prefix)))
     (candidates (company-jedi-candidates))
     (location (company-jedi-location arg))
     (reference (company-jedi-reference))
@@ -276,13 +294,6 @@ Save current position in `find-tag-marker-ring'."
        'company-jedi-eldoc)
   (turn-on-eldoc-mode)
   (company-jedi-start))
-
-;;;###autoload
-(defun company-jedi-complete-on-dot ()
-  "Call `company-jedi' after dot insertion."
-  (interactive)
-  (insert ".")
-  (company-jedi 'interactive))
 
 (provide 'company-jedi)
 
