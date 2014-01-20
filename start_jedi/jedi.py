@@ -28,7 +28,9 @@ def summary(definition):
 def is_py(definition):
     """Check if file name is a python source."""
 
-    return definition.module_path.endswith('.py')
+    is_file = definition.module_path.endswith('.py')
+    is_builtin = definition.module_path == 'builtins'
+    return is_file or is_builtin
 
 
 def first_line(text):

@@ -34,6 +34,16 @@ class LocationTest(TestCase):
 
         self.assertEqual(1, len(jedi.process(**request)))
 
+    def test_definition_with_builtins(self):
+        """Jedi must keep builtin definitions."""
+
+        request = editor(
+            'test/jedi_location/fixtures/builtins.py', 6, 1,
+            'location'
+        )
+
+        self.assertEqual(2, len(jedi.process(**request)))
+
     def test_empty_definition(self):
         """Strip unknown definitions."""
 
