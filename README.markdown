@@ -1,4 +1,4 @@
-# company-jedi [![Build Status](https://travis-ci.org/proofit404/company-jedi.png?branch=master)](https://travis-ci.org/proofit404/company-jedi)
+# company-jedi [![Build Status](https://travis-ci.org/proofit404/company-jedi.png?branch=master)](https://travis-ci.org/proofit404/company-jedi) [![Dependency Status](https://gemnasium.com/proofit404/company-jedi.png)](https://gemnasium.com/proofit404/company-jedi)
 
 [Jedi](https://github.com/davidhalter/jedi) backend for [company-mode](https://github.com/company-mode/company-mode).
 
