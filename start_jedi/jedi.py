@@ -25,14 +25,6 @@ def summary(definition):
     )
 
 
-def is_py(definition):
-    """Check if file name is a python source."""
-
-    is_file = definition.module_path.endswith('.py')
-    is_builtin = definition.module_path == 'builtins'
-    return is_file or is_builtin
-
-
 def first_line(text):
     """Return text first line."""
 
@@ -76,26 +68,16 @@ class CompanyJedi():
     def location(self):
         """Find names assignment place."""
 
-        definitions = self.script.goto_definitions()
-
-        locations = [name for name in definitions if is_py(name)]
-
-        return {summary(name): details(name) for name in locations}
+        return {summary(name): details(name) for name in self._goto()}
 
     def reference(self):
         """Find name reference places."""
 
-        # Script.usages() and Script.goto_assignments() both call
-        # Script._goto() method for definition search. So each result
-        # will has equal _start_pos attribute. With
-        # Script.goto_definitions() we may optain different column
-        # position for the same definition.  So we use assignments
-        # here because of necessary filtration.
-        usages = [name for name in self.script.usages() if is_py(name)]
+        usages = self.script.usages()
 
-        assignments = self.script.goto_assignments()
+        locations = self._goto()
 
-        references = [name for name in usages if name not in assignments]
+        references = [name for name in usages if name not in locations]
 
         return {summary(name): details(name) for name in references}
 

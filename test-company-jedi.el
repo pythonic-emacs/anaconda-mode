@@ -51,7 +51,7 @@
   "Test find definition at point."
   (make-test-file)
   (should (equal (company-jedi-location)
-                 (cons default-path 6))))
+                 (cons default-path 1)))) ; Fist definition will chose by mocked user.
 
 (ert-deftest test-jedi-multiple-location ()
   "Test non determined locations."

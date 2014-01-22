@@ -19,12 +19,18 @@ class LocationTest(TestCase):
                 'line': 1,
                 'column': 0,
                 'description': 'def my_func',
+            },
+            ROOT + 'test/jedi_location/fixtures/simple.py:6 - inception = my_list[2]': {
+                'module_path': ROOT + 'test/jedi_location/fixtures/simple.py',
+                'line': 6,
+                'column': 0,
+                'description': 'inception = my_list[2]',
             }
         }
 
         self.assertEqual(response, jedi.process(**request))
 
-    def test_definition_filter(self):
+    def test_non_python_definition_filter(self):
         """Jedi must filter non python sources."""
 
         request = editor(
@@ -32,17 +38,31 @@ class LocationTest(TestCase):
             'location'
         )
 
-        self.assertEqual(1, len(jedi.process(**request)))
+        result = jedi.process(**request)
+
+        self.assertEqual(1, len(result))
+
+        for k, v in result.items():
+            self.assertTrue(v['module_path'].endswith('.py'))
 
     def test_definition_with_builtins(self):
-        """Jedi must keep builtin definitions."""
+        """Jedi must keep builtin definitions.
+
+        But also jedi must properly return python module location
+        for those definitions. Not a builtin keyword.
+        """
 
         request = editor(
             'test/jedi_location/fixtures/builtins.py', 6, 1,
             'location'
         )
 
-        self.assertEqual(2, len(jedi.process(**request)))
+        result = jedi.process(**request)
+
+        self.assertEqual(2, len(result))
+
+        for k, v in result.items():
+            self.assertTrue(v['module_path'].endswith('.py'))
 
     def test_empty_definition(self):
         """Strip unknown definitions."""
