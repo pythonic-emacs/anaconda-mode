@@ -60,6 +60,19 @@ class CompanyJedi():
 
         return completions
 
+    def _goto(self):
+        """List definitions with assignments.
+
+        Filter same definitions in favor of more explicit definition.
+        """
+
+        assignments = self.script.goto_assignments()
+        definitions = self.script.goto_definitions()
+
+        for name in assignments + definitions:
+            if name.module_path.endswith('.py'):
+                yield name
+
     def location(self):
         """Find names assignment place."""
 
@@ -149,5 +162,7 @@ def process(attributes, command):
         logger.exception(message)
         result = None
 
+    # Protection from empty strings, lists, etc.
+    # Must return None in all this cases.
     if result:
         return result

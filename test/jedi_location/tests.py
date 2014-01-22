@@ -53,3 +53,27 @@ class LocationTest(TestCase):
         )
 
         self.assertIsNone(jedi.process(**request))
+
+    def test_jedi_goto_filter_same_definitions(self):
+        """Merge definitions with assignments properly.
+
+        When merge definitions and assignments together
+        jedi must filter BaseDefinitions without module_name
+        and definitions with the same line numbers in favor of
+        more consistent location.
+        """
+
+        request = editor(
+            'test/jedi_location/fixtures/builtins.py', 6, 1,
+            '_goto'
+        )
+
+        result = jedi.process(**request)
+
+        result_len = 0
+        for base_def in result:
+            self.assertTrue(base_def.module_path.endswith('.py'))
+            self.assertTrue(type(base_def.line) is int)
+            result_len += 1
+
+        self.assertEqual(2, result_len)
