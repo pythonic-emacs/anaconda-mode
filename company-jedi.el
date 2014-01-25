@@ -1,6 +1,6 @@
 ;;; company-jedi.el --- Jedi backend for company-mode
 
-;; Copyright (C) 2013 by Malyshev Artem
+;; Copyright (C) 2013, 2014 by Malyshev Artem
 
 ;; Author: Malyshev Artem <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/company-jedi
@@ -78,6 +78,13 @@
   (interactive)
   (unless (company-jedi-running-p)
     (company-jedi-bootstrap)))
+
+;;;###autoload
+(defun company-jedi-stop ()
+  "Stop remote jedi server."
+  (interactive)
+  (when (company-jedi-running-p)
+    (kill-process company-jedi-process)))
 
 (defun company-jedi-do-request (body)
   "Make POST Request to jedi server with result processing.
