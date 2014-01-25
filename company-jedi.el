@@ -36,6 +36,10 @@
 (defvar company-jedi-complete-on-dot t
   "If not nil, invoke jedi completion after dot inserting.")
 
+(defvar company-jedi-after-start-hook
+  '(company-jedi-mode company-jedi-eldoc-mode)
+  "Hook runs after `company-jedi-start' call.")
+
 (defvar company-jedi-completing-read-function
   (if (or (featurep 'helm) (locate-library "helm"))
       'helm-comp-read
@@ -77,7 +81,8 @@
   "Start remote jedi server."
   (interactive)
   (unless (company-jedi-running-p)
-    (company-jedi-bootstrap)))
+    (company-jedi-bootstrap))
+  (run-hooks 'company-jedi-after-start-hook))
 
 ;;;###autoload
 (defun company-jedi-stop ()
@@ -300,14 +305,33 @@ Save current position in `find-tag-marker-ring'."
         (substring doc 0 (min (frame-width) (length doc)))
       doc)))
 
+
+;;; Minor mode.
+
+(defvar company-jedi-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "M-?") 'company-jedi-show-doc)
+    (define-key map (kbd "M-r") 'company-jedi-find-references)
+    (define-key map (kbd "M-.") 'company-jedi-goto-definition)
+    (define-key map (kbd "M-,") 'pop-tag-mark)
+    map)
+  "Keymap for Company Jedi mode.")
+
 ;;;###autoload
-(defun company-jedi-eldoc-setup ()
+(define-minor-mode company-jedi-mode
+  "Minor mode for Company Jedi interaction.
+
+\\{company-jedi-mode-map}"
+  :lighter " Jedi"
+  :keymap company-jedi-mode-map)
+
+;;;###autoload
+(defun company-jedi-eldoc-mode ()
   "Setup eldoc mode properly for python buffer."
   (interactive)
   (set (make-local-variable 'eldoc-documentation-function)
        'company-jedi-eldoc)
-  (turn-on-eldoc-mode)
-  (company-jedi-start))
+  (turn-on-eldoc-mode))
 
 (provide 'company-jedi)
 

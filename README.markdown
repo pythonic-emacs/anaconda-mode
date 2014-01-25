@@ -77,28 +77,6 @@ If you've installed Python dependencies without virtualenv, you need to customiz
 (setq company-jedi-command (format "python3 -m start_jedi -p %s" company-jedi-port))
 ```
 
-## Sample Configuration
-
-```lisp
-(eval-after-load "company"
-  '(progn
-     (add-to-list 'company-backends 'company-jedi)))
-
-(eval-after-load "python"
-  '(progn
-     (define-key python-mode-map (kbd "<C-tab>") 'company-jedi)
-     (define-key python-mode-map (kbd "M-?") 'company-jedi-show-doc)
-     (define-key python-mode-map (kbd "M-r") 'company-jedi-find-references)
-     (define-key python-mode-map (kbd "M-.") 'company-jedi-goto-definition)
-     (define-key python-mode-map (kbd "M-,") 'pop-tag-mark)))
-
-(add-hook 'python-mode-hook 'company-jedi-eldoc-setup)
-
-(setq company-jedi-show-eldoc-as-single-line t)
-
-(global-company-mode)
-```
-
 ## Contributions
 
 Are very welcome. But any significant change has to be accompanied with tests, both for Emacs Lisp and Python code.
