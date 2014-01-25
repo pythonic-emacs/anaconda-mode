@@ -23,8 +23,21 @@
 
 ## Future work
 
-* asynchronous task processing
-* python2 support
+#### 0.1 milestone:
+
+* 2.6, 2.7, 3.1, 3.2 pythons support
+
+#### 0.2 milestone:
+
+* virtualenv support
+
+#### 0.3 milestone:
+
+* non blocking client
+
+#### 0.4 milestone:
+
+* concurrent server side
 
 ## Install
 
@@ -36,8 +49,7 @@ First of all you need to install the package from [Melpa](http://melpa.milkbox.n
 Now you need resolve Jedi dependencies with Python's [PyPI](https://pypi.python.org/pypi).
 By default you need virtualenv installed before you get company-jedi frontend to work.
 
-    cd $HOME/.emacs.d/elpa/company-jedi-*
-    make
+    M-x company-jedi-install
 
 But using `company-jedi` without virtualenv is still possible with additional setup.
 For now you need to run the following command from the package directory:

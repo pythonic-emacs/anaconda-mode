@@ -86,6 +86,13 @@
   (when (company-jedi-running-p)
     (kill-process company-jedi-process)))
 
+;;;###autoload
+(defun company-jedi-install ()
+  "Install jedi dependencies with pip.  Virtualenv required."
+  (interactive)
+  (let ((default-directory company-jedi-dir))
+    (compile "make")))
+
 (defun company-jedi-do-request (body)
   "Make POST Request to jedi server with result processing.
 
