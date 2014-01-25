@@ -1,4 +1,4 @@
-from unittest import TestCase
+from unittest import TestCase, skip
 from start_jedi import jedi
 from test import editor
 
@@ -14,5 +14,18 @@ class CandidatesTest(TestCase):
         )
 
         response = ['date', 'datetime', 'datetime_CAPI']
+
+        self.assertEqual(response, jedi.process(**request))
+
+    @skip('Not implemented yet.')
+    def test_autocomplete_from_virtualenv(self):
+        """Jedi must search for candidates in virtual environment."""
+
+        request = editor(
+            'test/jedi_candidates/fixtures/import_from_venv.py', 1, 20,
+            'candidates'
+        )
+
+        response = ['ppp_function']
 
         self.assertEqual(response, jedi.process(**request))
