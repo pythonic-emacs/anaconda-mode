@@ -74,7 +74,7 @@ To automatically start the server when you open any python-mode buffer, add the 
 If you've installed Python dependencies without virtualenv, you need to customize the command that starts the server:
 
 ```lisp
-(setq company-jedi-command (format "python3 -m start_jedi -p %s" company-jedi-port))
+(setq company-jedi-python-bin "python3")
 ```
 
 ## Contributions

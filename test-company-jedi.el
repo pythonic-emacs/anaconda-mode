@@ -92,7 +92,7 @@
 
 (defun fixture-path (file)
   "Make absolute path from project path."
-  (concat (file-name-directory load-file-name) file))
+  (concat company-jedi-dir file))
 
 (defun load-fixture (file line column)
   "Open fixture file."
@@ -108,9 +108,7 @@
 
 (setq company-jedi-port 8000)
 
-(setq company-jedi-command
-      (concat (file-name-as-directory user-emacs-directory)
-              "jedi/venv/bin/python3 -m start_jedi --debug"))
+(setq company-jedi-debug t)
 
 (company-jedi-start)
 

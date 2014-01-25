@@ -46,6 +46,14 @@
     'ido-completing-read)
   "Completing read function used in company-jedi.")
 
+(defvar company-jedi-python-bin
+  (let ((default-directory user-emacs-directory))
+    (file-truename "jedi/venv/bin/python3"))
+  "Python executable with installed dependencies.")
+
+(defvar company-jedi-debug nil
+  "Turn on jedi debug logging.")
+
 (defvar company-jedi-host "localhost"
   "Target host with jedi server.")
 
@@ -53,9 +61,11 @@
   "Port for start_jedi connection.")
 
 (defvar company-jedi-command
-  (concat (file-name-as-directory user-emacs-directory)
-          "jedi/venv/bin/python3 -m start_jedi -p "
-          (number-to-string company-jedi-port))
+  (mapconcat 'identity
+             (list company-jedi-python-bin "-m" "start_jedi"
+                   "--port" (number-to-string company-jedi-port)
+                   (when company-jedi-debug "--debug"))
+             " ")
   "Command to run start_jedi server.")
 
 (defvar company-jedi-dir
