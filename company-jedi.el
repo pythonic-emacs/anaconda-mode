@@ -183,9 +183,9 @@ ARG may come from `company-call-backend' function."
   "Return key list of HASH."
   (let (keys)
     (maphash
-     (lambda (k v) (add-to-list 'keys k t))
+     (lambda (k v) (add-to-list 'keys k))
      hash)
-    keys))
+    (sort keys 'string<)))
 
 (defun company-jedi-user-chose (prompt hash)
   "With PROMPT ask user for HASH value."
@@ -194,7 +194,7 @@ ARG may come from `company-call-backend' function."
              hash)))
 
 (defun company-jedi-chose-module (prompt modules)
-  "Chose module from MOD-LIST.
+  "Chose module from MODULES.
 
 Return cons of file name and line.
 
@@ -203,6 +203,9 @@ PROMPT will used for completing read function."
     (when user-chose
       (cons (gethash "module_path" user-chose)
             (gethash "line" user-chose)))))
+
+
+;;; Company backed.
 
 (defun company-jedi-prefix ()
   "Grab prefix at point.
@@ -273,57 +276,14 @@ See `company-backends' for more info about COMMAND and ARG."
     (eldoc (company-jedi-do-request (company-jedi-request-json "eldoc")))
     (sorted t)))
 
-(defun company-jedi-find-file (file line)
-  "Find FILE at specified line.
-
-Save current position in `find-tag-marker-ring'."
-  (ring-insert find-tag-marker-ring (point-marker))
-  (find-file file)
-  (goto-line line)
-  (back-to-indentation))
-
-;;;###autoload
-(defun company-jedi-goto-definition ()
-  "Jump to definition at point."
-  (interactive)
-  (let ((module (company-jedi 'location)))
-    (when module
-      (company-jedi-find-file (car module) (cdr module)))))
-
-;;;###autoload
-(defun company-jedi-find-references ()
-  "Jump to reference at point."
-  (interactive)
-  (let ((module (company-jedi 'reference)))
-    (when module
-      (company-jedi-find-file (car module) (cdr module)))))
-
-;;;###autoload
-(defun company-jedi-show-doc ()
-  "Show documentation for context at point."
-  (interactive)
-  (let ((doc-buffer (company-jedi 'doc-buffer)))
-    (if doc-buffer
-        (display-buffer doc-buffer)
-      (error "Can't find documentation at point."))))
-
-(defun company-jedi-eldoc ()
-  "Show eldoc for context at point."
-  (interactive)
-  (let ((doc (company-jedi 'eldoc)))
-    (if (and doc company-jedi-show-eldoc-as-single-line)
-        (substring doc 0 (min (frame-width) (length doc)))
-      doc)))
-
 
 ;;; Minor mode.
 
 (defvar company-jedi-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "M-?") 'company-jedi-show-doc)
+    (define-key map [remap find-tag] 'company-jedi-goto-definition)
     (define-key map (kbd "M-r") 'company-jedi-find-references)
-    (define-key map (kbd "M-.") 'company-jedi-goto-definition)
-    (define-key map (kbd "M-,") 'pop-tag-mark)
+    (define-key map (kbd "M-?") 'company-jedi-show-doc)
     map)
   "Keymap for Company Jedi mode.")
 
@@ -335,6 +295,42 @@ Save current position in `find-tag-marker-ring'."
   :lighter " Jedi"
   :keymap company-jedi-mode-map)
 
+(defun company-jedi-find-file (file line)
+  "Find FILE at specified LINE.
+
+Save current position in `find-tag-marker-ring'."
+  (ring-insert find-tag-marker-ring (point-marker))
+  (find-file file)
+  (goto-line line)
+  (back-to-indentation))
+
+(defun company-jedi-goto-definition ()
+  "Jump to definition at point."
+  (interactive)
+  (let ((module (company-jedi 'location)))
+    (if module
+        (company-jedi-find-file (car module) (cdr module))
+      (error "Can't find definition."))))
+
+(defun company-jedi-find-references ()
+  "Jump to reference at point."
+  (interactive)
+  (let ((module (company-jedi 'reference)))
+    (if module
+        (company-jedi-find-file (car module) (cdr module))
+      (error "Can't find references."))))
+
+(defun company-jedi-show-doc ()
+  "Show documentation for context at point."
+  (interactive)
+  (let ((doc-buffer (company-jedi 'doc-buffer)))
+    (if doc-buffer
+        (display-buffer doc-buffer)
+      (error "Can't find documentation."))))
+
+
+;;; Eldoc mode.
+
 ;;;###autoload
 (defun company-jedi-eldoc-mode ()
   "Setup eldoc mode properly for python buffer."
@@ -342,6 +338,14 @@ Save current position in `find-tag-marker-ring'."
   (set (make-local-variable 'eldoc-documentation-function)
        'company-jedi-eldoc)
   (turn-on-eldoc-mode))
+
+(defun company-jedi-eldoc ()
+  "Show eldoc for context at point."
+  (interactive)
+  (let ((doc (company-jedi 'eldoc)))
+    (if (and doc company-jedi-show-eldoc-as-single-line)
+        (substring doc 0 (min (frame-width) (length doc)))
+      doc)))
 
 (provide 'company-jedi)
 
