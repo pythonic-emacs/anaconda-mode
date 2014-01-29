@@ -40,10 +40,12 @@ class LocationTest(TestCase):
 
         result = company.process(**request)
 
-        self.assertEqual(1, len(result))
-
-        for k, v in result.items():
-            self.assertTrue(v['module_path'].endswith('.py'))
+        # Don't check len(result) here.  Some python versions doesn't has
+        # fixture module defined in python code.  So dictionary length may
+        # be different (or even be a None if there is only C sources).
+        if result:
+            for k, v in result.items():
+                self.assertTrue(v['module_path'].endswith('.py'))
 
     def test_definition_with_builtins(self):
         """Jedi must keep builtin definitions.
