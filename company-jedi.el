@@ -63,6 +63,7 @@
 (defvar company-jedi-command
   (mapconcat 'identity
              (list company-jedi-python-bin "-m" "start_jedi"
+                   "--ip" company-jedi-host
                    "--port" (number-to-string company-jedi-port)
                    (when company-jedi-debug "--debug"))
              " ")

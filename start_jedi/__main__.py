@@ -22,4 +22,4 @@ if args.debug:
     logger.addHandler(handler)
 
 
-start_jedi.run(args.port)
+start_jedi.run(args.ip, args.port)
