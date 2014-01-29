@@ -5,3 +5,5 @@ log
 [#]*[#]
 *.elc
 *~
+.tox
+MANIFEST
