@@ -1,8 +1,5 @@
 language: python
 
-python:
-  - "3.3"
+install: pip install tox
 
-install: "pip install -r requirements.txt"
-
-script: "python -m unittest discover"
+script: tox
