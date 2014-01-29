@@ -8,7 +8,7 @@ class EldocTest(TestCase):
     def test_eldoc(self):
         """Should return signature string."""
 
-        request = editor('test/jedi_eldoc/fixtures/simple.py', 2, 10, 'eldoc')
+        request = editor('test/jedi_eldoc/fixtures/simple.py', 8, 5, 'eldoc')
 
         response = ("dump(obj, fp, skipkeys = False, ensure_ascii = True, "
                     "check_circular = True, allow_nan = True, cls = None, "
