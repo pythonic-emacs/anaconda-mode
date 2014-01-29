@@ -1,6 +1,10 @@
-from start_jedi import jedi
-from http import server
+try:
+    from http import server
+except ImportError:
+    # Python 2x workaround
+    import BaseHTTPServer as server
 
+from start_jedi import company
 import json
 import logging
 
@@ -26,7 +30,7 @@ class JediHandler(server.BaseHTTPRequestHandler):
 
             data = json.loads(request)
 
-            response = jedi.process(**data)
+            response = company.process(**data)
             logger.debug('Jedi result: %s', response)
 
         except TypeError:
