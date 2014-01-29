@@ -68,7 +68,8 @@ class CompanyJedi():
     def location(self):
         """Find names assignment place."""
 
-        return {summary(name): details(name) for name in self._goto()}
+        # Use list comprehension rather dict comprehension due to Python2.6
+        return dict((summary(name), details(name)) for name in self._goto())
 
     def reference(self):
         """Find name reference places."""
@@ -79,14 +80,14 @@ class CompanyJedi():
 
         references = [name for name in usages if name not in locations]
 
-        return {summary(name): details(name) for name in references}
+        return dict((summary(name), details(name)) for name in references)
 
     def doc(self):
         """Documentations list for all definitions at point."""
 
         raw_docs = [name.raw_doc for name in self.script.goto_definitions()]
 
-        return {first_line(doc): doc for doc in raw_docs if doc}
+        return dict((first_line(doc), doc) for doc in raw_docs if doc)
 
     def meta(self):
         """Return single line documentation string or None."""
