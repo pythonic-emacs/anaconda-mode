@@ -1,5 +1,5 @@
 from unittest import TestCase, skip
-from start_jedi import jedi
+from start_jedi import company
 from test import editor
 
 
@@ -15,7 +15,7 @@ class CandidatesTest(TestCase):
 
         response = ['date', 'datetime', 'datetime_CAPI']
 
-        self.assertEqual(response, jedi.process(**request))
+        self.assertEqual(response, company.process(**request))
 
     @skip('Not implemented yet.')
     def test_autocomplete_from_virtualenv(self):
@@ -28,4 +28,4 @@ class CandidatesTest(TestCase):
 
         response = ['ppp_function']
 
-        self.assertEqual(response, jedi.process(**request))
+        self.assertEqual(response, company.process(**request))

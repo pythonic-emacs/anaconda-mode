@@ -1,5 +1,5 @@
 from unittest import TestCase
-from start_jedi import jedi
+from start_jedi import company
 from test import editor
 
 
@@ -15,11 +15,11 @@ class EldocTest(TestCase):
                     "indent = None, separators = None, default = None, "
                     "sort_keys = False, **kw)")
 
-        self.assertEqual(response, jedi.process(**request))
+        self.assertEqual(response, company.process(**request))
 
     def test_empty_eldoc(self):
         """Don't answer eldoc on unknown functions."""
 
         request = editor('test/jedi_eldoc/fixtures/broken.py', 4, 6, 'eldoc')
 
-        self.assertIsNone(jedi.process(**request))
+        self.assertIsNone(company.process(**request))

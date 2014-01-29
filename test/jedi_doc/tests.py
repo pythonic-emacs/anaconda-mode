@@ -1,5 +1,5 @@
 from unittest import TestCase
-from start_jedi import jedi
+from start_jedi import company
 from test import editor
 
 
@@ -12,11 +12,11 @@ class DocTest(TestCase):
 
         response = {'Document for function f.': 'Document for function f.'}
 
-        self.assertEqual(response, jedi.process(**request))
+        self.assertEqual(response, company.process(**request))
 
     def test_empty_doc(self):
         """Ignore docless functions."""
 
         request = editor('test/jedi_doc/fixtures/docless.py', 4, 3, 'doc')
 
-        self.assertIsNone(jedi.process(**request))
+        self.assertIsNone(company.process(**request))

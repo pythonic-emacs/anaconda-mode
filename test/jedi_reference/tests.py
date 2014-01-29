@@ -1,5 +1,5 @@
 from unittest import TestCase
-from start_jedi import jedi
+from start_jedi import company
 from test import editor, ROOT
 
 
@@ -28,7 +28,7 @@ class ReferenceTest(TestCase):
             }
         }
 
-        self.assertEqual(response, jedi.process(**request))
+        self.assertEqual(response, company.process(**request))
 
     def test_empty_references(self):
         """Strip unknown references."""
@@ -38,4 +38,4 @@ class ReferenceTest(TestCase):
             'reference'
         )
 
-        self.assertIsNone(jedi.process(**request))
+        self.assertIsNone(company.process(**request))

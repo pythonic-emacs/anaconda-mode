@@ -1,5 +1,5 @@
 from unittest import TestCase
-from start_jedi import jedi
+from start_jedi import company
 from test import editor
 
 
@@ -12,7 +12,7 @@ class MetaTest(TestCase):
 
         response = 'Document for function f.'
 
-        self.assertEqual(response, jedi.process(**request))
+        self.assertEqual(response, company.process(**request))
 
     def test_empty_meta(self):
         """Ignore docless functions."""
@@ -23,4 +23,4 @@ class MetaTest(TestCase):
             company_arg='ttt'
         )
 
-        self.assertIsNone(jedi.process(**request))
+        self.assertIsNone(company.process(**request))

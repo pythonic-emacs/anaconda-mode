@@ -1,5 +1,5 @@
 from unittest import TestCase
-from start_jedi import jedi
+from start_jedi import company
 from test import editor, ROOT
 
 
@@ -28,7 +28,7 @@ class LocationTest(TestCase):
             }
         }
 
-        self.assertEqual(response, jedi.process(**request))
+        self.assertEqual(response, company.process(**request))
 
     def test_non_python_definition_filter(self):
         """Jedi must filter non python sources."""
@@ -38,7 +38,7 @@ class LocationTest(TestCase):
             'location'
         )
 
-        result = jedi.process(**request)
+        result = company.process(**request)
 
         self.assertEqual(1, len(result))
 
@@ -57,7 +57,7 @@ class LocationTest(TestCase):
             'location'
         )
 
-        result = jedi.process(**request)
+        result = company.process(**request)
 
         self.assertEqual(2, len(result))
 
@@ -72,7 +72,7 @@ class LocationTest(TestCase):
             'location'
         )
 
-        self.assertIsNone(jedi.process(**request))
+        self.assertIsNone(company.process(**request))
 
     def test_jedi_goto_filter_same_definitions(self):
         """Merge definitions with assignments properly.
@@ -88,7 +88,7 @@ class LocationTest(TestCase):
             '_goto'
         )
 
-        result = jedi.process(**request)
+        result = company.process(**request)
 
         result_len = 0
         for base_def in result:
