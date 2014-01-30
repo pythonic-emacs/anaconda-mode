@@ -1,8 +1,12 @@
 try:
-    from unittest2 import TestCase, skip
-except ImportError:
     from unittest import TestCase, skip
+except ImportError:
+    from unittest2 import TestCase, skip
 
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 import os
 import logging
