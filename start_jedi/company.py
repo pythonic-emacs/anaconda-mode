@@ -18,7 +18,7 @@ def details(definition):
 def summary(definition):
     """Summarize definition into one string."""
 
-    return '{}:{} - {}'.format(
+    return '{0}:{1} - {2}'.format(
         definition.module_path,
         definition.line,
         definition.description
@@ -112,7 +112,7 @@ class CompanyJedi():
             params = signatures[0].params
             call_params = [param.get_code(new_line=False) for param in params]
 
-            return '{}({})'.format(call_name, ', '.join(call_params))
+            return '{0}({1})'.format(call_name, ', '.join(call_params))
 
 
 def process(attributes, command):
@@ -135,13 +135,13 @@ def process(attributes, command):
 
     except AttributeError:
 
-        message = 'Call unsupported operation: {}'.format(command)
+        message = 'Call unsupported operation: {0}'.format(command)
         logger.exception(message)
         result = None
 
     except TypeError:
 
-        message = 'Missing parameters for Jedi object: {}'.format(attributes)
+        message = 'Missing parameters for Jedi object: {0}'.format(attributes)
         logger.exception(message)
         result = None
 
