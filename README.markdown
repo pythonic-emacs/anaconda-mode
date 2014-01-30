@@ -25,7 +25,7 @@
 
 #### 0.1 milestone:
 
-* 2.6, 2.7, 3.1, 3.2 pythons support
+* 2.6, 2.7, 3.2, 3.3 pythons support
 
 #### 0.2 milestone:
 
