@@ -1,4 +1,4 @@
-from unittest import TestCase
+from test import TestCase
 from start_jedi import httpd
 
 

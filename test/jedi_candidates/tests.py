@@ -1,4 +1,4 @@
-from unittest import TestCase, skip
+from test import TestCase, skip
 from start_jedi import company
 from test import editor
 

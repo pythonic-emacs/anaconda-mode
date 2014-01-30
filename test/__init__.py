@@ -1,3 +1,9 @@
+try:
+    from unittest2 import TestCase, skip
+except ImportError:
+    from unittest import TestCase, skip
+
+
 import os
 import logging
 
