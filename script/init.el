@@ -1,10 +1,14 @@
-(require 'cl)
+;;; init --- configuration file
+
+;;; Commentary:
+
+;;; Code:
+
 (require 'cask)
 
-(cask-initialize
- (file-name-directory
-  (directory-file-name
-   (file-name-directory load-file-name))))
+(let ((source-directory (locate-dominating-file load-file-name "Cask")))
+  (cask-initialize source-directory)
+  (add-to-list 'load-path source-directory))
 
 ;; Python settings.
 
@@ -15,6 +19,8 @@
 (add-hook 'python-mode-hook 'company-jedi-start)
 
 ;; Company settings.
+
+(require 'cl)
 
 (global-company-mode)
 
