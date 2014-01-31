@@ -1,5 +1,4 @@
 (require 'ert)
-(require 'company-jedi)
 
 ;; Test definitions.
 
@@ -87,31 +86,3 @@
   "Company must ignore empty doc strings."
   (load-fixture "test/jedi_doc/fixtures/docless.py" 1 4)
   (should (null (company-jedi-meta))))
-
-;; Helper functions.
-
-(defun fixture-path (file)
-  "Make absolute path from project path."
-  (concat company-jedi-dir file))
-
-(defun load-fixture (file line column)
-  "Open fixture file."
-  (find-file-read-only (fixture-path file))
-  (goto-line line)
-  (move-to-column column))
-
-(defun mock-completing-read (prompt collection)
-  "Emulate user chose."
-  (car (sort collection 'string<)))
-
-(setq company-jedi-completing-read-function 'mock-completing-read)
-
-(setq company-jedi-port 8000)
-
-(setq company-jedi-debug t)
-
-(company-jedi-start)
-
-(when noninteractive
-  (sleep-for 5) ;; Wait for start_jedi server will ready to work.
-  (ert-run-tests-batch-and-exit))

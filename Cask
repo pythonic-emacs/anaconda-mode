@@ -4,4 +4,5 @@
 
 (development
     (depends-on "helm")
+    (depends-on "ert-runner")
     (depends-on "cask"))
