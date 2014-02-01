@@ -32,7 +32,7 @@ class TestPost(TestCase):
                    '}')
 
         self._handler.headers = {'content-length': len(request)}
-        self._handler.rfile.read.return_value = request
+        self._handler.rfile.read.return_value = request.encode()
 
         self._post(self._handler)
         self._handler.send_response.assert_called_with(200)
@@ -46,7 +46,7 @@ class TestPost(TestCase):
                    '}')
 
         self._handler.headers = {'content-length': '47'}
-        self._handler.rfile.return_value = request
+        self._handler.rfile.return_value = request.encode()
 
         self._post(self._handler)
         self._handler.send_error.assert_called_with(400)
@@ -57,7 +57,7 @@ class TestPost(TestCase):
         request = '{"aaa": 1, "bbb": 2}'
 
         self._handler.headers = None
-        self._handler.rfile.read.return_value = request
+        self._handler.rfile.read.return_value = request.encode()
 
         self._post(self._handler)
         self._handler.send_error.assert_called_with(400)
@@ -68,7 +68,7 @@ class TestPost(TestCase):
         request = '{"aaa": 1, "bb'
 
         self._handler.headers = {'content-length': '14'}
-        self._handler.rfile.read.return_value = request
+        self._handler.rfile.read.return_value = request.encode()
 
         self._post(self._handler)
         self._handler.send_error.assert_called_with(400)
@@ -79,7 +79,7 @@ class TestPost(TestCase):
         request = '{"aaa": 1, "bbb": 2}'
 
         self._handler.headers = {'content-length': '20'}
-        self._handler.rfile.read.return_value = request
+        self._handler.rfile.read.return_value = request.encode()
 
         self._post(self._handler)
         self._handler.send_error.assert_called_with(400)
