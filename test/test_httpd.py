@@ -1,13 +1,21 @@
 from test import TestCase, mock
 from start_jedi import httpd
 
-post = httpd.JediHandler.do_POST
-
 
 class TestPost(TestCase):
 
-    @mock.patch('start_jedi.httpd.JediHandler', autospec=True)
-    def test_correct_post_request(self, mock_handler):
+    def setUp(self):
+        """Create mock objects for HTTP Handler."""
+
+        self._post = httpd.JediHandler.do_POST
+
+        patcher = mock.patch('start_jedi.httpd.JediHandler', autospec=True)
+        self.addCleanup(patcher.stop)
+        self._handler = patcher.start()
+        self._handler.rfile = mock.Mock()
+        self._handler.wfile = mock.Mock()
+
+    def test_correct_post_request(self):
         """Need status 200 on correct post request with its body."""
 
         request = ('{'
@@ -23,15 +31,13 @@ class TestPost(TestCase):
                    ' }'
                    '}')
 
-        mock_handler.headers = {'content-length': len(request)}
-        mock_handler.rfile = mock_handler.wfile = mock.Mock()
-        mock_handler.rfile.read.return_value = request
+        self._handler.headers = {'content-length': len(request)}
+        self._handler.rfile.read.return_value = request
 
-        post(mock_handler)
-        mock_handler.send_response.assert_called_with(200)
+        self._post(self._handler)
+        self._handler.send_response.assert_called_with(200)
 
-    @mock.patch('start_jedi.httpd.JediHandler', autospec=True)
-    def test_handle_jedi_exceptions(self, mock_handler):
+    def test_handle_jedi_exceptions(self):
         """Need status 400 on jedi failure."""
 
         request = ('{'
@@ -39,48 +45,41 @@ class TestPost(TestCase):
                    ' "attributes": {}'
                    '}')
 
-        mock_handler.headers = {'content-length': '47'}
-        mock_handler.rfile = mock.Mock()
-        mock_handler.rfile.return_value = request
+        self._handler.headers = {'content-length': '47'}
+        self._handler.rfile.return_value = request
 
-        post(mock_handler)
-        mock_handler.send_error.assert_called_with(400)
+        self._post(self._handler)
+        self._handler.send_error.assert_called_with(400)
 
-    @mock.patch('start_jedi.httpd.JediHandler', autospec=True)
-    def test_missing_content_length(self, mock_handler):
+    def test_missing_content_length(self):
         """Need send status 400 on missing body."""
 
         request = '{"aaa": 1, "bbb": 2}'
 
-        mock_handler.headers = None
-        mock_handler.rfile = mock.Mock()
-        mock_handler.rfile.read.return_value = request
+        self._handler.headers = None
+        self._handler.rfile.read.return_value = request
 
-        post(mock_handler)
-        mock_handler.send_error.assert_called_with(400)
+        self._post(self._handler)
+        self._handler.send_error.assert_called_with(400)
 
-    @mock.patch('start_jedi.httpd.JediHandler', autospec=True)
-    def test_broken_content(self, mock_handler):
+    def test_broken_content(self):
         """Need send status 400 on invalid Json body."""
 
         request = '{"aaa": 1, "bb'
 
-        mock_handler.headers = {'content-length': '14'}
-        mock_handler.rfile = mock.Mock()
-        mock_handler.rfile.read.return_value = request
+        self._handler.headers = {'content-length': '14'}
+        self._handler.rfile.read.return_value = request
 
-        post(mock_handler)
-        mock_handler.send_error.assert_called_with(400)
+        self._post(self._handler)
+        self._handler.send_error.assert_called_with(400)
 
-    @mock.patch('start_jedi.httpd.JediHandler', autospec=True)
-    def test_incomplete_content(self, mock_handler):
+    def test_incomplete_content(self):
         """Need send 400 on valid request without necessary keys."""
 
         request = '{"aaa": 1, "bbb": 2}'
 
-        mock_handler.headers = {'content-length': '20'}
-        mock_handler.rfile = mock.Mock()
-        mock_handler.rfile.read.return_value = request
+        self._handler.headers = {'content-length': '20'}
+        self._handler.rfile.read.return_value = request
 
-        post(mock_handler)
-        mock_handler.send_error.assert_called_with(400)
+        self._post(self._handler)
+        self._handler.send_error.assert_called_with(400)
