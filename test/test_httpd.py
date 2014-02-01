@@ -1,131 +1,86 @@
-from test import TestCase
+from test import TestCase, mock
 from start_jedi import httpd
-
 
 post = httpd.JediHandler.do_POST
 
 
-class HandlerMock():
-
-    def __init__(self, headers={}, body=''):
-        """Create fake handler object with request attribute."""
-
-        self.headers = Headers(headers)
-        self.rfile = FileMock(body)
-        self.wfile = FileMock()
-
-    def send_response(self, code):
-        """Save response code."""
-
-        self.response_code = code
-
-    def end_headers(self):
-        """Begin body section."""
-
-        pass
-
-    def send_error(self, code):
-        """Save error code as response."""
-
-        self.response_code = code
-
-
-class FileMock():
-
-    def __init__(self, content=''):
-        """Create file fake."""
-
-        self.content = content
-
-    def read(self, n):
-        """Read n characters from content attribute."""
-
-        return (self.content[:n]).encode()
-
-    def write(self, message):
-        """Write new file content."""
-
-        self.content += message.decode()
-
-
-class Headers(dict):
-    """Fail tolerant dictionary."""
-
-    def __init__(self, dictionary):
-        """Save internal dictionary."""
-
-        self.dictionary = dictionary
-
-    def __getitem__(self, key):
-        """Return item or None."""
-
-        if key in self.dictionary:
-            result = self.dictionary[key]
-        else:
-            result = None
-
-        return result
-
-
 class TestPost(TestCase):
 
-    def test_correct_post_request(self):
+    @mock.patch('start_jedi.httpd.JediHandler', autospec=True)
+    def test_correct_post_request(self, mock_handler):
         """Need status 200 on correct post request with its body."""
 
-        json = ('{'
-                ' "command": "candidates",'
-                ' "attributes": {'
-                '     "source": "imp",'
-                '     "line": 1,'
-                '     "column": 3,'
-                '     "point": 2,'
-                '     "path": "",'
-                '     "company_prefix": "",'
-                '     "company_arg": ""'
-                ' }'
-                '}')
+        request = ('{'
+                   ' "command": "candidates",'
+                   ' "attributes": {'
+                   '     "source": "imp",'
+                   '     "line": 1,'
+                   '     "column": 3,'
+                   '     "point": 2,'
+                   '     "path": "",'
+                   '     "company_prefix": "",'
+                   '     "company_arg": ""'
+                   ' }'
+                   '}')
 
-        mock_handler = HandlerMock(
-            headers={'content-length': len(json)},
-            body=json)
+        mock_handler.headers = {'content-length': len(request)}
+        mock_handler.rfile = mock_handler.wfile = mock.Mock()
+        mock_handler.rfile.read.return_value = request
+
         post(mock_handler)
-        self.assertEqual(200, mock_handler.response_code)
+        mock_handler.send_response.assert_called_with(200)
 
-    def test_handle_jedi_exceptions(self):
-        """Need status 400 on jedi exceptions."""
+    @mock.patch('start_jedi.httpd.JediHandler', autospec=True)
+    def test_handle_jedi_exceptions(self, mock_handler):
+        """Need status 400 on jedi failure."""
 
-        mock_handler = HandlerMock(
-            headers={'content-length': '47'},
-            body=('{'
-                  ' "command": "unsupported_command",'
-                  ' "attributes": {}'
-                  '}'))
+        request = ('{'
+                   ' "command": "unsupported_command",'
+                   ' "attributes": {}'
+                   '}')
+
+        mock_handler.headers = {'content-length': '47'}
+        mock_handler.rfile = mock.Mock()
+        mock_handler.rfile.return_value = request
+
         post(mock_handler)
-        self.assertEqual(400, mock_handler.response_code)
+        mock_handler.send_error.assert_called_with(400)
 
-    def test_missing_content_length(self):
+    @mock.patch('start_jedi.httpd.JediHandler', autospec=True)
+    def test_missing_content_length(self, mock_handler):
         """Need send status 400 on missing body."""
 
-        mock_handler = HandlerMock(
-            body='{"aaa": 1, "bbb": 2}')
-        post(mock_handler)
-        self.assertEqual(400, mock_handler.response_code)
+        request = '{"aaa": 1, "bbb": 2}'
 
-    def test_broken_content(self):
+        mock_handler.headers = None
+        mock_handler.rfile = mock.Mock()
+        mock_handler.rfile.read.return_value = request
+
+        post(mock_handler)
+        mock_handler.send_error.assert_called_with(400)
+
+    @mock.patch('start_jedi.httpd.JediHandler', autospec=True)
+    def test_broken_content(self, mock_handler):
         """Need send status 400 on invalid Json body."""
 
-        mock_handler = HandlerMock(
-            headers={'content-length': '14'},
-            body='{"aaa": 1, "bb')
-        post(mock_handler)
-        self.assertEqual(400, mock_handler.response_code)
+        request = '{"aaa": 1, "bb'
 
-    def test_incomplete_content(self, ):
-        """Need send 400 on valid json without necessary keys."""
-
-        mock_handler = HandlerMock(
-            headers={'content-length': '20'},
-            body='{"aaa": 1, "bbb": 2}')
+        mock_handler.headers = {'content-length': '14'}
+        mock_handler.rfile = mock.Mock()
+        mock_handler.rfile.read.return_value = request
 
         post(mock_handler)
-        self.assertEqual(400, mock_handler.response_code)
+        mock_handler.send_error.assert_called_with(400)
+
+    @mock.patch('start_jedi.httpd.JediHandler', autospec=True)
+    def test_incomplete_content(self, mock_handler):
+        """Need send 400 on valid request without necessary keys."""
+
+        request = '{"aaa": 1, "bbb": 2}'
+
+        mock_handler.headers = {'content-length': '20'}
+        mock_handler.rfile = mock.Mock()
+        mock_handler.rfile.read.return_value = request
+
+        post(mock_handler)
+        mock_handler.send_error.assert_called_with(400)
