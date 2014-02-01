@@ -26,6 +26,10 @@
   "Emulate user chose."
   (car (sort collection 'string<)))
 
+(when (getenv "ENVPYTHON")
+  (setq company-jedi-python-bin (getenv "ENVPYTHON"))
+  (message "Python binary: %s" (getenv "ENVPYTHON")))
+
 (setq company-jedi-completing-read-function 'mock-completing-read)
 
 (setq company-jedi-port 8000)

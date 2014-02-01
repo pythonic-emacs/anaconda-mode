@@ -48,7 +48,7 @@
 
 (defvar company-jedi-python-bin
   (let ((default-directory user-emacs-directory))
-    (file-truename "jedi/venv/bin/python3"))
+    (file-truename "jedi/venv/bin/python"))
   "Python executable with installed dependencies.")
 
 (defvar company-jedi-debug nil
@@ -62,7 +62,8 @@
 
 (defvar company-jedi-command
   (mapconcat 'identity
-             (list company-jedi-python-bin "-m" "start_jedi"
+             (list company-jedi-python-bin
+                   "-m" "start_jedi.__main__" ;; Python 2.6 can't run packages directly.
                    "--ip" company-jedi-host
                    "--port" (number-to-string company-jedi-port)
                    (when company-jedi-debug "--debug"))

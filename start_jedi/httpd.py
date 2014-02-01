@@ -1,7 +1,6 @@
 try:
     from http import server
 except ImportError:
-    # Python 2x workaround
     import BaseHTTPServer as server
 
 from start_jedi import company
