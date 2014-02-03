@@ -12,6 +12,10 @@
 
 ;; Python settings.
 
+(when (getenv "ENVPYTHON")
+  (setq company-jedi-python-bin (getenv "ENVPYTHON"))
+  (message "Python binary: %s" (getenv "ENVPYTHON")))
+
 (setq company-jedi-port 8000)
 
 (setq company-jedi-debug t)
