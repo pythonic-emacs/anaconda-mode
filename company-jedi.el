@@ -118,9 +118,13 @@ BODY mast be encoded json string."
     (when response
       (prog1
           (with-current-buffer response
-            (goto-char url-http-end-of-headers)
-            (when (eq 200 url-http-response-status)
-              (company-jedi-decode)))
+            (and (eq 200 url-http-response-status)
+                 ;; Workaround: BaseHTTPServer in older versions
+                 ;; return wrong ^M newline characters.  Use this hack
+                 ;; until switching to tornado in 0.4.0 milestone.
+                 (or (search-forward "\n\n" nil t)
+                     (search-forward "\r\n\r\n" nil t))
+                 (company-jedi-decode)))
         (kill-buffer response)))))
 
 (defun company-jedi-retrive (body)
