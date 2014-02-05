@@ -1,5 +1,12 @@
 language: python
 
-install: pip install tox
+before_install:
+  - curl -L http://bootstrap.saltstack.org | sudo sh
+  - sudo cp -r salt/states /srv/states
+  - sudo cp salt/minion /etc/salt/minion
 
-script: tox
+install:
+  - sudo salt-call state.highstate --local
+
+script:
+  - tox
