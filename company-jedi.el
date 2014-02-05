@@ -36,9 +36,9 @@
 (defvar company-jedi-complete-on-dot t
   "If not nil, invoke jedi completion after dot inserting.")
 
-(defvar company-jedi-after-start-hook
+(defvar company-jedi-start-stop-hook
   '(company-jedi-mode company-jedi-eldoc-mode)
-  "Hook runs after `company-jedi-start' call.")
+  "Hook runs after `company-jedi-start' or `company-jedi-stop' call.")
 
 (defvar company-jedi-completing-read-function
   (if (or (featurep 'helm) (locate-library "helm"))
@@ -94,14 +94,15 @@
   (interactive)
   (unless (company-jedi-running-p)
     (company-jedi-bootstrap))
-  (run-hooks 'company-jedi-after-start-hook))
+  (run-hooks 'company-jedi-start-stop-hook))
 
 ;;;###autoload
 (defun company-jedi-stop ()
   "Stop remote jedi server."
   (interactive)
   (when (company-jedi-running-p)
-    (kill-process company-jedi-process)))
+    (kill-process company-jedi-process))
+  (run-hook-with-args 'company-jedi-start-stop-hook -1))
 
 ;;;###autoload
 (defun company-jedi-install ()
@@ -338,16 +339,22 @@ Save current position in `find-tag-marker-ring'."
 ;;; Eldoc mode.
 
 ;;;###autoload
-(defun company-jedi-eldoc-mode ()
-  "Setup eldoc mode properly for python buffer."
-  (interactive)
-  (set (make-local-variable 'eldoc-documentation-function)
-       'company-jedi-eldoc)
-  (turn-on-eldoc-mode))
+(define-minor-mode company-jedi-eldoc-mode
+  "Eldoc mode for company-jedi backend.
+
+\\{company-jedi-eldoc-mode-map}"
+  :lighter ""
+  :keymap nil
+  (if company-jedi-eldoc-mode
+      (progn
+        (set (make-local-variable 'eldoc-documentation-function)
+             'company-jedi-eldoc)
+        (eldoc-mode 1))
+  (kill-local-variable 'eldoc-documentation-function)
+  (eldoc-mode -1)))
 
 (defun company-jedi-eldoc ()
   "Show eldoc for context at point."
-  (interactive)
   (let ((doc (company-jedi 'eldoc)))
     (if (and doc company-jedi-show-eldoc-as-single-line)
         (substring doc 0 (min (frame-width) (length doc)))
