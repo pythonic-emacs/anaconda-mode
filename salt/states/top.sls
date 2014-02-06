@@ -2,3 +2,4 @@ base:
   '*':
     - tox
     - emacs
+    - cask
