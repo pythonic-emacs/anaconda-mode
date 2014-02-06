@@ -1,0 +1,3 @@
+tox:
+  pip:
+    - installed
