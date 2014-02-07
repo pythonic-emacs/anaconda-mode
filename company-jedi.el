@@ -54,8 +54,8 @@
 (defvar company-jedi-debug nil
   "Turn on jedi debug logging.")
 
-(defvar company-jedi-host "localhost"
-  "Target host with jedi server.")
+(defvar company-jedi-host "127.0.0.1"   ;; Don't use localhost here due to:
+  "Target host with jedi server.")      ;; http://debbugs.gnu.org/cgi/bugreport.cgi?bug=12893
 
 (defvar company-jedi-port 24970
   "Port for start_jedi connection.")
