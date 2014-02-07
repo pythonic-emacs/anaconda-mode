@@ -3,14 +3,11 @@
 [Jedi](https://github.com/davidhalter/jedi) backend for [company-mode](https://github.com/company-mode/company-mode).
 
 ![screenshot1](screenshots/snapshot1.png)
-![screenshot2](screenshots/snapshot2.png)
-![screenshot3](screenshots/snapshot3.png)
-![screenshot4](screenshots/snapshot4.png)
 
 ## Requirements
 
 * emacs 24.3
-* python3
+* python 2.6, 2.7, 3.2 or 3.3
 * virtualenv
 
 ## Features
@@ -22,10 +19,6 @@
 * eldoc
 
 ## Future work
-
-#### 0.1 milestone:
-
-* 2.6, 2.7, 3.2, 3.3 pythons support
 
 #### 0.2 milestone:
 
@@ -56,9 +49,6 @@ For now you need to run the following command from the package directory:
 
     pip install -r requirements.txt
 
-Jedi works with any Python sources, but `company-jedi` currently runs on Python 3 only.
-So you'll need to install that version in your virtual environment.
-
 ## Usage
 
 By default `company-jedi` starts its HTTP server on port `24970` for interaction with Python process.
@@ -74,7 +64,7 @@ To automatically start the server when you open any python-mode buffer, add the 
 If you've installed Python dependencies without virtualenv, you need to customize the command that starts the server:
 
 ```lisp
-(setq company-jedi-python-bin "python3")
+(setq company-jedi-python-bin "python")
 ```
 
 ## Contributions
@@ -82,4 +72,10 @@ If you've installed Python dependencies without virtualenv, you need to customiz
 Are very welcome. But any significant change has to be accompanied with tests, both for Emacs Lisp and Python code.
 To run the test suite, call:
 
-    make check
+    tox
+
+## Thanks
+
+* Dmitry Gutov **@dgutov**
+* Bo Lin **@sadboy**
+* Vasilij Schneidermann **@wasamasa**

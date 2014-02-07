@@ -4,7 +4,7 @@
 
 ;; Author: Malyshev Artem <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/company-jedi
-;; Version: 0.0.1
+;; Version: 0.1.0
 ;; Package-Requires: ((company "0.6.12"))
 
 ;; This program is free software; you can redistribute it and/or modify
