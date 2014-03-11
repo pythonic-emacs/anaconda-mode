@@ -218,16 +218,18 @@ PROMPT will used for completing read function."
   "Grab prefix at point.
 
  Properly detect strings, comments and attribute access."
-  (when (not (company-in-string-or-comment))
-    (let ((symbol (company-grab-symbol)))
-      (if symbol
-          (if (and company-jedi-complete-on-dot
-                   (save-excursion
-                     (forward-char (- (length symbol)))
-                     (looking-back "\\." (- (point) 1))))
-              (cons symbol t)
-            symbol)
-        'stop))))
+  (and (eq major-mode 'python-mode)
+       (company-jedi-running-p)
+       (not (company-in-string-or-comment))
+       (let ((symbol (company-grab-symbol)))
+         (if symbol
+             (if (and company-jedi-complete-on-dot
+                      (save-excursion
+                        (forward-char (- (length symbol)))
+                        (looking-back "\\." (- (point) 1))))
+                 (cons symbol t)
+               symbol)
+           'stop))))
 
 (defun company-jedi-candidates ()
   "Request completion candidates from jedi."
@@ -272,9 +274,7 @@ See `company-backends' for more info about COMMAND and ARG."
   (interactive (list 'interactive))
   (case command
     (interactive (company-begin-backend 'company-jedi))
-    (prefix (and (memq major-mode '(python-mode inferior-python-mode))
-                 (company-jedi-running-p)
-                 (company-jedi-prefix)))
+    (prefix (company-jedi-prefix))
     (candidates (company-jedi-candidates))
     (location (company-jedi-location arg))
     (reference (company-jedi-reference))
@@ -350,8 +350,8 @@ Save current position in `find-tag-marker-ring'."
         (set (make-local-variable 'eldoc-documentation-function)
              'company-jedi-eldoc)
         (eldoc-mode 1))
-  (kill-local-variable 'eldoc-documentation-function)
-  (eldoc-mode -1)))
+    (kill-local-variable 'eldoc-documentation-function)
+    (eldoc-mode -1)))
 
 (defun company-jedi-eldoc ()
   "Show eldoc for context at point."
