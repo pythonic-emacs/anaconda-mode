@@ -4,34 +4,43 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def details(definition):
-    """Make hash with definition details."""
+def process(attributes, command):
+    """Process Jedi operation correspond to request.
 
-    return {
-        'module_path': definition.module_path,
-        'line': definition.line,
-        'column': definition.column,
-        'description': definition.description
-    }
+    Accepted keywords:
+    attributes -- arguments dicitionary passed to Jedi script constructor
+    command -- method name called from Anaconda backend
+    """
+
+    try:
+
+        company = Anaconda(**attributes)
+        logger.debug('Start jedi processing')
+
+        company_method = getattr(company, command)
+        logger.debug('Select company method: %s', company_method)
+
+        result = company_method()
+
+    except AttributeError:
+
+        message = 'Call unsupported operation: {0}'.format(command)
+        logger.exception(message)
+        result = None
+
+    except TypeError:
+
+        message = 'Missing parameters for Jedi object: {0}'.format(attributes)
+        logger.exception(message)
+        result = None
+
+    # Protection from empty strings, lists, etc.
+    # Must return None in all this cases.
+    if result:
+        return result
 
 
-def summary(definition):
-    """Summarize definition into one string."""
-
-    return '{0}:{1} - {2}'.format(
-        definition.module_path,
-        definition.line,
-        definition.description
-    )
-
-
-def first_line(text):
-    """Return text first line."""
-
-    return text.split('\n', 1)[0]
-
-
-class CompanyJedi():
+class Anaconda():
     """Jedi library interaction."""
 
     def __init__(self, source, line, column, point, path,
@@ -115,37 +124,28 @@ class CompanyJedi():
             return '{0}({1})'.format(call_name, ', '.join(call_params))
 
 
-def process(attributes, command):
-    """Process Jedi operation correspond to request.
+def details(definition):
+    """Make hash with definition details."""
 
-    Accepted keywords:
-    attributes -- arguments dicitionary passed to Jedi script constructor
-    command -- method name called from CompanyJedi backend
-    """
+    return {
+        'module_path': definition.module_path,
+        'line': definition.line,
+        'column': definition.column,
+        'description': definition.description
+    }
 
-    try:
 
-        company = CompanyJedi(**attributes)
-        logger.debug('Start jedi processing')
+def summary(definition):
+    """Summarize definition into one string."""
 
-        company_method = getattr(company, command)
-        logger.debug('Select company method: %s', company_method)
+    return '{0}:{1} - {2}'.format(
+        definition.module_path,
+        definition.line,
+        definition.description
+    )
 
-        result = company_method()
 
-    except AttributeError:
+def first_line(text):
+    """Return text first line."""
 
-        message = 'Call unsupported operation: {0}'.format(command)
-        logger.exception(message)
-        result = None
-
-    except TypeError:
-
-        message = 'Missing parameters for Jedi object: {0}'.format(attributes)
-        logger.exception(message)
-        result = None
-
-    # Protection from empty strings, lists, etc.
-    # Must return None in all this cases.
-    if result:
-        return result
+    return text.split('\n', 1)[0]

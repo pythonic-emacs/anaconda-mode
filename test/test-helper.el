@@ -14,7 +14,7 @@
 
 (defun fixture-path (file)
   "Make absolute path from project path."
-  (concat company-jedi-dir file))
+  (concat anaconda-mode-directory file))
 
 (defun load-fixture (file line column)
   "Open fixture file."
@@ -27,20 +27,20 @@
   (car (sort collection 'string<)))
 
 (when (getenv "ENVPYTHON")
-  (setq company-jedi-python-bin (getenv "ENVPYTHON"))
+  (setq anaconda-mode-python-bin (getenv "ENVPYTHON"))
   (message "Python binary: %s" (getenv "ENVPYTHON")))
 
-(setq company-jedi-completing-read-function 'mock-completing-read)
+(setq anaconda-mode-completing-read-function 'mock-completing-read)
 
-(setq company-jedi-port 8000)
+(setq anaconda-mode-port 8000)
 
-(setq company-jedi-debug t)
+(setq anaconda-mode-debug t)
 
 ;; Server bootstrap.
 
 (require 'cl)
-(require 'company-jedi)
+(require 'anaconda-mode)
 
-(company-jedi-start)
+(anaconda-mode-start)
 
-(sleep-for 5) ;; Wait for start_jedi server will ready to work.
+(sleep-for 5) ;; Wait for anaconda_mode server will ready to work.

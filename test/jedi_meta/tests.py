@@ -1,5 +1,5 @@
 from test import TestCase
-from start_jedi import company
+from anaconda_mode import anaconda
 from test import editor
 
 
@@ -12,7 +12,7 @@ class MetaTest(TestCase):
 
         response = 'Document for function f.'
 
-        self.assertEqual(response, company.process(**request))
+        self.assertEqual(response, anaconda.process(**request))
 
     def test_empty_meta(self):
         """Ignore docless functions."""
@@ -23,4 +23,4 @@ class MetaTest(TestCase):
             company_arg='ttt'
         )
 
-        self.assertIsNone(company.process(**request))
+        self.assertIsNone(anaconda.process(**request))

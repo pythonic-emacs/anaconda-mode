@@ -1,5 +1,5 @@
 from test import TestCase
-from start_jedi import company
+from anaconda_mode import anaconda
 from test import editor, ROOT
 
 
@@ -28,7 +28,7 @@ class ReferenceTest(TestCase):
             }
         }
 
-        self.assertEqual(response, company.process(**request))
+        self.assertEqual(response, anaconda.process(**request))
 
     def test_empty_references(self):
         """Strip unknown references."""
@@ -38,4 +38,4 @@ class ReferenceTest(TestCase):
             'reference'
         )
 
-        self.assertIsNone(company.process(**request))
+        self.assertIsNone(anaconda.process(**request))

@@ -1,5 +1,5 @@
 from test import TestCase
-from start_jedi import company
+from anaconda_mode import anaconda
 from test import editor
 
 
@@ -15,11 +15,11 @@ class EldocTest(TestCase):
                     "indent = None, separators = None, default = None, "
                     "sort_keys = False, **kw)")
 
-        self.assertEqual(response, company.process(**request))
+        self.assertEqual(response, anaconda.process(**request))
 
     def test_empty_eldoc(self):
         """Don't answer eldoc on unknown functions."""
 
         request = editor('test/jedi_eldoc/fixtures/broken.py', 4, 6, 'eldoc')
 
-        self.assertIsNone(company.process(**request))
+        self.assertIsNone(anaconda.process(**request))

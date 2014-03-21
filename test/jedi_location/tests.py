@@ -1,5 +1,5 @@
 from test import TestCase
-from start_jedi import company
+from anaconda_mode import anaconda
 from test import editor, ROOT
 
 
@@ -28,7 +28,7 @@ class LocationTest(TestCase):
             }
         }
 
-        self.assertEqual(response, company.process(**request))
+        self.assertEqual(response, anaconda.process(**request))
 
     def test_non_python_definition_filter(self):
         """Jedi must filter non python sources."""
@@ -38,7 +38,7 @@ class LocationTest(TestCase):
             'location'
         )
 
-        result = company.process(**request)
+        result = anaconda.process(**request)
 
         # Don't check len(result) here.  Some python versions doesn't has
         # fixture module defined in python code.  So dictionary length may
@@ -59,7 +59,7 @@ class LocationTest(TestCase):
             'location'
         )
 
-        result = company.process(**request)
+        result = anaconda.process(**request)
 
         self.assertEqual(2, len(result))
 
@@ -74,7 +74,7 @@ class LocationTest(TestCase):
             'location'
         )
 
-        self.assertIsNone(company.process(**request))
+        self.assertIsNone(anaconda.process(**request))
 
     def test_jedi_goto_filter_same_definitions(self):
         """Merge definitions with assignments properly.
@@ -90,7 +90,7 @@ class LocationTest(TestCase):
             '_goto'
         )
 
-        result = company.process(**request)
+        result = anaconda.process(**request)
 
         result_len = 0
         for base_def in result:

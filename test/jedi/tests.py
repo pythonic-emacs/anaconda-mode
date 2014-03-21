@@ -1,5 +1,5 @@
 from test import TestCase
-from start_jedi import company
+from anaconda_mode import anaconda
 from test import editor
 
 
@@ -10,7 +10,7 @@ class RegressionTest(TestCase):
 
         request = editor('test/jedi/fixtures/simple.py', 2, 11, 'Wrong...')
 
-        self.assertIsNone(company.process(**request))
+        self.assertIsNone(anaconda.process(**request))
 
     def test_missing_attributes(self):
         """Ignore incomplete code attributes."""
@@ -20,4 +20,4 @@ class RegressionTest(TestCase):
             'attributes': {}
         }
 
-        self.assertIsNone(company.process(**request))
+        self.assertIsNone(anaconda.process(**request))

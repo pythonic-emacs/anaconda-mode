@@ -1,8 +1,8 @@
 (source melpa)
 
-(package-file "company-jedi.el")
+(package-file "anaconda-mode.el")
 
 (development
-    (depends-on "helm")
-    (depends-on "ert-runner")
-    (depends-on "cask"))
+ (depends-on "cask")
+ (depends-on "ert-runner")
+ (depends-on "helm"))

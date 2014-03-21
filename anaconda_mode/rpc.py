@@ -3,14 +3,14 @@ try:
 except ImportError:
     import BaseHTTPServer as server
 
-from start_jedi import company
+from anaconda_mode import anaconda
 import json
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class JediHandler(server.BaseHTTPRequestHandler):
+class Handler(server.BaseHTTPRequestHandler):
 
     error_message_format = ''
 
@@ -29,7 +29,7 @@ class JediHandler(server.BaseHTTPRequestHandler):
 
             data = json.loads(request)
 
-            response = company.process(**data)
+            response = anaconda.process(**data)
             logger.debug('Jedi result: %s', response)
 
         except TypeError:
@@ -60,7 +60,7 @@ class JediHandler(server.BaseHTTPRequestHandler):
         return
 
 
-class JediServer(server.HTTPServer):
+class Rpc(server.HTTPServer):
     """Jedi HTTP server."""
 
     def start(self):

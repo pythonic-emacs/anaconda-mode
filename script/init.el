@@ -10,17 +10,19 @@
   (cask-initialize source-directory)
   (add-to-list 'load-path source-directory))
 
+(require 'anaconda-mode)
+
 ;; Python settings.
 
 (when (getenv "ENVPYTHON")
-  (setq company-jedi-python-bin (getenv "ENVPYTHON"))
+  (setq anaconda-mode-python-bin (getenv "ENVPYTHON"))
   (message "Python binary: %s" (getenv "ENVPYTHON")))
 
-(setq company-jedi-port 8000)
+(setq anaconda-mode-port 8000)
 
-(setq company-jedi-debug t)
+(setq anaconda-mode-debug t)
 
-(add-hook 'python-mode-hook 'company-jedi-start)
+(add-hook 'python-mode-hook 'anaconda-mode-start)
 
 ;; Company settings.
 
@@ -28,4 +30,4 @@
 
 (global-company-mode)
 
-(add-to-list 'company-backends 'company-jedi)
+(add-to-list 'company-backends 'company-anaconda)

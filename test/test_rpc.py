@@ -1,5 +1,5 @@
 from test import TestCase, mock
-from start_jedi import httpd
+from anaconda_mode import rpc
 
 
 class TestPost(TestCase):
@@ -7,9 +7,9 @@ class TestPost(TestCase):
     def setUp(self):
         """Create mock objects for HTTP Handler."""
 
-        self._post = httpd.JediHandler.do_POST
+        self._post = rpc.Handler.do_POST
 
-        patcher = mock.patch('start_jedi.httpd.JediHandler', autospec=True)
+        patcher = mock.patch('anaconda_mode.rpc.Handler', autospec=True)
         self.addCleanup(patcher.stop)
         self._handler = patcher.start()
         self._handler.rfile = mock.Mock()

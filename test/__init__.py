@@ -15,7 +15,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 ROOT = os.path.realpath(BASE_DIR) + os.path.sep
 
 logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger('start_jedi')
+logger = logging.getLogger('anaconda_mode')
 
 if not os.path.isdir(ROOT + 'log'):
     os.mkdir(ROOT + 'log')
