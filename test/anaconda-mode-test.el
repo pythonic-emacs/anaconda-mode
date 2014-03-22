@@ -2,12 +2,12 @@
 
 ;; Test definitions.
 
-(ert-deftest test-jedi-running ()
-  "Test if jedi running successfully."
+(ert-deftest test-anaconda-mode-running ()
+  "Test if anaconda_mode running successfully."
   (should (anaconda-mode-running-p)))
 
-(ert-deftest test-jedi-candidates-json ()
-  "Test jedi completion json request string generator."
+(ert-deftest test-anaconda-mode-request-json ()
+  "Test request string generator."
   (load-fixture "test/jedi_candidates/fixtures/simple.py" 2 11)
   (should (equal (anaconda-mode-request-json "candidates")
                  (concat "{"
@@ -16,63 +16,42 @@
                          ""          "\"source\":" (anaconda-mode-encode (buffer-string)) ", "
                          ""          "\"line\":2, "
                          ""          "\"column\":11, "
-                         ""          "\"point\":27, "
-                         ""          "\"path\":" (anaconda-mode-encode (buffer-file-name)) ", "
-                         ""          "\"company_prefix\":\"\", "
-                         ""          "\"company_arg\":\"\""
+                         ""          "\"path\":" (anaconda-mode-encode (buffer-file-name))
                          ""    "}"
                          "}"))))
 
-(ert-deftest test-jedi-candidates ()
-  "Completion request must return candidates list."
+(ert-deftest test-anaconda-mode-candidates ()
+  "Test completion at point."
   (load-fixture "test/jedi_candidates/fixtures/simple.py" 2 11)
   (should (equal (anaconda-mode-candidates)
                  '("date" "datetime" "datetime_CAPI"))))
 
-(ert-deftest test-jedi-location-json ()
-  "Test doto_definition json generator."
-  (load-fixture "test/jedi_location/fixtures/simple.py" 8 1)
-  (should (equal (anaconda-mode-request-json "location")
-                 (concat "{"
-                         ""    "\"command\":\"location\", "
-                         ""    "\"attributes\":{"
-                         ""          "\"source\":" (anaconda-mode-encode (buffer-string)) ", "
-                         ""          "\"line\":8, "
-                         ""          "\"column\":1, "
-                         ""          "\"point\":103, "
-                         ""          "\"path\":" (anaconda-mode-encode (buffer-file-name)) ", "
-                         ""          "\"company_prefix\":\"\", "
-                         ""          "\"company_arg\":\"\""
-                         ""    "}"
-                         "}"))))
-
-(ert-deftest test-jedi-location ()
+(ert-deftest test-anaconda-mode-location ()
   "Test find definition at point."
   (let ((fixture "test/jedi_location/fixtures/simple.py"))
     (load-fixture fixture 8 1)
-    (should (equal (anaconda-mode-location)
-                   (cons (fixture-path fixture) 1))))) ; Fist definition will chose by mocked user.
+    (should (equal (anaconda-mode-locate-definition)
+                   (cons (fixture-path fixture) 1)))))
 
-(ert-deftest test-jedi-multiple-location ()
+(ert-deftest test-anaconda-mode-multiple-location ()
   "Test non determined locations."
   (let ((fixture "test/jedi_location/fixtures/builtins.py"))
     (load-fixture fixture 6 1)
-    (should (equal (anaconda-mode-location)
+    (should (equal (anaconda-mode-locate-definition)
                    (cons (fixture-path fixture) 2)))))
 
-(ert-deftest test-jedi-reference ()
+(ert-deftest test-anaconda-mode-reference ()
   "Test fund references."
   (let ((fixture "test/jedi_reference/fixtures/simple.py"))
     (load-fixture fixture 1 4)
-    (should (equal (anaconda-mode-reference)
+    (should (equal (anaconda-mode-locate-reference)
                    (cons (fixture-path fixture) 4)))))
 
-(ert-deftest test-jedi-doc ()
-  "Test found documentation string."
+(ert-deftest test-anaconda-mode-doc ()
+  "Test documentation string search."
   (load-fixture "test/jedi_doc/fixtures/simple.py" 1 4)
-  (should (equal "Document for function f."
-                 (with-current-buffer (anaconda-mode-doc-buffer)
-                   (buffer-string)))))
+  (should (equal (anaconda-mode-doc-string)
+                 "Document for function f.")))
 
 (ert-deftest test-key-list ()
   "Should obtain keys from hash."
@@ -81,8 +60,3 @@
                    (puthash "a" "bar" hash)
                    (puthash "b" "foo" hash)
                    (key-list hash)))))
-
-(ert-deftest test-jedi-meta ()
-  "Company must ignore empty doc strings."
-  (load-fixture "test/jedi_doc/fixtures/docless.py" 1 4)
-  (should (null (anaconda-mode-meta))))

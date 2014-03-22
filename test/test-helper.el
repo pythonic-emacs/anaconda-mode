@@ -38,9 +38,8 @@
 
 ;; Server bootstrap.
 
-(require 'cl)
 (require 'anaconda-mode)
 
-(anaconda-mode-start)
+(anaconda-mode-start-node)
 
 (sleep-for 5) ;; Wait for anaconda_mode server will ready to work.
