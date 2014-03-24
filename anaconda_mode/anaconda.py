@@ -43,16 +43,10 @@ def process(attributes, command):
 class Anaconda():
     """Jedi library interaction."""
 
-    def __init__(self, source, line, column, point, path,
-                 company_prefix, company_arg):
+    def __init__(self, source, line, column, path):
         """Initialize Jedi with source."""
 
-        suffix = company_arg[len(company_prefix):]
-        context = source[:point] + suffix + source[point:]
-
-        logger.debug('Imply jedi context: \n%s', context)
-
-        self.script = jedi.Script(context, line, column, path)
+        self.script = jedi.Script(source, line, column, path)
 
     def candidates(self):
         """Select auto-complete candidates for source position."""
@@ -77,7 +71,6 @@ class Anaconda():
     def location(self):
         """Find names assignment place."""
 
-        # Use list comprehension rather dict comprehension due to Python2.6
         return dict((summary(name), details(name)) for name in self._goto())
 
     def reference(self):
