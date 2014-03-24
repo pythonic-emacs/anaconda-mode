@@ -48,10 +48,17 @@ class Anaconda():
 
         self.script = jedi.Script(source, line, column, path)
 
-    def candidates(self):
+    def complete(self):
         """Select auto-complete candidates for source position."""
 
-        completions = [comp.name for comp in self.script.completions()]
+        completions = []
+
+        for comp in self.script.completions():
+
+            completions.append(
+                dict(name=comp.name,
+                     doc=comp.doc or None,
+                     short_doc=first_line(comp.raw_doc) or None))
 
         return completions
 
