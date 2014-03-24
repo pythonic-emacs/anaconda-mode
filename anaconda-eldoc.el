@@ -28,7 +28,7 @@
 (defvar anaconda-eldoc-as-single-line nil
   "If not nil, trim eldoc string to frame width.")
 
-(defun anaconda-mode-eldoc-function ()
+(defun anaconda-eldoc-function ()
   "Show eldoc for context at point."
   (let ((doc (anaconda-mode-call "eldoc")))
     (if (and doc anaconda-eldoc-as-single-line)
@@ -36,14 +36,14 @@
       doc)))
 
 ;;;###autoload
-(define-minor-mode anaconda-eldoc-mode
-  "ElDoc mode for anaconda-mode."
+(define-minor-mode anaconda-eldoc
+  "ElDoc for anaconda-mode."
   :lighter ""
   :keymap nil
   (if anaconda-eldoc
       (progn
         (make-local-variable 'eldoc-documentation-function)
-        (set eldoc-documentation-function 'anaconda-mode-eldoc-function)
+        (set eldoc-documentation-function 'anaconda-eldoc-function)
         (eldoc-mode 1))
     (kill-local-variable 'eldoc-documentation-function)
     (eldoc-mode -1)))
