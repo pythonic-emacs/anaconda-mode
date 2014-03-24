@@ -53,7 +53,7 @@ See `company-backends' for more info about COMMAND and ARG."
   (interactive (list 'interactive))
   (case command
     (interactive (company-begin-backend 'anaconda-mode))
-    (prefix (anaconda-mode-prefix))
+    (prefix (company-anaconda-prefix))
     (candidates (anaconda-mode-candidates))
     (location (anaconda-mode-location))
     (doc-buffer (anaconda-mode-doc-buffer))
