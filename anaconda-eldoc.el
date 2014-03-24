@@ -35,6 +35,7 @@
         (substring doc 0 (min (frame-width) (length doc)))
       doc)))
 
+;;;###autoload
 (define-minor-mode anaconda-eldoc-mode
   "ElDoc mode for anaconda-mode."
   :lighter ""
