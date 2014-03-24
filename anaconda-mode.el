@@ -180,6 +180,14 @@ ARG may come from `company-call-backend' function."
 
 ;;; View documentation.
 
+(defun anaconda-mode-view-doc ()
+  "Show documentation for context at point."
+  (interactive)
+  (let ((doc (anaconda-mode-doc-string)))
+    (if doc
+        (anaconda-mode-doc-buffer doc)
+      (error "Can't find documentation"))))
+
 (defun anaconda-mode-doc-string ()
   "Request documentation string.
 Allow user to chose what doc he want to read."
@@ -187,19 +195,15 @@ Allow user to chose what doc he want to read."
    "Doc: "
    (anaconda-mode-call "doc")))
 
-(defun anaconda-mode-view-doc ()
-  "Show documentation for context at point."
-  (interactive)
-  (let ((doc (anaconda-mode-doc-buffer))
-        (buf (get-buffer-create "*anaconda-doc*")))
-    (if doc
-        (with-current-buffer buf
-          (view-mode -1)
-          (erase-buffer)
-          (insert doc)
-          (view-mode 1)
-          (display-buffer buf))
-      (error "Can't find documentation"))))
+(defun anaconda-mode-doc-buffer (doc)
+  "Create buffer for viewing DOC."
+  (let ((buf (get-buffer-create "*anaconda-doc*")))
+    (with-current-buffer buf
+      (view-mode -1)
+      (erase-buffer)
+      (insert doc)
+      (view-mode 1)
+      (display-buffer buf))))
 
 
 ;;; Jump to definition.
