@@ -26,13 +26,10 @@
   "Emulate user chose."
   (car (sort collection 'string<)))
 
-(when (getenv "ENVPYTHON")
-  (setq anaconda-mode-python-bin (getenv "ENVPYTHON"))
-  (message "Python binary: %s" (getenv "ENVPYTHON")))
+(let ((envdir (getenv "ENVDIR")))
+  (setq python-shell-virtualenv-path envdir))
 
-(setq anaconda-mode-completing-read-function 'mock-completing-read)
-
-(setq anaconda-mode-port 8000)
+(setq anaconda-mode-port 8887)
 
 (setq anaconda-mode-debug t)
 
