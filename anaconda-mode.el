@@ -26,6 +26,7 @@
 (require 'url)
 (require 'json)
 (require 'etags)
+(require 'python)
 
 
 ;;; Server.
