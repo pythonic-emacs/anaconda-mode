@@ -91,6 +91,13 @@
   (anaconda-mode-start-node)
   (anaconda-mode-do-request (anaconda-mode-request-json command)))
 
+(defun anaconda-mode-call-debug (command)
+  "View anaconda_mode reply for COMMAND call.
+Debugging purpose only."
+  (switch-to-buffer
+   (anaconda-mode-retrive
+    (anaconda-mode-request-json "complete"))))
+
 (defun anaconda-mode-do-request (body)
   "Make POST Request to jedi server with result processing.
 BODY mast be encoded json string."
