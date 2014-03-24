@@ -27,10 +27,10 @@
 (require 'anaconda-mode)
 (eval-when-compile (require 'cl))
 
-(defvar anaconda-company-complete-on-dot t
-  "If not nil, invoke anaconda completion after dot inserting.")
+(defvar company-anaconda-complete-on-dot t
+  "If not nil, invoke `company-anaconda' completion after dot inserting.")
 
-(defun anaconda-company-prefix ()
+(defun company-anaconda-prefix ()
   "Grab prefix at point.
 Properly detect strings, comments and attribute access."
   (and (eq major-mode 'python-mode)
@@ -38,7 +38,7 @@ Properly detect strings, comments and attribute access."
        (not (company-in-string-or-comment))
        (let ((symbol (company-grab-symbol)))
          (if symbol
-             (if (and anaconda-company-complete-on-dot
+             (if (and company-anaconda-complete-on-dot
                       (save-excursion
                         (forward-char (- (length symbol)))
                         (looking-back "\\." (- (point) 1))))
@@ -59,6 +59,6 @@ See `company-backends' for more info about COMMAND and ARG."
     (doc-buffer (anaconda-mode-doc-buffer))
     (sorted t)))
 
-(provide 'anaconda-company)
+(provide 'company-anaconda)
 
-;;; anaconda-company.el ends here
+;;; company-anaconda.el ends here
