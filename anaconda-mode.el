@@ -180,6 +180,9 @@ ARG may come from `company-call-backend' function."
 
 ;;; Code completion.
 
+(defun anaconda-mode-complete-at-point ()
+  "Complete at point with anaconda_mode.")
+
 (defun anaconda-mode-candidates ()
   "Request completion candidates."
   (anaconda-mode-call "candidates"))
