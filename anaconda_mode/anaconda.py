@@ -51,14 +51,16 @@ class Anaconda():
     def complete(self):
         """Select auto-complete candidates for source position."""
 
-        completions = []
+        completions = {}
 
         for comp in self.script.completions():
 
-            completions.append(
-                dict(name=comp.name,
-                     doc=comp.doc or None,
-                     short_doc=first_line(comp.raw_doc) or None))
+            completions[comp.name] = {
+                'doc': comp.doc or None,
+                'short_doc': first_line(comp.raw_doc) or None,
+            }
+
+        logger.debug('Completions: %s', completions)
 
         return completions
 
@@ -94,18 +96,15 @@ class Anaconda():
     def doc(self):
         """Documentations list for all definitions at point."""
 
-        raw_docs = [name.raw_doc for name in self.script.goto_definitions()]
+        docs = {}
 
-        return dict((first_line(doc), doc) for doc in raw_docs if doc)
+        for definition in self.script.goto_definitions():
 
-    def meta(self):
-        """Return single line documentation string or None."""
+            if definition.raw_doc:
 
-        documents = [name.raw_doc for name in self.script.goto_definitions()]
+                docs[first_line(definition.raw_doc)] = definition.doc
 
-        if len(documents) == 1:
-
-            return first_line(documents[0])
+        return docs
 
     def eldoc(self):
         """Return eldoc format documentation string or None."""
