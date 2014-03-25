@@ -52,9 +52,9 @@ Properly detect strings, comments and attribute access."
 See `company-backends' for more info about COMMAND and ARG."
   (interactive (list 'interactive))
   (case command
-    (interactive (company-begin-backend 'anaconda-mode))
+    (interactive (company-begin-backend 'company-anaconda))
     (prefix (company-anaconda-prefix))
-    (candidates (anaconda-mode-candidates))
+    (candidates (mapcar (lambda (h) (gethash "name" h)) (anaconda-mode-call "complete")))
     (location (anaconda-mode-location))
     (doc-buffer (anaconda-mode-doc-buffer))
     (sorted t)))
