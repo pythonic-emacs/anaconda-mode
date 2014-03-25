@@ -195,7 +195,7 @@ ARG may come from `company-call-backend' function."
   (interactive)
   (let ((doc (anaconda-mode-doc-string)))
     (if doc
-        (anaconda-mode-doc-buffer doc)
+        (display-buffer (anaconda-mode-doc-buffer doc))
       (error "Can't find documentation"))))
 
 (defun anaconda-mode-doc-string ()
@@ -213,7 +213,7 @@ Allow user to chose what doc he want to read."
       (erase-buffer)
       (insert doc)
       (view-mode 1)
-      (display-buffer buf))))
+      buf)))
 
 
 ;;; Jump to definition.
