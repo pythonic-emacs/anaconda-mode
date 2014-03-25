@@ -30,6 +30,13 @@
 (defvar company-anaconda-complete-on-dot t
   "If not nil, invoke `company-anaconda' completion after dot inserting.")
 
+(defvar company-anaconda-cache nil
+  "Completion info cache for current company frontend.")
+
+(defun company-anaconda-get-chache (candidate param)
+  "Return CANDIDATE PARAM from cache."
+  (gethash param (gethash candidate company-anaconda-cache)))
+
 (defun company-anaconda-prefix ()
   "Grab prefix at point.
 Properly detect strings, comments and attribute access."
@@ -46,6 +53,22 @@ Properly detect strings, comments and attribute access."
                symbol)
            'stop))))
 
+(defun company-anaconda-candidates ()
+  "Populate completion cache with candidates and return name list."
+  (setq company-anaconda-cache (anaconda-mode-call "complete"))
+  (let (candidates)
+    (maphash (lambda (k v) (push k candidates)) company-anaconda-cache)
+    candidates))
+
+(defun company-anaconda-doc-buffer (candidate)
+  "Return documentation buffer for chosen CANDIDATE."
+  (let ((doc (company-anaconda-get-chache candidate "doc")))
+    (and doc (anaconda-mode-doc-buffer doc))))
+
+(defun company-anaconda-meta (candidate)
+  "Return short documentation string for chosen CANDIDATE."
+  (company-anaconda-get-chache candidate "short_doc"))
+
 ;;;###autoload
 (defun company-anaconda (command &optional arg)
   "Jedi backend for company-mode.
@@ -54,10 +77,9 @@ See `company-backends' for more info about COMMAND and ARG."
   (case command
     (interactive (company-begin-backend 'company-anaconda))
     (prefix (company-anaconda-prefix))
-    (candidates (mapcar (lambda (h) (gethash "name" h)) (anaconda-mode-call "complete")))
-    (location (anaconda-mode-location))
-    (doc-buffer (anaconda-mode-doc-buffer))
-    (sorted t)))
+    (candidates (company-anaconda-candidates))
+    (doc-buffer (company-anaconda-doc-buffer arg))
+    (meta (company-anaconda-meta arg))))
 
 (provide 'company-anaconda)
 
