@@ -164,7 +164,7 @@ ARG may come from `company-call-backend' function."
 (defvar anaconda-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
-    (define-key map [remap find-tag] 'anaconda-mode-goto-definition)
+    (define-key map [remap find-tag] 'anaconda-mode-find-definition)
     (define-key map (kbd "M-r") 'anaconda-mode-find-reference)
     map)
   "Keymap for `anaconda-mode'.")
