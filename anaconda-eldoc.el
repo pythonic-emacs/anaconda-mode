@@ -43,7 +43,7 @@
   (if anaconda-eldoc
       (progn
         (make-local-variable 'eldoc-documentation-function)
-        (set eldoc-documentation-function 'anaconda-eldoc-function)
+        (setq-local eldoc-documentation-function 'anaconda-eldoc-function)
         (eldoc-mode 1))
     (kill-local-variable 'eldoc-documentation-function)
     (eldoc-mode -1)))
