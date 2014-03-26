@@ -51,7 +51,9 @@
   "Test documentation string search."
   (load-fixture "test/jedi_doc/fixtures/simple.py" 1 4)
   (should (equal (anaconda-mode-doc-string)
-                 "Document for function f.")))
+                 "f(a, b = 1)
+
+Document for function f.")))
 
 (ert-deftest test-key-list ()
   "Should obtain keys from hash."
