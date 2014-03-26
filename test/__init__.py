@@ -11,6 +11,9 @@ except ImportError:
 import os
 import logging
 
+from anaconda_mode import anaconda
+
+
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 ROOT = os.path.realpath(BASE_DIR) + os.path.sep
 
@@ -32,28 +35,21 @@ logger.propagate = False  # Not echo to console
 # Helper methods.
 
 
-def editor(path, line, column, command,
-           company_prefix='', company_arg=''):
-    """Emulate requests from user.
+def editor(path, line, column, command):
+    """Execute user request."""
 
-    Return callable api for jedi."""
-
-    with open(path) as f:
+    with open(ROOT + path) as f:
         lines = f.readlines()
+        source = ''.join(lines)
 
-    source = ''.join(lines)
-
-    point = len(''.join(lines[:line-1]) + lines[line-1][:column])
-
-    return {
+    request = {
         'command': command,
         'attributes': {
             'source': source,
             'line': line,
             'column': column,
-            'point': point,
             'path': path,
-            'company_prefix': company_prefix,
-            'company_arg': company_arg,
         }
     }
+
+    return anaconda.process(**request)
