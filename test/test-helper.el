@@ -22,9 +22,11 @@
   (goto-line line)
   (move-to-column column))
 
-(defun mock-completing-read (prompt collection)
+(defun mock-completing-read (prompt collection &rest ignored)
   "Emulate user chose."
   (car (sort collection 'string<)))
+
+(setq completing-read-function 'mock-completing-read)
 
 (let ((envdir (getenv "ENVDIR")))
   (setq python-shell-virtualenv-path envdir))
