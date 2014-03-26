@@ -1,6 +1,4 @@
-from test import TestCase
-from anaconda_mode import anaconda
-from test import editor
+from test import TestCase, anaconda, editor
 
 
 class RegressionTest(TestCase):
@@ -8,9 +6,9 @@ class RegressionTest(TestCase):
     def test_unsupported_command(self):
         """Ignore adjective commands."""
 
-        request = editor('test/jedi/fixtures/simple.py', 2, 11, 'Wrong...')
+        response = editor('test/jedi/fixtures/simple.py', 2, 11, 'Wrong...')
 
-        self.assertIsNone(anaconda.process(**request))
+        self.assertIsNone(response)
 
     def test_missing_attributes(self):
         """Ignore incomplete code attributes."""
