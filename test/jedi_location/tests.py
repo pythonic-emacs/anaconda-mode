@@ -1,6 +1,4 @@
-from test import TestCase
-from anaconda_mode import anaconda
-from test import editor, ROOT
+from test import TestCase, editor, ROOT
 
 
 class LocationTest(TestCase):
@@ -8,19 +6,20 @@ class LocationTest(TestCase):
     def test_definition_search(self):
         """Jedi must find correct definitions."""
 
-        request = editor(
+        response = editor(
             'test/jedi_location/fixtures/simple.py', 8, 1,
-            'location'
-        )
+            'location')
 
-        response = {
-            ROOT + 'test/jedi_location/fixtures/simple.py:1 - def my_func': {
+        expected = {
+            ROOT + ('test/jedi_location/fixtures/simple.py:1'
+                    ' - def my_func'): {
                 'module_path': ROOT + 'test/jedi_location/fixtures/simple.py',
                 'line': 1,
                 'column': 0,
                 'description': 'def my_func',
             },
-            ROOT + 'test/jedi_location/fixtures/simple.py:6 - inception = my_list[2]': {
+            ROOT + ('test/jedi_location/fixtures/simple.py:6'
+                    ' - inception = my_list[2]'): {
                 'module_path': ROOT + 'test/jedi_location/fixtures/simple.py',
                 'line': 6,
                 'column': 0,
@@ -28,17 +27,14 @@ class LocationTest(TestCase):
             }
         }
 
-        self.assertEqual(response, anaconda.process(**request))
+        self.assertEqual(response, expected)
 
     def test_non_python_definition_filter(self):
         """Jedi must filter non python sources."""
 
-        request = editor(
+        result = editor(
             'test/jedi_location/fixtures/non_python.py', 2, 13,
-            'location'
-        )
-
-        result = anaconda.process(**request)
+            'location')
 
         # Don't check len(result) here.  Some python versions doesn't has
         # fixture module defined in python code.  So dictionary length may
@@ -54,12 +50,10 @@ class LocationTest(TestCase):
         for those definitions. Not a builtin keyword.
         """
 
-        request = editor(
+        result = editor(
             'test/jedi_location/fixtures/builtins.py', 6, 1,
             'location'
         )
-
-        result = anaconda.process(**request)
 
         self.assertEqual(2, len(result))
 
@@ -69,12 +63,11 @@ class LocationTest(TestCase):
     def test_empty_definition(self):
         """Strip unknown definitions."""
 
-        request = editor(
+        response = editor(
             'test/jedi_location/fixtures/not_defined.py', 1, 13,
-            'location'
-        )
+            'location')
 
-        self.assertIsNone(anaconda.process(**request))
+        self.assertIsNone(response)
 
     def test_jedi_goto_filter_same_definitions(self):
         """Merge definitions with assignments properly.
@@ -85,12 +78,9 @@ class LocationTest(TestCase):
         more consistent location.
         """
 
-        request = editor(
+        result = editor(
             'test/jedi_location/fixtures/builtins.py', 6, 1,
-            '_goto'
-        )
-
-        result = anaconda.process(**request)
+            '_goto')
 
         result_len = 0
         for base_def in result:
