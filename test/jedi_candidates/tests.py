@@ -1,5 +1,4 @@
-from test import TestCase
-from test import editor
+from test import TestCase, editor
 
 
 class CandidatesTest(TestCase):
