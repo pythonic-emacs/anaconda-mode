@@ -20,11 +20,11 @@
                          ""    "}"
                          "}"))))
 
-(ert-deftest test-anaconda-mode-candidates ()
+(ert-deftest test-anaconda-mode-complete ()
   "Test completion at point."
-  (load-fixture "test/jedi_candidates/fixtures/simple.py" 2 11)
-  (should (equal (anaconda-mode-candidates)
-                 '("date" "datetime" "datetime_CAPI"))))
+  (load-fixture "test/jedi_candidates/fixtures/simple.py" 14 4)
+  (should (equal (anaconda-mode-complete-thing)
+                 '("test1" "test2"))))
 
 (ert-deftest test-anaconda-mode-location ()
   "Test find definition at point."

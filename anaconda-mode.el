@@ -183,8 +183,13 @@ ARG may come from `company-call-backend' function."
 (defun anaconda-mode-complete-at-point ()
   "Complete at point with anaconda_mode.")
 
+(defun anaconda-mode-complete-thing ()
+  "Complete python thing at point."
+  (mapcar (lambda (h) (gethash "name" h))
+          (anaconda-mode-complete)))
+
 (defun anaconda-mode-complete ()
-  "Request completion candidates."
+  "Request completion candidates together with its properties."
   (anaconda-mode-call "complete"))
 
 
