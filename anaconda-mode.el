@@ -175,21 +175,33 @@ ARG may come from `company-call-backend' function."
 
 \\{anaconda-mode-map}"
   :lighter " Anaconda"
-  :keymap anaconda-mode-map)
+  :keymap anaconda-mode-map
+  (if anaconda-mode
+      (add-hook 'completion-at-point-functions
+                'anaconda-mode-complete-at-point nil t)
+    (remove-hook 'completion-at-point-functions
+                 'anaconda-mode-complete-at-point t)))
 
 
 ;;; Code completion.
 
 (defun anaconda-mode-complete-at-point ()
-  "Complete at point with anaconda_mode.")
+  "Complete at point with anaconda_mode."
+  (let* ((bounds (bounds-of-thing-at-point 'symbol))
+         (start (or (car bounds) (point)))
+         (stop (or (cdr bounds) (point))))
+    (list start stop
+          (completion-table-dynamic
+           'anaconda-mode-complete-thing))))
 
-(defun anaconda-mode-complete-thing ()
-  "Complete python thing at point."
+(defun anaconda-mode-complete-thing (&rest ignored)
+  "Complete python thing at point.
+IGNORED parameter is the string for which completion is required."
   (mapcar (lambda (h) (gethash "name" h))
           (anaconda-mode-complete)))
 
 (defun anaconda-mode-complete ()
-  "Request completion candidates together with its properties."
+  "Request completion candidates."
   (anaconda-mode-call "complete"))
 
 
