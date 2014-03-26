@@ -1,6 +1,4 @@
-from test import TestCase
-from anaconda_mode import anaconda
-from test import editor, ROOT
+from test import TestCase, editor, ROOT
 
 
 class ReferenceTest(TestCase):
@@ -8,12 +6,11 @@ class ReferenceTest(TestCase):
     def test_references_search(self):
         """Jedi must find all references to object."""
 
-        request = editor(
+        response = editor(
             'test/jedi_reference/fixtures/simple.py', 1, 4,
-            'reference'
-        )
+            'reference')
 
-        response = {
+        expected = {
             ROOT + 'test/jedi_reference/fixtures/simple.py:4 - a@4,4': {
                 'module_path': ROOT + 'test/jedi_reference/fixtures/simple.py',
                 'line': 4,
@@ -28,14 +25,13 @@ class ReferenceTest(TestCase):
             }
         }
 
-        self.assertEqual(response, anaconda.process(**request))
+        self.assertEqual(response, expected)
 
     def test_empty_references(self):
         """Strip unknown references."""
 
-        request = editor(
+        response = editor(
             'test/jedi_reference/fixtures/useless.py', 1, 4,
-            'reference'
-        )
+            'reference')
 
-        self.assertIsNone(anaconda.process(**request))
+        self.assertIsNone(response)
