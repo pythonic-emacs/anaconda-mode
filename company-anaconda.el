@@ -30,13 +30,6 @@
 (defvar company-anaconda-complete-on-dot t
   "If not nil, invoke `company-anaconda' completion after dot inserting.")
 
-(defvar company-anaconda-cache nil
-  "Completion info cache for current company frontend.")
-
-(defun company-anaconda-get-chache (candidate param)
-  "Return CANDIDATE PARAM from cache."
-  (gethash param (gethash candidate company-anaconda-cache)))
-
 (defun company-anaconda-prefix ()
   "Grab prefix at point.
 Properly detect strings, comments and attribute access."
@@ -54,20 +47,22 @@ Properly detect strings, comments and attribute access."
            'stop))))
 
 (defun company-anaconda-candidates ()
-  "Populate completion cache with candidates and return name list."
-  (setq company-anaconda-cache (anaconda-mode-call "complete"))
-  (let (candidates)
-    (maphash (lambda (k v) (push k candidates)) company-anaconda-cache)
-    candidates))
+  "Obtain candidates list from anaconda."
+  (mapcar (lambda (h)
+            (let ((candidate (gethash "name" h)))
+              (put-text-property 0 1 'short-doc (gethash "short_doc" h) candidate)
+              (put-text-property 0 1 'doc (gethash "doc" h) candidate)
+              candidate))
+          (anaconda-mode-complete)))
 
 (defun company-anaconda-doc-buffer (candidate)
   "Return documentation buffer for chosen CANDIDATE."
-  (let ((doc (company-anaconda-get-chache candidate "doc")))
+  (let ((doc (get-text-property 0 'doc candidate)))
     (and doc (anaconda-mode-doc-buffer doc))))
 
 (defun company-anaconda-meta (candidate)
   "Return short documentation string for chosen CANDIDATE."
-  (company-anaconda-get-chache candidate "short_doc"))
+  (get-text-property 0 'short-doc candidate))
 
 ;;;###autoload
 (defun company-anaconda (command &optional arg)
