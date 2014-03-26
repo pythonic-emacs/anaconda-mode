@@ -1,6 +1,8 @@
 from test import TestCase, mock
 from anaconda_mode import rpc
 
+import json
+
 
 class TestPost(TestCase):
 
@@ -18,18 +20,15 @@ class TestPost(TestCase):
     def test_correct_post_request(self):
         """Need status 200 on correct post request with its body."""
 
-        request = ('{'
-                   ' "command": "candidates",'
-                   ' "attributes": {'
-                   '     "source": "imp",'
-                   '     "line": 1,'
-                   '     "column": 3,'
-                   '     "point": 2,'
-                   '     "path": "",'
-                   '     "company_prefix": "",'
-                   '     "company_arg": ""'
-                   ' }'
-                   '}')
+        request = json.dumps({
+            "command": "complete",
+            "attributes": {
+                "source": "imp",
+                "line": 1,
+                "column": 3,
+                "path": "",
+            }
+        })
 
         self._handler.headers = {'content-length': len(request)}
         self._handler.rfile.read.return_value = request.encode()
@@ -40,10 +39,10 @@ class TestPost(TestCase):
     def test_handle_jedi_exceptions(self):
         """Need status 400 on jedi failure."""
 
-        request = ('{'
-                   ' "command": "unsupported_command",'
-                   ' "attributes": {}'
-                   '}')
+        request = json.dumps({
+            "command": "unsupported_command",
+            "attributes": {}
+        })
 
         self._handler.headers = {'content-length': '47'}
         self._handler.rfile.return_value = request.encode()
