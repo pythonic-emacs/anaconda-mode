@@ -183,9 +183,9 @@ ARG may come from `company-call-backend' function."
 (defun anaconda-mode-complete-at-point ()
   "Complete at point with anaconda_mode.")
 
-(defun anaconda-mode-candidates ()
+(defun anaconda-mode-complete ()
   "Request completion candidates."
-  (anaconda-mode-call "candidates"))
+  (anaconda-mode-call "complete"))
 
 
 ;;; View documentation.

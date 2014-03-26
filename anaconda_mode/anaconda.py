@@ -51,14 +51,15 @@ class Anaconda():
     def complete(self):
         """Select auto-complete candidates for source position."""
 
-        completions = {}
+        completions = []
 
         for comp in self.script.completions():
 
-            completions[comp.name] = {
+            completions.append({
+                'name': comp.name,
                 'doc': comp.doc or None,
                 'short_doc': first_line(comp.raw_doc) or None,
-            }
+            })
 
         logger.debug('Completions: %s', completions)
 
