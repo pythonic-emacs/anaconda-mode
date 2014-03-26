@@ -1,5 +1,4 @@
-from test import TestCase, skip
-from anaconda_mode import anaconda
+from test import TestCase
 from test import editor
 
 
@@ -8,11 +7,26 @@ class CandidatesTest(TestCase):
     def test_autocomplete(self):
         """Jedi must complete correct sources."""
 
-        request = editor(
-            'test/jedi_candidates/fixtures/simple.py', 2, 11,
-            'candidates'
-        )
+        response = editor(
+            'test/jedi_candidates/fixtures/simple.py', 14, 4, 'complete')
 
-        response = ['date', 'datetime', 'datetime_CAPI']
+        expected = [
+            {
+                "name": "test1",
+                "short_doc": "First test function.",
+                "doc": """test1(a, b)
 
-        self.assertEqual(response, anaconda.process(**request))
+First test function.""",
+            },
+            {
+                "name": "test2",
+                "short_doc": "Second test function.",
+                "doc": """test2(c)
+
+Second test function.
+
+Accept one argument only."""
+            },
+        ]
+
+        self.assertEqual(response, expected)
