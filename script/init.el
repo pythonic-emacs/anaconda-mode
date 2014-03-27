@@ -36,3 +36,13 @@
 (require 'anaconda-eldoc)
 
 (add-hook 'python-mode-hook 'anaconda-eldoc)
+
+;; Helm settings.
+
+(require 'helm-config)
+
+(helm-mode)
+
+;; Pyenv settings.
+
+(pyenv-mode)
