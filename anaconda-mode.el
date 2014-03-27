@@ -32,9 +32,6 @@
 
 ;;; Server.
 
-(defvar anaconda-mode-python-bin "python"
-  "Path to python executable.")
-
 (defvar anaconda-mode-debug nil
   "Turn on anaconda_mode debug logging.")
 
@@ -44,15 +41,19 @@
 (defvar anaconda-mode-port 24970
   "Port for anaconda_mode connection.")
 
-(defvar anaconda-mode-command
-  (mapconcat 'identity
-             (list anaconda-mode-python-bin
-                   "-m" "anaconda_mode.__main__"
-                   "--ip" anaconda-mode-host
-                   "--port" (number-to-string anaconda-mode-port)
-                   (when anaconda-mode-debug "--debug"))
-             " ")
-  "Command to run anaconda_mode server.")
+(defun anaconda-mode-python ()
+  "Detect python executable."
+  (let ((virtualenv python-shell-virtualenv-path))
+    (if virtualenv
+        (concat (file-name-as-directory virtualenv) "bin/python")
+      "python")))
+
+(defun anaconda-mode-python-args ()
+  "Python arguments to run anaconda_mode server."
+  (list "-m" "anaconda_mode.__main__"
+        "--ip" anaconda-mode-host
+        "--port" (number-to-string anaconda-mode-port)
+        (if anaconda-mode-debug "--debug" "")))
 
 (defvar anaconda-mode-directory
   (file-name-directory load-file-name)
@@ -70,7 +71,10 @@
   "Run anaconda-mode-command process."
   (let ((default-directory anaconda-mode-directory))
     (setq anaconda-mode-process
-          (start-process-shell-command "anaconda_mode" nil anaconda-mode-command))
+          (apply 'start-process
+                 "anaconda_mode" nil
+                 (anaconda-mode-python)
+                 (anaconda-mode-python-args)))
     ;; TODO: Wait here for anaconda_mode will be ready to process requests.
     ))
 
