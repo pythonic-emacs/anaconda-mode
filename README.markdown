@@ -13,21 +13,7 @@ Code navigation, documentation lookup and completion for Python.
 * jump to definition
 * find references
 * view documentation
-* eldoc
-
-## Future work
-
-#### 0.2 milestone:
-
-* virtualenv support
-
-#### 0.3 milestone:
-
-* non blocking client
-
-#### 0.4 milestone:
-
-* concurrent server side
+* virtualenv
 
 ## Install
 
@@ -47,6 +33,16 @@ python buffers add following to your configuration.
 ```lisp
 (add-hook 'python-mode-hook 'anaconda-mode)
 ```
+
+Anaconda mode detect active virtual environment through value of
+`python-shell-virtualenv-path` variable defined in `python.el`
+library.  When you set it to actual virtualenv path next anaconda-mode
+command you call will restart its python process in proper environment
+before performing this call.  This allow anaconda processing
+virtualenv site-packages with minimum number of actions from your
+side.  I strongly recommended you to use package like
+[pyenv-mode](https://github.com/proofit404/pyenv-mode) or similar
+package to hold `python-shell-virtualenv-path` in actual state.
 
 ## Contribs
 
