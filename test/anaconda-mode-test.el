@@ -6,6 +6,11 @@
   "Test if anaconda_mode running successfully."
   (should (anaconda-mode-running-p)))
 
+(ert-deftest test-anaconda-mode-virtualenv ()
+  "Check that anaconda_mode start with proper python executable."
+  (should (string= (anaconda-mode-python)
+                   (getenv "ENVPYTHON"))))
+
 (ert-deftest test-anaconda-mode-request-json ()
   "Test request string generator."
   (load-fixture "test/jedi_candidates/fixtures/simple.py" 2 11)
