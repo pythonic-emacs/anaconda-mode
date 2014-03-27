@@ -74,12 +74,12 @@
           (apply 'start-process
                  "anaconda_mode" nil
                  (anaconda-mode-python)
-                 (anaconda-mode-python-args)))
-    ;; TODO: Wait here for anaconda_mode will be ready to process requests.
-    ))
+                 (anaconda-mode-python-args)))))
 
 (defun anaconda-mode-start-node ()
   "Start anaconda_mode server."
+  (when (anaconda-mode-need-restart)
+    (anaconda-mode-stop-node))
   (unless (anaconda-mode-running-p)
     (anaconda-mode-bootstrap)))
 
@@ -87,6 +87,14 @@
   "Stop anaconda-mode server."
   (when (anaconda-mode-running-p)
     (kill-process anaconda-mode-process)))
+
+(defun anaconda-mode-need-restart ()
+  "Check if current `anaconda-mode-process'.
+Return nil if it run under proper environment."
+  (and (anaconda-mode-running-p)
+       (not (equal (process-command anaconda-mode-process)
+                   (cons (anaconda-mode-python)
+                         (anaconda-mode-python-args))))))
 
 
 ;;; Interaction.
