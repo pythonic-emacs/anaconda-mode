@@ -112,7 +112,7 @@ Debugging purpose only."
     (anaconda-mode-request-json "complete"))))
 
 (defun anaconda-mode-do-request (body)
-  "Make POST Request to jedi server with result processing.
+  "Make POST Request to anaconda_mode server with result processing.
 BODY mast be encoded json string."
   (let ((response (anaconda-mode-retrive body)))
     (when response
@@ -128,7 +128,7 @@ BODY mast be encoded json string."
         (kill-buffer response)))))
 
 (defun anaconda-mode-retrive (body)
-  "Make POST request to jedi server synchronously.
+  "Make POST request to anaconda_mode server synchronously.
 BODY must be encoded json string."
   (let ((url (format "http://%s:%s" anaconda-mode-host anaconda-mode-port))
         (url-request-method "POST")
@@ -139,8 +139,7 @@ BODY must be encoded json string."
 
 (defun anaconda-mode-request-json (command)
   "Generate json request for COMMAND.
-COMMAND must be one of Jedi command string.
-ARG may come from `company-call-backend' function."
+COMMAND must be one of anaconda_mode command string."
   (anaconda-mode-encode
    (list (cons "command" command)
          (cons "attributes" (anaconda-mode-point)))))
@@ -184,7 +183,7 @@ ARG may come from `company-call-backend' function."
 
 ;;;###autoload
 (define-minor-mode anaconda-mode
-  "Minor mode for Company Jedi interaction.
+  "Code navigation, documentation lookup and completion for Python.
 
 \\{anaconda-mode-map}"
   :lighter " Anaconda"

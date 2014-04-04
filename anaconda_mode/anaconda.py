@@ -14,13 +14,13 @@ def process(attributes, command):
 
     try:
 
-        company = Anaconda(**attributes)
+        anaconda = Anaconda(**attributes)
         logger.debug('Start jedi processing')
 
-        company_method = getattr(company, command)
-        logger.debug('Select company method: %s', company_method)
+        anaconda_method = getattr(anaconda, command)
+        logger.debug('Select anaconda method: %s', anaconda_method)
 
-        result = company_method()
+        result = anaconda_method()
 
     except AttributeError:
 
