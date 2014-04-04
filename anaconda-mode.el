@@ -50,10 +50,10 @@
 
 (defun anaconda-mode-python-args ()
   "Python arguments to run anaconda_mode server."
-  (list "-m" "anaconda_mode.__main__"
-        "--ip" anaconda-mode-host
-        "--port" (number-to-string anaconda-mode-port)
-        (if anaconda-mode-debug "--debug" "")))
+  (delq nil (list "-m" "anaconda_mode.__main__"
+                  "--ip" anaconda-mode-host
+                  "--port" (number-to-string anaconda-mode-port)
+                  (when anaconda-mode-debug "--debug"))))
 
 (defvar anaconda-mode-directory
   (file-name-directory load-file-name)
