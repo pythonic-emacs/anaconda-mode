@@ -27,24 +27,14 @@
 (require 'anaconda-mode)
 (eval-when-compile (require 'cl))
 
-(defvar company-anaconda-complete-on-dot t
-  "If not nil, invoke `company-anaconda' completion after dot inserting.")
-
 (defun company-anaconda-prefix ()
   "Grab prefix at point.
 Properly detect strings, comments and attribute access."
   (and (eq major-mode 'python-mode)
        (anaconda-mode-running-p)
        (not (company-in-string-or-comment))
-       (let ((symbol (company-grab-symbol)))
-         (if symbol
-             (if (and company-anaconda-complete-on-dot
-                      (save-excursion
-                        (forward-char (- (length symbol)))
-                        (looking-back "\\." (- (point) 1))))
-                 (cons symbol t)
-               symbol)
-           'stop))))
+       (or (company-grab-symbol-cons "\\." 1)
+           'stop)))
 
 (defun company-anaconda-candidates ()
   "Obtain candidates list from anaconda."
