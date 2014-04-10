@@ -89,3 +89,28 @@ class LocationTest(TestCase):
             result_len += 1
 
         self.assertEqual(2, result_len)
+
+    def test_jedi_goto_import_statements_filter(self):
+        """Jedi must ignore imports lines.
+
+        Don't show lines like
+        import something
+        from module import something
+        """
+
+        result = editor(
+            'test/jedi_location/fixtures/ignore_imports/ignore.py', 3, 1,
+            'location')
+
+        expected = {
+            ROOT + ('test/jedi_location/fixtures/ignore_imports/one.py:1'
+                    ' - def other'): {
+                'column': 0,
+                'line': 1,
+                'description': 'def other',
+                'module_path': ROOT + ('test/jedi_location/fixtures/'
+                                       'ignore_imports/one.py'),
+            }
+        }
+
+        self.assertEqual(result, expected)

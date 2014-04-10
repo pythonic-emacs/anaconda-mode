@@ -75,7 +75,9 @@ class Anaconda():
         definitions = self.script.goto_definitions()
 
         for name in assignments + definitions:
-            if name.module_path.endswith('.py'):
+
+            if name.module_path.endswith('.py') and name.type != 'import':
+
                 yield name
 
     def location(self):
