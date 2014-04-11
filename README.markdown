@@ -44,6 +44,20 @@ side.  I strongly recommended you to use package like
 [pyenv-mode](https://github.com/proofit404/pyenv-mode) or similar
 package to hold `python-shell-virtualenv-path` in actual state.
 
+#### Interactive commands
+
+Here ara interactive command available with anaconda-mode
+
+Keybinding  | Description
+------------|--------------------------------------------
+M-.         | anaconda-mode-find-definition
+C-x 4 .     | anaconda-mode-find-definition-other-frame
+C-x 5 .     | anaconda-mode-find-definition-other-window
+M-?         | anaconda-mode-view-doc
+M-r         | anaconda-mode-find-reference
+C-x 5 R     | anaconda-mode-find-reference-other-frame
+C-x 4 R     | anaconda-mode-find-reference-other-window
+
 ## Contribs
 
 Anaconda doesn't has internal contrib interface yet.  But any way you
