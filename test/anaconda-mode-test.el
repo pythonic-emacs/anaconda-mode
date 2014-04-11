@@ -36,21 +36,21 @@
   (let ((fixture "test/jedi_location/fixtures/simple.py"))
     (load-fixture fixture 8 1)
     (should (equal (anaconda-mode-locate-definition)
-                   (cons (fixture-path fixture) 1)))))
+                   (list (fixture-path fixture) 1 0)))))
 
 (ert-deftest test-anaconda-mode-multiple-location ()
   "Test non determined locations."
   (let ((fixture "test/jedi_location/fixtures/builtins.py"))
     (load-fixture fixture 6 1)
     (should (equal (anaconda-mode-locate-definition)
-                   (cons (fixture-path fixture) 2)))))
+                   (list (fixture-path fixture) 2 4)))))
 
 (ert-deftest test-anaconda-mode-reference ()
   "Test fund references."
   (let ((fixture "test/jedi_reference/fixtures/simple.py"))
     (load-fixture fixture 1 4)
     (should (equal (anaconda-mode-locate-reference)
-                   (cons (fixture-path fixture) 4)))))
+                   (list (fixture-path fixture) 4 4)))))
 
 (ert-deftest test-anaconda-mode-doc ()
   "Test documentation string search."

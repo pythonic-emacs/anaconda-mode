@@ -177,7 +177,11 @@ COMMAND must be one of anaconda_mode command string."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
     (define-key map [remap find-tag] 'anaconda-mode-find-definition)
+    (define-key map [remap find-tag-other-window] 'anaconda-mode-find-definition-other-window)
+    (define-key map [remap find-tag-other-frame] 'anaconda-mode-find-definition-other-frame)
     (define-key map (kbd "M-r") 'anaconda-mode-find-reference)
+    (define-key map (kbd "C-x 4 R") 'anaconda-mode-find-reference-other-window)
+    (define-key map (kbd "C-x 5 R") 'anaconda-mode-find-reference-other-frame)
     map)
   "Keymap for `anaconda-mode'.")
 
@@ -247,19 +251,32 @@ Allow user to chose what doc he want to read."
 
 ;;; Jump to definition.
 
-(defun anaconda-mode-find-definition ()
-  "Find definition at point."
-  (interactive)
-  (let ((module (anaconda-mode-locate-definition)))
-    (if module
-        (anaconda-mode-find-file (car module) (cdr module))
-      (error "Can't find definition"))))
-
 (defun anaconda-mode-locate-definition ()
   "Request definitions."
   (anaconda-mode-chose-module
    "Definition: "
    (anaconda-mode-call "location")))
+
+(defun anaconda-mode-definition-buffer ()
+  "Get definition buffer or raise error."
+  (apply #'anaconda-mode-file-buffer
+         (or (anaconda-mode-locate-definition)
+             (error "Can't find definition"))))
+
+(defun anaconda-mode-find-definition ()
+  "Find definition at point."
+  (interactive)
+  (switch-to-buffer (anaconda-mode-definition-buffer)))
+
+(defun anaconda-mode-find-definition-other-window ()
+  "Find definition at point in other window."
+  (interactive)
+  (switch-to-buffer-other-window (anaconda-mode-definition-buffer)))
+
+(defun anaconda-mode-find-definition-other-frame ()
+  "Find definition at point in other frame."
+  (interactive)
+  (switch-to-buffer-other-frame (anaconda-mode-definition-buffer)))
 
 
 ;;; Find reference.
@@ -270,21 +287,35 @@ Allow user to chose what doc he want to read."
    "Reference: "
    (anaconda-mode-call "reference")))
 
+(defun anaconda-mode-reference-buffer ()
+  "Get reference buffer or raise error."
+  (apply #'anaconda-mode-file-buffer
+         (or (anaconda-mode-locate-reference)
+             (error "Can't find references"))))
+
 (defun anaconda-mode-find-reference ()
   "Jump to reference at point."
   (interactive)
-  (let ((module (anaconda-mode-locate-reference)))
-    (if module
-        (anaconda-mode-find-file (car module) (cdr module))
-      (error "Can't find references"))))
+  (switch-to-buffer (anaconda-mode-reference-buffer)))
+
+(defun anaconda-mode-find-reference-other-window ()
+  "Jump to reference at point in other window."
+  (interactive)
+  (switch-to-buffer-other-window (anaconda-mode-reference-buffer)))
+
+(defun anaconda-mode-find-reference-other-frame ()
+  "Jump to reference at point in other frame."
+  (interactive)
+  (switch-to-buffer-other-frame (anaconda-mode-reference-buffer)))
 
 (defun anaconda-mode-chose-module (prompt modules)
   "Completing read with PROMPT from MODULES.
 Return cons of file name and line."
   (let ((user-chose (anaconda-mode-user-chose prompt modules)))
     (when user-chose
-      (cons (gethash "module_path" user-chose)
-            (gethash "line" user-chose)))))
+      (list (gethash "module_path" user-chose)
+            (gethash "line" user-chose)
+            (gethash "column" user-chose)))))
 
 (defun anaconda-mode-user-chose (prompt hash)
   "With PROMPT ask user for HASH value."
@@ -309,14 +340,16 @@ Keys must be a string."
      hash)
     (sort keys 'string<)))
 
-(defun anaconda-mode-find-file (file line)
-  "Find FILE at specified LINE.
+(defun anaconda-mode-file-buffer (file line column)
+  "Find FILE no select at specified LINE and COLUMN.
 Save current position in `find-tag-marker-ring'."
-  (ring-insert find-tag-marker-ring (point-marker))
-  (find-file file)
-  (goto-char (point-min))
-  (forward-line (1- line))
-  (back-to-indentation))
+  (let ((buf (find-file-noselect file)))
+    (ring-insert find-tag-marker-ring (point-marker))
+    (with-current-buffer buf
+      (goto-char (point-min))
+      (forward-line (1- line))
+      (move-to-column column)
+      buf)))
 
 (provide 'anaconda-mode)
 
