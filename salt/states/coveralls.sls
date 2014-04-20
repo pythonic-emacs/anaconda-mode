@@ -1,0 +1,3 @@
+coveralls:
+  pip:
+    - installed
