@@ -55,8 +55,8 @@ C-x 4 .     | anaconda-mode-find-definition-other-frame
 C-x 5 .     | anaconda-mode-find-definition-other-window
 M-?         | anaconda-mode-view-doc
 M-r         | anaconda-mode-find-reference
-C-x 5 R     | anaconda-mode-find-reference-other-frame
 C-x 4 R     | anaconda-mode-find-reference-other-window
+C-x 5 R     | anaconda-mode-find-reference-other-frame
 
 ## Contribs
 
@@ -81,6 +81,15 @@ Anaconda backend for [company-mode](http://company-mode.github.io).
 ```
 
 ![screenshot1](screenshots/snapshot1.png)
+
+## Known Issues
+
+If you're using proxy server, you have to make sure that the proxy is
+not used for communicating with anaconda-mode:
+
+```shell
+export no_proxy="localhost,127.0.0.1"
+```
 
 ## Contributions
 
