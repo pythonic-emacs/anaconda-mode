@@ -1,0 +1,6 @@
+# This is dummy requirements.txt used for gemnasium servise.  All
+# necessary dependencies bundled together with anaconda-mode.  You
+# doesn't need to install any packages by hand.
+
+jedi==0.7
+argparse==1.1
