@@ -1,0 +1,3 @@
+[run]
+omit =
+     anaconda_mode/vendor/
