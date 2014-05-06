@@ -109,7 +109,7 @@ Return nil if it run under proper environment."
 Debugging purpose only."
   (switch-to-buffer
    (anaconda-mode-retrive
-    (anaconda-mode-request-json "complete"))))
+    (anaconda-mode-request-json command))))
 
 (defun anaconda-mode-do-request (body)
   "Make POST Request to anaconda_mode server with result processing.
