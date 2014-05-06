@@ -1,16 +1,15 @@
 try:
-    from http import server
+    from http.server import BaseHTTPRequestHandler, HTTPServer
 except ImportError:
-    import BaseHTTPServer as server
+    from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 from anaconda_mode import anaconda
-import json
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class Handler(server.BaseHTTPRequestHandler):
+class Handler(BaseHTTPRequestHandler):
 
     error_message_format = ''
 
@@ -24,12 +23,10 @@ class Handler(server.BaseHTTPRequestHandler):
             content_len = self.headers['content-length']
             logger.debug('Content length: %s', content_len)
 
-            request = self.rfile.read(int(content_len)).decode()
-            logger.debug('Accepted content: %s', request)
+            data = self.rfile.read(int(content_len))
+            logger.debug('Accepted content: %s', data)
 
-            data = json.loads(request)
-
-            response = anaconda.process(**data)
+            response = anaconda.process(data)
             logger.debug('Jedi result: %s', response)
 
         except TypeError:
@@ -46,12 +43,11 @@ class Handler(server.BaseHTTPRequestHandler):
 
             if response is not None:
 
-                message = json.dumps(response).encode()
-                logger.debug('Send message to host: %s', message)
+                logger.debug('Send message to host: %s', response.json)
 
                 self.send_response(200)
                 self.end_headers()
-                self.wfile.write(message)
+                self.wfile.write(response.json)
 
             else:
 
@@ -60,11 +56,11 @@ class Handler(server.BaseHTTPRequestHandler):
         return
 
 
-class Rpc(server.HTTPServer):
-    """Jedi HTTP server."""
+class Server(HTTPServer):
+    """Anaconda HTTP server."""
 
     def start(self):
-        """Start Jedi server."""
+        """Start Anaconda server."""
 
         logger.info('Starting Jedi server...')
         self.serve_forever()

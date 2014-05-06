@@ -5,7 +5,7 @@ BASE_DIR = os.path.dirname(__file__)
 VENDOR_DIR = os.path.join(BASE_DIR, 'vendor')
 sys.path.append(VENDOR_DIR)
 
-import anaconda_mode.rpc
+import anaconda_mode.transport
 import anaconda_mode.cli
 import logging
 

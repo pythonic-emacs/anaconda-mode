@@ -1,5 +1,5 @@
 from test import TestCase, mock
-from anaconda_mode import rpc
+from anaconda_mode import transport
 
 import json
 
@@ -9,9 +9,9 @@ class TestPost(TestCase):
     def setUp(self):
         """Create mock objects for HTTP Handler."""
 
-        self._post = rpc.Handler.do_POST
+        self._post = transport.Handler.do_POST
 
-        patcher = mock.patch('anaconda_mode.rpc.Handler', autospec=True)
+        patcher = mock.patch('anaconda_mode.transport.Handler', autospec=True)
         self.addCleanup(patcher.stop)
         self._handler = patcher.start()
         self._handler.rfile = mock.Mock()
