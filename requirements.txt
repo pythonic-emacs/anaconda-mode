@@ -4,3 +4,4 @@
 
 jedi==0.7
 argparse==1.1
+json-rpc==1.3
