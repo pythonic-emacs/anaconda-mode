@@ -9,8 +9,17 @@ class Dispatcher(collections.MutableMapping):
 
     """
 
-    def __init__(self):
+    def __init__(self, prototype=None):
+        """ Build method dispatcher.
+
+        :param prototype: Initial method mapping.
+        :type prototype: None or object or dict
+
+        """
         self.method_map = dict()
+
+        if prototype is not None:
+            self.build_method_map(prototype)
 
     def __getitem__(self, key):
         return self.method_map[key]
@@ -36,3 +45,23 @@ class Dispatcher(collections.MutableMapping):
 
         """
         self.method_map[name or f.__name__] = f
+
+    def build_method_map(self, prototype):
+        """ Add prototype methods to the dispatcher.
+
+        :param prototype: Method mapping.
+        :type prototype: None or object or dict
+
+        If given prototype is a dictionary then all callable objects
+        will be added to dispatcher.  If given prototype is an object
+        then all public methods will be used.
+
+        """
+        if not isinstance(prototype, dict):
+            prototype = dict((method, getattr(prototype, method))
+                             for method in dir(prototype)
+                             if not method.startswith('_'))
+
+        for attr, method in prototype.items():
+            if callable(method):
+                self[attr] = method
