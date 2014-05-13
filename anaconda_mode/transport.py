@@ -1,9 +1,10 @@
+from anaconda_mode import rpc
+
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
 except ImportError:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
-from anaconda_mode import anaconda
 import logging
 
 logger = logging.getLogger(__name__)
@@ -26,7 +27,7 @@ class Handler(BaseHTTPRequestHandler):
             data = self.rfile.read(int(content_len))
             logger.debug('Accepted content: %s', data)
 
-            response = anaconda.process(data)
+            response = rpc.handle(data)
             logger.debug('Jedi result: %s', response)
 
         except TypeError:
