@@ -17,9 +17,9 @@ def run_server(ip, port):
 
     address = (ip, port)
 
-    handler = anaconda_mode.rpc.Handler
+    handler = anaconda_mode.transport.Handler
 
-    node = anaconda_mode.rpc.Rpc(address, handler)
+    node = anaconda_mode.transport.Server(address, handler)
 
     node.start()
 
