@@ -1,7 +1,5 @@
-from jsonrpc import JSONRPCResponseManager, Dispatcher
-from anaconda_mode.jedi import api
-
-dispatcher = Dispatcher(api)
+from jsonrpc import JSONRPCResponseManager, dispatcher
+import anaconda_mode.jedi
 
 
 def handle(request):
