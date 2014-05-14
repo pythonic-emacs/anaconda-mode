@@ -19,42 +19,24 @@ class Handler(BaseHTTPRequestHandler):
 
         logger.info('Processing request...')
 
-        try:
+        content_len = self.headers['content-length']
+        logger.debug('Content length: %s', content_len)
 
-            content_len = self.headers['content-length']
-            logger.debug('Content length: %s', content_len)
+        data = self.rfile.read(int(content_len))
+        logger.debug('Accepted content: %s', data)
 
-            data = self.rfile.read(int(content_len))
-            logger.debug('Accepted content: %s', data)
+        response = rpc.handle(data)
+        logger.debug('Jedi result: %s', response.data)
 
-            response = rpc.handle(data)
-            logger.debug('Jedi result: %s', response)
+        if response is not None:
 
-        except TypeError:
-
-            logger.exception('Request send wrong keywords combination')
-            self.send_error(400)
-
-        except ValueError:
-
-            logger.exception('Request send broken json string')
-            self.send_error(400)
+            self.send_response(200)
+            self.end_headers()
+            self.wfile.write(response.json)
 
         else:
 
-            if response is not None:
-
-                logger.debug('Send message to host: %s', response.json)
-
-                self.send_response(200)
-                self.end_headers()
-                self.wfile.write(response.json)
-
-            else:
-
-                self.send_error(500)
-
-        return
+            self.send_error(500)
 
 
 class Server(HTTPServer):
