@@ -1,18 +1,10 @@
 from __future__ import absolute_import
 
+from jsonrpc import dispatcher
 import jedi
 import logging
 
 logger = logging.getLogger(__name__)
-
-api = {}
-
-
-def rpc_method(func):
-    """Register function as rpc api method."""
-
-    api[func.__name__] = func
-    return func
 
 
 def jedi_script(source, line, column, path):
@@ -21,7 +13,7 @@ def jedi_script(source, line, column, path):
     return jedi.Script(source, line, column, path)
 
 
-@rpc_method
+@dispatcher.add_method
 def complete(*args):
     """Select auto-complete candidates for source position."""
 
@@ -59,14 +51,14 @@ def goto(*args):
             yield name
 
 
-@rpc_method
+@dispatcher.add_method
 def location(*args):
     """Find names assignment place."""
 
     return dict((summary(name), details(name)) for name in goto(*args))
 
 
-@rpc_method
+@dispatcher.add_method
 def reference(*args):
     """Find name reference places."""
 
@@ -80,7 +72,7 @@ def reference(*args):
     return dict((summary(name), details(name)) for name in references)
 
 
-@rpc_method
+@dispatcher.add_method
 def doc(*args):
     """Documentations list for all definitions at point."""
 
@@ -97,7 +89,7 @@ def doc(*args):
     return docs
 
 
-@rpc_method
+@dispatcher.add_method
 def eldoc(*args):
     """Return eldoc format documentation string or None."""
 
