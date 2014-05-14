@@ -51,15 +51,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         response = handle(data)
         logger.debug('Jedi result: %s', response.data)
 
-        if response is not None:
-
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(response.json)
-
-        else:
-
-            self.send_error(500)
+        self.send_response(500 if response.error else 200)
+        self.end_headers()
+        self.wfile.write(response.json.encode())
 
 
 def handle(request):
