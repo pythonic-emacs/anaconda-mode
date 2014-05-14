@@ -1,10 +1,5 @@
-from __future__ import absolute_import
-
 from jsonrpc import dispatcher
 import jedi
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 def jedi_script(source, line, column, path):
@@ -28,8 +23,6 @@ def complete(*args):
             'doc': comp.doc or None,
             'short_doc': first_line(comp.raw_doc) or None,
         })
-
-    logger.debug('Completions: %s', completions)
 
     return completions
 
@@ -87,25 +80,6 @@ def doc(*args):
             docs[first_line(definition.raw_doc)] = definition.doc
 
     return docs
-
-
-@dispatcher.add_method
-def eldoc(*args):
-    """Return eldoc format documentation string or None."""
-
-    script = jedi_script(*args)
-
-    signatures = script.call_signatures()
-
-    logger.debug('Call signatures: %s', signatures)
-
-    if len(signatures) == 1:
-
-        call_name = signatures[0].call_name
-        params = signatures[0].params
-        call_params = [param.get_code(new_line=False) for param in params]
-
-        return '{0}({1})'.format(call_name, ', '.join(call_params))
 
 
 def details(definition):
