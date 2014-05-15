@@ -2,7 +2,9 @@ import sys
 import os
 
 BASE_DIR = os.path.dirname(__file__)
+LOG_DIR = os.path.join(BASE_DIR, 'log')
 VENDOR_DIR = os.path.join(BASE_DIR, 'vendor')
+
 sys.path.append(VENDOR_DIR)
 
 try:
@@ -80,6 +82,29 @@ def parse_args():
     return parser.parse_args()
 
 
+def setup_logger(logfile):
+    """Set logger handler, formatter params.
+
+    Create logging directory if necessary.
+
+    :param logfile: log file name
+    :type logfile: str
+    """
+
+    logger.setLevel(logging.DEBUG)
+
+    if not os.path.isdir(LOG_DIR):
+        os.mkdir(LOG_DIR)
+
+    handler = logging.FileHandler(os.path.join(LOG_DIR, logfile))
+    handler.setLevel(logging.DEBUG)
+
+    formatter = logging.Formatter(logging.BASIC_FORMAT)
+    handler.setFormatter(formatter)
+
+    logger.addHandler(handler)
+
+
 def main():
     """Program entry point."""
 
@@ -87,18 +112,7 @@ def main():
 
     if args.debug:
 
-        logger.setLevel(logging.DEBUG)
-
-        if not os.path.isdir("log"):
-            os.mkdir("log")
-
-        handler = logging.FileHandler('log/development.log')
-        handler.setLevel(logging.DEBUG)
-
-        formatter = logging.Formatter(logging.BASIC_FORMAT)
-        handler.setFormatter(formatter)
-
-        logger.addHandler(handler)
+        setup_logger('development.log')
 
     run_server(args.ip, args.port)
 
