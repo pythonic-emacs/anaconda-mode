@@ -104,3 +104,4 @@ suite, call:
 * Dmitry Gutov **@dgutov**
 * Bo Lin **@sadboy**
 * Vasilij Schneidermann **@wasamasa**
+* Fredrik Bergroth **@fbergroth**
