@@ -1,0 +1,9 @@
+[submodule "vendor/jedi"]
+	path = vendor/jedi
+	url = https://github.com/davidhalter/jedi.git
+[submodule "vendor/jsonrpc"]
+	path = vendor/jsonrpc
+	url = https://github.com/pavlov99/json-rpc.git
+[submodule "vendor/click"]
+	path = vendor/click
+	url = https://github.com/mitsuhiko/click.git
