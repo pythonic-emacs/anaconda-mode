@@ -47,24 +47,24 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         logger.info('Processing request...')
 
-        content_len = self.headers['content-length']
-        logger.debug('Content length: %s', content_len)
+        content_len = self.headers.get('content-length')
+        if content_len is not None:
+            data = self.rfile.read(int(content_len))
+            status, response = handle(data)
+        else:
+            status, response = 400, 'Missing content-length header'
 
-        data = self.rfile.read(int(content_len))
-        logger.debug('Accepted content: %s', data)
-
-        response = handle(data)
-        logger.debug('Jedi result: %s', response.data)
-
-        self.send_response(500 if response.error else 200)
+        self.send_response(status)
         self.end_headers()
-        self.wfile.write(response.json.encode())
+        self.wfile.write(response.encode())
 
 
 def handle(request):
     """Perform json rpc call."""
 
-    return JSONRPCResponseManager.handle(request, dispatcher)
+    response = JSONRPCResponseManager.handle(request, dispatcher)
+    status = 500 if response.error else 200
+    return status, response.json
 
 
 def parse_args():
