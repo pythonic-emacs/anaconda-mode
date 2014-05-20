@@ -1,0 +1,2 @@
+[run]
+include = anaconda_*.py
