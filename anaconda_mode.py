@@ -3,9 +3,12 @@ import os
 
 BASE_DIR = os.path.dirname(__file__)
 LOG_DIR = os.path.join(BASE_DIR, 'log')
-VENDOR_DIR = os.path.join(BASE_DIR, 'vendor')
 
-sys.path.append(VENDOR_DIR)
+# Add every directory inside vendor/ to sys.path.
+for file in os.listdir('vendor'):
+    path = os.path.join(BASE_DIR, 'vendor', file)
+    if os.path.isdir(path) and path not in sys.path:
+        sys.path.append(path)
 
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
