@@ -8,4 +8,4 @@ cask:
 melpa:
   cmd.run:
     - name: cask install
-    - cwd: /home/travis/build/proofit404/anaconda-mode
+    - cwd: {{ salt['pillar.get']('build_dir') }}

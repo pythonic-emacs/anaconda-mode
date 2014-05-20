@@ -1,25 +1,14 @@
-from jsonrpc import dispatcher
-import jedi
+from anaconda_common import script_method
 
 
-def jedi_script(source, line, column, path):
-    """Make jedi instance."""
-
-    return jedi.Script(source, line, column, path)
-
-
-@dispatcher.add_method
-def eldoc(*args):
-    """Return eldoc format documentation string or None."""
-
-    script = jedi_script(*args)
-
+@script_method
+def eldoc(script):
+    """Return eldoc format documentation string or ''."""
     signatures = script.call_signatures()
 
     if len(signatures) == 1:
+        sgn = signatures[0]
+        params = ', '.join(p.description for p in sgn.params)
+        return '{0}({1})'.format(sgn.name, params)
 
-        call_name = signatures[0].call_name
-        params = signatures[0].params
-        call_params = [param.get_code(new_line=False) for param in params]
-
-        return '{0}({1})'.format(call_name, ', '.join(call_params))
+    return ''

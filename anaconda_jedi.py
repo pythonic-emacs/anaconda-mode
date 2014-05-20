@@ -1,90 +1,49 @@
-from jsonrpc import dispatcher
-import jedi
+from anaconda_common import script_method
 
 
-def jedi_script(source, line, column, path):
-    """Make jedi instance."""
-
-    return jedi.Script(source, line, column, path)
-
-
-@dispatcher.add_method
-def complete(*args):
+@script_method
+def complete(script):
     """Select auto-complete candidates for source position."""
-
-    script = jedi_script(*args)
-
-    completions = []
-
-    for comp in script.completions():
-
-        completions.append({
-            'name': comp.name,
-            'doc': comp.doc or None,
-            'short_doc': first_line(comp.raw_doc) or None,
-        })
-
-    return completions
+    return [{'name': comp.name,
+             'doc': comp.doc or None,
+             'short_doc': first_line(comp.raw_doc) or None}
+            for comp in script.completions()]
 
 
-def goto(*args):
+@script_method
+def location(script):
+    """Find names assignment place."""
+    return dict((summary(defn), details(defn))
+                for defn in all_definitions(script))
+
+
+@script_method
+def reference(script):
+    """Find name reference places."""
+    definitions = all_definitions(script)
+    return dict((summary(defn), details(defn))
+                for defn in script.usages() if defn not in definitions)
+
+
+@script_method
+def doc(script):
+    """Documentations list for all definitions at point."""
+    return dict((first_line(defn.raw_doc), defn.doc)
+                for defn in script.goto_definitions() if defn.raw_doc)
+
+
+def all_definitions(script):
     """List definitions with assignments.
 
     Filter same definitions in favor of more explicit definition.
     """
-
-    script = jedi_script(*args)
-    assignments = script.goto_assignments()
-    definitions = script.goto_definitions()
-
-    for name in assignments + definitions:
-
-        if name.module_path.endswith('.py') and name.type != 'import':
-
-            yield name
-
-
-@dispatcher.add_method
-def location(*args):
-    """Find names assignment place."""
-
-    return dict((summary(name), details(name)) for name in goto(*args))
-
-
-@dispatcher.add_method
-def reference(*args):
-    """Find name reference places."""
-
-    locations = goto(*args)
-
-    script = jedi_script(*args)
-    usages = script.usages()
-
-    references = [name for name in usages if name not in locations]
-
-    return dict((summary(name), details(name)) for name in references)
-
-
-@dispatcher.add_method
-def doc(*args):
-    """Documentations list for all definitions at point."""
-
-    script = jedi_script(*args)
-
-    docs = {}
-
-    for definition in script.goto_definitions():
-
-        if definition.raw_doc:
-
-            docs[first_line(definition.raw_doc)] = definition.doc
-
-    return docs
+    defns = script.goto_assignments() + script.goto_definitions()
+    return [defn for defn in defns
+            if defn.module_path and defn.type != 'import']
 
 
 def details(definition):
     """Make hash with definition details."""
-
     return {
         'module_path': definition.module_path,
         'line': definition.line,
@@ -95,7 +54,6 @@ def details(definition):
 
 def summary(definition):
     """Summarize definition into one string."""
-
     return '{0}:{1} - {2}'.format(
         definition.module_path,
         definition.line,
@@ -105,5 +63,4 @@ def summary(definition):
 
 def first_line(text):
     """Return text first line."""
-
     return text.split('\n', 1)[0]

@@ -50,7 +50,7 @@
 
 (defun anaconda-mode-python-args ()
   "Python arguments to run anaconda_mode server."
-  (delq nil (list "-m" "anaconda_mode.__main__"
+  (delq nil (list "anaconda_mode.py"
                   "--ip" anaconda-mode-host
                   "--port" (number-to-string anaconda-mode-port)
                   (when anaconda-mode-debug "--debug"))))
@@ -141,8 +141,10 @@ BODY must be encoded json string."
   "Generate json request for COMMAND.
 COMMAND must be one of anaconda_mode command string."
   (anaconda-mode-encode
-   (list (cons "command" command)
-         (cons "attributes" (anaconda-mode-point)))))
+   (list (cons "method" command)
+         (cons "id" "0")
+         (cons "jsonrpc" "2.0")
+         (cons "params" (anaconda-mode-point)))))
 
 (defun anaconda-mode-point ()
   "Return json compatible buffer point description."
@@ -161,7 +163,7 @@ COMMAND must be one of anaconda_mode command string."
   (let ((json-array-type 'list)
         (json-object-type 'hash-table)
         (json-key-type 'string))
-    (json-read)))
+    (gethash "result" (json-read))))
 
 (defun anaconda-mode-decode-from-string (arg)
   "Decode JSON from ARG."

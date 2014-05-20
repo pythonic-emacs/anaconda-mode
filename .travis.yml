@@ -6,7 +6,7 @@ before_install:
   - sudo cp salt/minion /etc/salt/minion
 
 install:
-  - sudo salt-call state.highstate --local
+  - sudo salt-call state.highstate pillar="{'build_dir':'$TRAVIS_BUILD_DIR'}" --local
 
 script:
   - tox

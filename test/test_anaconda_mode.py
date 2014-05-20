@@ -1,76 +1,30 @@
-def setUp(self):
-    """Create mock objects for HTTP Handler."""
+from test.helpers import process, make_request
 
-    self._post = transport.Handler.do_POST
 
-    patcher = mock.patch('anaconda_mode.transport.Handler', autospec=True)
-    self.addCleanup(patcher.stop)
-    self._handler = patcher.start()
-    self._handler.rfile = mock.Mock()
-    self._handler.wfile = mock.Mock()
+def status_of(method, params):
+    return process(make_request(method, params))[0]
 
-def test_correct_post_request(self):
+
+def status_of_req(request):
+    return process(request)[0]
+
+
+def test_correct_post_request():
     """Need status 200 on correct post request with its body."""
+    params = dict(source='imp', line=1, column=3, path='')
+    assert status_of("complete", params) == 200
 
-    request = json.dumps({
-        "command": "complete",
-        "attributes": {
-            "source": "imp",
-            "line": 1,
-            "column": 3,
-            "path": "",
-        }
-    })
 
-    self._handler.headers = {'content-length': len(request)}
-    self._handler.rfile.read.return_value = request.encode()
+def test_handle_jedi_exceptions():
+    """Need status 500 on jedi failure."""
+    assert status_of("unsupported_method", {}) == 500
 
-    self._post(self._handler)
-    self._handler.send_response.assert_called_with(200)
 
-def test_handle_jedi_exceptions(self):
-    """Need status 400 on jedi failure."""
+def test_broken_content():
+    """Need send status 500 on invalid Json body."""
+    assert status_of_req('{"aaa": 1, "bb') == 500
 
-    request = json.dumps({
-        "command": "unsupported_command",
-        "attributes": {}
-    })
 
-    self._handler.headers = {'content-length': '47'}
-    self._handler.rfile.return_value = request.encode()
-
-    self._post(self._handler)
-    self._handler.send_error.assert_called_with(400)
-
-def test_missing_content_length(self):
-    """Need send status 400 on missing body."""
-
-    request = '{"aaa": 1, "bbb": 2}'
-
-    self._handler.headers = None
-    self._handler.rfile.read.return_value = request.encode()
-
-    self._post(self._handler)
-    self._handler.send_error.assert_called_with(400)
-
-def test_broken_content(self):
-    """Need send status 400 on invalid Json body."""
-
-    request = '{"aaa": 1, "bb'
-
-    self._handler.headers = {'content-length': '14'}
-    self._handler.rfile.read.return_value = request.encode()
-
-    self._post(self._handler)
-    self._handler.send_error.assert_called_with(400)
-
-def test_incomplete_content(self):
-    """Need send 400 on valid request without necessary keys."""
-
-    request = '{"aaa": 1, "bbb": 2}'
-
-    self._handler.headers = {'content-length': '20'}
-    self._handler.rfile.read.return_value = request.encode()
-
-    self._post(self._handler)
-    self._handler.send_error.assert_called_with(400)
+def test_incomplete_content():
+    """Need send 500 on valid request without necessary keys."""
+    assert status_of_req('{"aaa": 1, "bbb": 2}') == 500

@@ -13,11 +13,13 @@
 
 (ert-deftest test-anaconda-mode-request-json ()
   "Test request string generator."
-  (load-fixture "test/jedi_candidates/fixtures/simple.py" 2 11)
+  (load-fixture "test/jedi/fixtures/candidates/simple.py" 2 11)
   (should (equal (anaconda-mode-request-json "candidates")
                  (concat "{"
-                         ""    "\"command\":\"candidates\", "
-                         ""    "\"attributes\":{"
+                         ""    "\"method\":\"candidates\", "
+                         ""    "\"id\":\"0\", "
+                         ""    "\"jsonrpc\":\"2.0\", "
+                         ""    "\"params\":{"
                          ""          "\"source\":" (anaconda-mode-encode (buffer-string)) ", "
                          ""          "\"line\":2, "
                          ""          "\"column\":11, "
@@ -27,34 +29,34 @@
 
 (ert-deftest test-anaconda-mode-complete ()
   "Test completion at point."
-  (load-fixture "test/jedi_candidates/fixtures/simple.py" 14 4)
+  (load-fixture "test/jedi/fixtures/candidates/simple.py" 14 4)
   (should (equal (anaconda-mode-complete-thing)
                  '("test1" "test2"))))
 
 (ert-deftest test-anaconda-mode-location ()
   "Test find definition at point."
-  (let ((fixture "test/jedi_location/fixtures/simple.py"))
+  (let ((fixture "test/jedi/fixtures/location/simple.py"))
     (load-fixture fixture 8 1)
     (should (equal (anaconda-mode-locate-definition)
                    (list (fixture-path fixture) 1 0)))))
 
 (ert-deftest test-anaconda-mode-multiple-location ()
   "Test non determined locations."
-  (let ((fixture "test/jedi_location/fixtures/builtins.py"))
+  (let ((fixture "test/jedi/fixtures/location/builtins.py"))
     (load-fixture fixture 6 1)
     (should (equal (anaconda-mode-locate-definition)
                    (list (fixture-path fixture) 2 4)))))
 
 (ert-deftest test-anaconda-mode-reference ()
   "Test fund references."
-  (let ((fixture "test/jedi_reference/fixtures/simple.py"))
+  (let ((fixture "test/jedi/fixtures/reference/simple.py"))
     (load-fixture fixture 1 4)
     (should (equal (anaconda-mode-locate-reference)
                    (list (fixture-path fixture) 4 4)))))
 
 (ert-deftest test-anaconda-mode-doc ()
   "Test documentation string search."
-  (load-fixture "test/jedi_doc/fixtures/simple.py" 1 4)
+  (load-fixture "test/jedi/fixtures/doc/simple.py" 1 4)
   (should (equal (anaconda-mode-doc-string)
                  "f(a, b = 1)
 

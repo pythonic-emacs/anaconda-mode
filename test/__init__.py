@@ -1,3 +1,4 @@
-from anaconda_mode import setup_logger
+import os
 
-setup_logger('test.log')
+BASE_DIR = os.path.dirname(os.path.dirname(__file__))
+ROOT = os.path.realpath(BASE_DIR) + os.path.sep
