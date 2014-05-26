@@ -67,7 +67,8 @@
 (defun anaconda-mode-running-p ()
   "Check for running anaconda_mode server."
   (and anaconda-mode-process
-       (not (null (process-live-p anaconda-mode-process)))))
+       (not (null (process-live-p anaconda-mode-process)))
+       (json-rpc-ensure anaconda-mode-connection)))
 
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
@@ -76,7 +77,10 @@
           (apply 'start-process
                  "anaconda_mode" nil
                  (anaconda-mode-python)
-                 (anaconda-mode-python-args)))))
+                 (anaconda-mode-python-args)))
+    ;; FIXME: sync node start.  See #26
+    (setq anaconda-mode-connection
+          (json-rpc-connect anaconda-mode-host anaconda-mode-port))))
 
 (defun anaconda-mode-start-node ()
   "Start anaconda_mode server."
@@ -88,7 +92,9 @@
 (defun anaconda-mode-stop-node ()
   "Stop anaconda-mode server."
   (when (anaconda-mode-running-p)
-    (kill-process anaconda-mode-process)))
+    (kill-process anaconda-mode-process)
+    (json-rpc-close anaconda-mode-connection)
+    (setq anaconda-mode-connection nil)))
 
 (defun anaconda-mode-need-restart ()
   "Check if current `anaconda-mode-process'.
@@ -101,78 +107,21 @@ Return nil if it run under proper environment."
 
 ;;; Interaction.
 
-(defun anaconda-mode-call (command)
-  "Make remote procedure call for COMMAND."
+(defun anaconda-mode-call (command &rest args)
+  "Make remote procedure call for COMMAND.
+ARGS are COMMAND argument passed to remote call."
   (anaconda-mode-start-node)
-  (anaconda-mode-do-request (anaconda-mode-request-json command)))
+  (apply 'json-rpc anaconda-mode-connection command args))
 
-(defun anaconda-mode-call-debug (command)
-  "View anaconda_mode reply for COMMAND call.
-Debugging purpose only."
-  (switch-to-buffer
-   (anaconda-mode-retrive
-    (anaconda-mode-request-json command))))
-
-(defun anaconda-mode-do-request (body)
-  "Make POST Request to anaconda_mode server with result processing.
-BODY mast be encoded json string."
-  (let ((response (anaconda-mode-retrive body)))
-    (when response
-      (prog1
-          (with-current-buffer response
-            (and (eq 200 url-http-response-status)
-                 ;; Workaround: BaseHTTPServer in older versions
-                 ;; return wrong ^M newline characters.  Use this hack
-                 ;; until switching to tornado in 0.4.0 milestone.
-                 (or (search-forward "\n\n" nil t)
-                     (search-forward "\r\n\r\n" nil t))
-                 (anaconda-mode-decode)))
-        (kill-buffer response)))))
-
-(defun anaconda-mode-retrive (body)
-  "Make POST request to anaconda_mode server synchronously.
-BODY must be encoded json string."
-  (let ((url (format "http://%s:%s" anaconda-mode-host anaconda-mode-port))
-        (url-request-method "POST")
-        (url-request-extra-headers `(("Content-Type" . "application/json")))
-        (url-request-data body)
-        (url-show-status nil))
-    (url-retrieve-synchronously url)))
-
-(defun anaconda-mode-request-json (command)
-  "Generate json request for COMMAND.
-COMMAND must be one of anaconda_mode command string."
-  (anaconda-mode-encode
-   (list (cons "method" command)
-         (cons "id" "0")
-         (cons "jsonrpc" "2.0")
-         (cons "params" (anaconda-mode-point)))))
-
-(defun anaconda-mode-point ()
-  "Return json compatible buffer point description."
-  (list (cons "source" (buffer-substring-no-properties (point-min) (point-max)))
-        (cons "line" (line-number-at-pos (point)))
-        (cons "column" (current-column))
-        (cons "path" (or (buffer-file-name) ""))))
-
-(defun anaconda-mode-encode (arg)
-  "Encode ARG to JSON."
-  (let ((json-array-type 'list))
-    (json-encode arg)))
-
-(defun anaconda-mode-decode ()
-  "Decode JSON at point."
-  (let ((json-array-type 'list)
-        (json-object-type 'hash-table)
-        (json-key-type 'string))
-    (gethash "result" (json-read))))
-
-(defun anaconda-mode-decode-from-string (arg)
-  "Decode JSON from ARG."
-  (let ((json-array-type 'list)
-        (json-object-type 'hash-table)
-        (json-key-type 'string))
-    (json-read-from-string arg)))
+(defun anaconda-mode-call-1 (command)
+  ;; TODO: Remove this function ones plugin system will be implemented.
+  ;; See #28.
+  (anaconda-mode-call
+   command
+   (buffer-substring-no-properties (point-min) (point-max))
+   (line-number-at-pos (point))
+   (current-column)
+   (or (buffer-file-name) "")))
 
 
 ;;; Minor mode.
@@ -222,7 +171,7 @@ IGNORED parameter is the string for which completion is required."
 
 (defun anaconda-mode-complete ()
   "Request completion candidates."
-  (anaconda-mode-call "complete"))
+  (anaconda-mode-call-1 "complete"))
 
 
 ;;; View documentation.
@@ -240,7 +189,7 @@ IGNORED parameter is the string for which completion is required."
 Allow user to chose what doc he want to read."
   (anaconda-mode-user-chose
    "Doc: "
-   (anaconda-mode-call "doc")))
+   (anaconda-mode-call-1 "doc")))
 
 (defun anaconda-mode-doc-buffer (doc)
   "Create buffer for viewing DOC."
@@ -259,7 +208,7 @@ Allow user to chose what doc he want to read."
   "Request definitions."
   (anaconda-mode-chose-module
    "Definition: "
-   (anaconda-mode-call "location")))
+   (anaconda-mode-call-1 "location")))
 
 (defun anaconda-mode-definition-buffer ()
   "Get definition buffer or raise error."
@@ -289,7 +238,7 @@ Allow user to chose what doc he want to read."
   "Request references."
   (anaconda-mode-chose-module
    "Reference: "
-   (anaconda-mode-call "reference")))
+   (anaconda-mode-call-1 "reference")))
 
 (defun anaconda-mode-reference-buffer ()
   "Get reference buffer or raise error."

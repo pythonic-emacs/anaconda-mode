@@ -21,7 +21,7 @@ import click
 
 logger = logging.getLogger(__name__)
 
-# FIXME: This must be an positional argument.
+# FIXME: This must be an positional argument.  See #28.
 import anaconda_jedi
 import anaconda_eldoc
 
