@@ -16,8 +16,8 @@ except ImportError:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 from jsonrpc import JSONRPCResponseManager, dispatcher
-import argparse
 import logging
+import click
 
 logger = logging.getLogger(__name__)
 
@@ -67,24 +67,6 @@ def handle(request):
     return status, response.json
 
 
-def parse_args():
-    """Parse command line arguments."""
-
-    parser = argparse.ArgumentParser(
-        description='Jedi auto-completion server.')
-
-    parser.add_argument('-d', '--debug', action='store_true',
-                        help='enable debug logging')
-
-    parser.add_argument('-i', '--ip', type=str, default='localhost',
-                        help='server IP')
-
-    parser.add_argument('-p', '--port', type=int, default=8000,
-                        help='server port number')
-
-    return parser.parse_args()
-
-
 def setup_logger(logfile):
     """Set logger handler, formatter params.
 
@@ -108,16 +90,17 @@ def setup_logger(logfile):
     logger.addHandler(handler)
 
 
-def main():
-    """Program entry point."""
-
-    args = parse_args()
-
-    if args.debug:
-
+@click.command()
+@click.option('--ip', default='127.0.0.1', help='Server IP.')
+@click.option('--port', type=int, default=8000, help='Server port.')
+@click.option('--debug', default=False, is_flag=True,
+              help='Enable debug logging.')
+def main(ip, port, debug):
+    """Runs anaconda server."""
+    if debug:
         setup_logger('development.log')
 
-    run_server(args.ip, args.port)
+    run_server(ip, port)
 
 
 if __name__ == '__main__':
