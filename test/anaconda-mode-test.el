@@ -11,22 +11,6 @@
   (should (string= (anaconda-mode-python)
                    (getenv "ENVPYTHON"))))
 
-(ert-deftest test-anaconda-mode-request-json ()
-  "Test request string generator."
-  (load-fixture "test/jedi/fixtures/candidates/simple.py" 2 11)
-  (should (equal (anaconda-mode-request-json "candidates")
-                 (concat "{"
-                         ""    "\"method\":\"candidates\", "
-                         ""    "\"id\":\"0\", "
-                         ""    "\"jsonrpc\":\"2.0\", "
-                         ""    "\"params\":{"
-                         ""          "\"source\":" (anaconda-mode-encode (buffer-string)) ", "
-                         ""          "\"line\":2, "
-                         ""          "\"column\":11, "
-                         ""          "\"path\":" (anaconda-mode-encode (buffer-file-name))
-                         ""    "}"
-                         "}"))))
-
 (ert-deftest test-anaconda-mode-complete ()
   "Test completion at point."
   (load-fixture "test/jedi/fixtures/candidates/simple.py" 14 4)

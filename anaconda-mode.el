@@ -5,7 +5,7 @@
 ;; Author: Malyshev Artem <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "24"))
+;; Package-Requires: ((emacs "24") (json-rpc "0.0.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,8 +24,7 @@
 
 ;;; Code:
 
-(require 'url)
-(require 'json)
+(require 'json-rpc)
 (require 'etags)
 (require 'python)
 
@@ -35,8 +34,8 @@
 (defvar anaconda-mode-debug nil
   "Turn on anaconda_mode debug logging.")
 
-(defvar anaconda-mode-host "127.0.0.1"       ;; Don't use localhost here due to:
-  "Target host with anaconda_mode server.")  ;; http://debbugs.gnu.org/cgi/bugreport.cgi?bug=12893
+(defvar anaconda-mode-host "localhost"
+  "Target host with anaconda_mode server.")
 
 (defvar anaconda-mode-port 24970
   "Port for anaconda_mode connection.")
@@ -61,6 +60,9 @@
 
 (defvar anaconda-mode-process nil
   "Currently running anaconda_mode process.")
+
+(defvar anaconda-mode-connection nil
+  "Json Rpc connection to anaconda_mode process.")
 
 (defun anaconda-mode-running-p ()
   "Check for running anaconda_mode server."
