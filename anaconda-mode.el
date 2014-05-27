@@ -75,10 +75,11 @@
   (let ((default-directory anaconda-mode-directory))
     (setq anaconda-mode-process
           (apply 'start-process
-                 "anaconda_mode" nil
+                 "anaconda_mode"
+                 "*anaconda*"
                  (anaconda-mode-python)
                  (anaconda-mode-python-args)))
-    ;; FIXME: sync node start.  See #26
+    (accept-process-output anaconda-mode-process)
     (setq anaconda-mode-connection
           (json-rpc-connect anaconda-mode-host anaconda-mode-port))))
 

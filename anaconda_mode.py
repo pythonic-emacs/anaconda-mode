@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys
 import os
 
@@ -29,11 +31,13 @@ import anaconda_eldoc
 def run_server(ip, port):
     """Run anaconda server."""
 
-    logger.info('Starting Jedi server...')
+    logger.info('Starting anaconda_mode server...')
 
     address = (ip, port)
 
     node = HTTPServer(address, RequestHandler)
+
+    print('anaconda_mode server started')
 
     node.serve_forever()
 
