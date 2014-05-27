@@ -2,6 +2,6 @@
 # necessary dependencies bundled together with anaconda-mode.  You
 # doesn't need to install any packages by hand.
 
-jedi==0.8
-click==0.7
-json-rpc==1.5
+jedi==0.8.0-final0
+json-rpc==1.6
+click==1.1
