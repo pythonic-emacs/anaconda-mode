@@ -5,7 +5,7 @@
 ;; Author: Malyshev Artem <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "24") (json-rpc "0.0.1") (cl-lib "0.5"))
+;; Package-Requires: ((emacs "24") (json-rpc "0.0.1"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@
 
 ;;; Code:
 
-(require 'cl-lib)
 (require 'json-rpc)
 (require 'etags)
 (require 'python)
@@ -172,7 +171,7 @@ ARGS are COMMAND argument passed to remote call."
 (defun anaconda-mode-complete-thing (&rest ignored)
   "Complete python thing at point.
 IGNORED parameter is the string for which completion is required."
-  (mapcar (lambda (x) (cl-getf x :name))
+  (mapcar (lambda (candidate) (plist-get candidate :name))
           (anaconda-mode-complete)))
 
 (defun anaconda-mode-complete ()
@@ -272,14 +271,14 @@ Allow user to chose what doc he want to read."
 Return cons of file name and line."
   (let ((user-chose (anaconda-mode-user-chose prompt modules)))
     (when user-chose
-      (list (cl-getf user-chose :module_path)
-            (cl-getf user-chose :line)
-            (cl-getf user-chose :column)))))
+      (list (plist-get user-chose :module_path)
+            (plist-get user-chose :line)
+            (plist-get user-chose :column)))))
 
 (defun anaconda-mode-user-chose (prompt hash)
   "With PROMPT ask user for HASH value."
   (when hash
-    (cl-getf hash (anaconda-mode-completing-read prompt (key-list hash)))))
+    (plist-get hash (anaconda-mode-completing-read prompt (key-list hash)))))
 
 (defun anaconda-mode-completing-read (prompt collection)
   "Call completing engine with PROMPT on COLLECTION."
