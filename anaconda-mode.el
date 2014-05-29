@@ -5,7 +5,7 @@
 ;; Author: Malyshev Artem <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "24") (json-rpc "0.0.1"))
+;; Package-Requires: ((emacs "24") (json-rpc "0.0.1") (cl-lib "0.5"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'json-rpc)
 (require 'etags)
 (require 'python)
@@ -54,6 +55,11 @@
                   "--port" (number-to-string anaconda-mode-port)
                   (when anaconda-mode-debug "--debug"))))
 
+(defun anaconda-mode-command ()
+  "Shell command to run anaconda_mode server."
+  (cons (anaconda-mode-python)
+	(anaconda-mode-python-args)))
+
 (defvar anaconda-mode-directory
   (file-name-directory load-file-name)
   "Directory containing anaconda_mode package.")
@@ -68,7 +74,7 @@
   "Check for running anaconda_mode server."
   (and anaconda-mode-process
        (not (null (process-live-p anaconda-mode-process)))
-       (json-rpc-ensure anaconda-mode-connection)))
+       (json-rpc-live-p anaconda-mode-connection)))
 
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
@@ -102,8 +108,7 @@
 Return nil if it run under proper environment."
   (and (anaconda-mode-running-p)
        (not (equal (process-command anaconda-mode-process)
-                   (cons (anaconda-mode-python)
-                         (anaconda-mode-python-args))))))
+                   (anaconda-mode-command)))))
 
 
 ;;; Interaction.
@@ -167,7 +172,7 @@ ARGS are COMMAND argument passed to remote call."
 (defun anaconda-mode-complete-thing (&rest ignored)
   "Complete python thing at point.
 IGNORED parameter is the string for which completion is required."
-  (mapcar (lambda (h) (gethash "name" h))
+  (mapcar (lambda (x) (cl-getf x :name))
           (anaconda-mode-complete)))
 
 (defun anaconda-mode-complete ()
@@ -267,15 +272,14 @@ Allow user to chose what doc he want to read."
 Return cons of file name and line."
   (let ((user-chose (anaconda-mode-user-chose prompt modules)))
     (when user-chose
-      (list (gethash "module_path" user-chose)
-            (gethash "line" user-chose)
-            (gethash "column" user-chose)))))
+      (list (cl-getf user-chose :module_path)
+            (cl-getf user-chose :line)
+            (cl-getf user-chose :column)))))
 
 (defun anaconda-mode-user-chose (prompt hash)
   "With PROMPT ask user for HASH value."
   (when hash
-    (gethash (anaconda-mode-completing-read prompt (key-list hash))
-             hash)))
+    (cl-getf hash (anaconda-mode-completing-read prompt (key-list hash)))))
 
 (defun anaconda-mode-completing-read (prompt collection)
   "Call completing engine with PROMPT on COLLECTION."
