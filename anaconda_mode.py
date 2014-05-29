@@ -59,6 +59,7 @@ class RequestHandler(BaseHTTPRequestHandler):
             status, response = 400, 'Missing content-length header'
 
         self.send_response(status)
+        self.send_header("Content-Length", len(response))
         self.end_headers()
         self.wfile.write(response.encode())
 
