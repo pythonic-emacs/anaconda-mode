@@ -30,7 +30,7 @@
 
 (defun anaconda-eldoc-function ()
   "Show eldoc for context at point."
-  (let ((doc (anaconda-mode-call "eldoc")))
+  (let ((doc (anaconda-mode-call-1 "eldoc")))
     (if (and doc anaconda-eldoc-as-single-line)
         (substring doc 0 (min (frame-width) (length doc)))
       doc)))
