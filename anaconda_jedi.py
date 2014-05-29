@@ -13,23 +13,25 @@ def complete(script):
 @script_method
 def location(script):
     """Find names assignment place."""
-    return dict((summary(defn), details(defn))
-                for defn in all_definitions(script))
+    return [details(defn) for defn in all_definitions(script)]
 
 
 @script_method
 def reference(script):
     """Find name reference places."""
     definitions = all_definitions(script)
-    return dict((summary(defn), details(defn))
-                for defn in script.usages() if defn not in definitions)
+    return [details(defn)
+            for defn in script.usages()
+            if defn not in definitions]
 
 
 @script_method
 def doc(script):
     """Documentations list for all definitions at point."""
-    return dict((first_line(defn.raw_doc), defn.doc)
-                for defn in script.goto_definitions() if defn.raw_doc)
+    return [{'short_doc': first_line(defn.raw_doc),
+             'doc': defn.doc}
+            for defn in script.goto_definitions()
+            if defn.raw_doc]
 
 
 def all_definitions(script):
@@ -45,20 +47,11 @@ def all_definitions(script):
 def details(definition):
     """Make hash with definition details."""
     return {
-        'module_path': definition.module_path,
+        'path': definition.module_path,
         'line': definition.line,
         'column': definition.column,
         'description': definition.description
     }
-
-
-def summary(definition):
-    """Summarize definition into one string."""
-    return '{0}:{1} - {2}'.format(
-        definition.module_path,
-        definition.line,
-        definition.description
-    )
 
 
 def first_line(text):

@@ -8,12 +8,12 @@ def test_doc_search():
 
     response = result_from_fixture('doc/simple', 1, 4, 'doc')
 
-    expected = {
-        'Document for function f.':
-        '''f(a, b = 1)
+    expected = [{
+        'short_doc': 'Document for function f.',
+        'doc': '''f(a, b = 1)
 
 Document for function f.''',
-    }
+    }]
 
     assert response == expected
 
@@ -23,4 +23,4 @@ def test_empty_doc():
 
     response = result_from_fixture('doc/docless', 4, 3, 'doc')
 
-    assert response == {}
+    assert response == []
