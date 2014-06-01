@@ -1,26 +1,30 @@
-from test.helpers import result_from_fixture
+from test.helpers import send
+
+from textwrap import dedent
 
 
-def test_doc_search():
-    import sys
-    print(sys.path)
-    """Jedi must find all assignments documentation."""
+def test_doc_fn_with_docstring():
+    rv = send('''
+              def f_|_(a, b=1):
+                  """Some docstring."""
+                  pass
+              ''', 'doc', 'some_module.py')
 
-    response = result_from_fixture('doc/simple', 1, 4, 'doc')
+    assert rv == dedent('''\
+        some_module - def f
+        ========================================
+        f(a, b = 1)
 
-    expected = [{
-        'short_doc': 'Document for function f.',
-        'doc': '''f(a, b = 1)
-
-Document for function f.''',
-    }]
-
-    assert response == expected
+        Some docstring.''')
 
 
-def test_empty_doc():
-    """Ignore docless functions."""
+def test_doc_fn_without_docstring():
+    rv = send('''
+              def f_|_(a, b=1):
+                  pass
+              ''', 'doc', 'other_module.py')
 
-    response = result_from_fixture('doc/docless', 4, 3, 'doc')
-
-    assert response == []
+    assert rv == dedent('''\
+        other_module - def f
+        ========================================
+        f(a, b = 1)''')
