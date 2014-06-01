@@ -78,7 +78,7 @@
   (if (and jump-if-single-item (= 1 (length result)))
       (anaconda-nav-goto-item (car result) nil)
     (with-current-buffer (get-buffer-create "*anaconda-nav*")
-      (view-mode-disable)
+      (view-mode -1)
       (erase-buffer)
       (setq-local overlay-arrow-position nil)
 
