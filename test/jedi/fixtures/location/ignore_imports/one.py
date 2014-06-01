@@ -1,3 +1,0 @@
-def other(a):
-
-    pass
