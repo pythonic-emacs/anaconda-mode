@@ -12,8 +12,6 @@
     (define-key map (kbd "RET") 'anaconda-nav-jump)
     (define-key map (kbd "n") 'anaconda-nav-next)
     (define-key map (kbd "p") 'anaconda-nav-prev)
-    (define-key map (kbd "SPC") 'anaconda-nav-scroll-down)
-    (define-key map (kbd "DEL") 'anaconda-nav-scroll-up)
     map)
   "Keymap for `anaconda-nav-mode'.")
 
@@ -27,14 +25,6 @@
 (defun anaconda-nav-prev ()
   (interactive)
   (anaconda-nav-next-error -1 nil t))
-
-(defun anaconda-nav-scroll-down ()
-  (interactive)
-  (scroll-other-window))
-
-(defun anaconda-nav-scroll-up ()
-  (interactive)
-  (scroll-other-window '-))
 
 (defun anaconda-nav-pop-marker ()
   (interactive)
