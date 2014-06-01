@@ -8,7 +8,10 @@ def eldoc(script):
 
     if len(signatures) == 1:
         sgn = signatures[0]
-        params = ', '.join(p.description for p in sgn.params)
-        return '{0}({1})'.format(sgn.name, params)
+        return {
+            'name': sgn.name,
+            'index': sgn.index,
+            'params': [p.description for p in sgn.params]
+        }
 
-    return ''
+    return []

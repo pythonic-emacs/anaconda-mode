@@ -9,17 +9,23 @@ def test_eldoc_signature():
                     sort_keys=False, **kw):
                   pass
 
-              f(_|_
+              f(123, _|_
               ''', 'eldoc')
 
-    assert rv == ('f(obj, fp, skipkeys = False, ensure_ascii = True,'
-                  ' check_circular = True, allow_nan = True, cls = None,'
-                  ' indent = None, separators = None, default = None,'
-                  ' sort_keys = False, **kw)')
+    assert rv == {
+        'name': 'f',
+        'index': 1,
+        'params': ['obj', 'fp', 'skipkeys = False', 'ensure_ascii = True',
+                   'check_circular = True', 'allow_nan = True', 'cls = None',
+                   'indent = None', 'separators = None', 'default = None',
+                   'sort_keys = False', '**kw']
+    }
 
 
 def test_eldoc_unknown_fn():
     rv = send('''
               unknown_fn(_|_
               ''', 'eldoc')
-    assert rv == ''
+
+    # [] translates directly to nil, making it more useful than {} or None
+    assert rv == []
