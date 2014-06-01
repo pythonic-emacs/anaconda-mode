@@ -1,7 +1,8 @@
 from __future__ import print_function
 
-import sys
+import logging
 import os
+import sys
 
 BASE_DIR = os.path.dirname(__file__)
 LOG_DIR = os.path.join(BASE_DIR, 'log')
@@ -12,20 +13,20 @@ for file in os.listdir('vendor'):
     if os.path.isdir(path) and path not in sys.path:
         sys.path.append(path)
 
+import click  # isort:skip
+from jsonrpc import dispatcher, JSONRPCResponseManager  # isort:skip
+
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
 except ImportError:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
-from jsonrpc import JSONRPCResponseManager, dispatcher
-import logging
-import click
 
 logger = logging.getLogger(__name__)
 
 # FIXME: This must be an positional argument.  See #28.
-import anaconda_jedi
-import anaconda_eldoc
+import anaconda_jedi   # isort:skip
+import anaconda_eldoc  # isort:skip
 
 
 def run_server(ip, port):
@@ -44,6 +45,7 @@ def run_server(ip, port):
 
 class RequestHandler(BaseHTTPRequestHandler):
 
+    protocol_version = 'HTTP/1.1'
     error_message_format = ''
 
     def do_POST(self):
@@ -59,9 +61,10 @@ class RequestHandler(BaseHTTPRequestHandler):
             status, response = 400, 'Missing content-length header'
 
         self.send_response(status)
+        response = response.encode('utf-8')
         self.send_header("Content-Length", len(response))
         self.end_headers()
-        self.wfile.write(response.encode())
+        self.wfile.write(response)
 
 
 def handle(request):
