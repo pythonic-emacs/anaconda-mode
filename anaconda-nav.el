@@ -42,7 +42,7 @@
     (error "No marker available"))
 
   (let* ((marker (pop anaconda-nav--markers))
-        (buffer (marker-buffer marker)))
+         (buffer (marker-buffer marker)))
     (unless (buffer-live-p buffer)
       (error "Buffer no longer available"))
     (switch-to-buffer buffer)
@@ -64,15 +64,16 @@
       (setq-local overlay-arrow-position nil)
 
       (--> result
-        (--group-by (plist-get it :module) it)
+        (--group-by (cons (plist-get it :module)
+                          (plist-get it :path)) it)
         (--each it (apply 'anaconda-nav--insert-module it)))
 
       (goto-char (point-min))
       (anaconda-nav-mode)
       (switch-to-buffer-other-window (current-buffer)))))
 
-(defun anaconda-nav--insert-module (name &rest items)
-  (insert name "\n")
+(defun anaconda-nav--insert-module (header &rest items)
+  (insert (car header) "\n")
   (--each items (insert (anaconda-nav--item it) "\n"))
   (insert "\n"))
 

@@ -46,36 +46,36 @@ Properly detect strings, comments and attribute access."
 
 (defun company-anaconda-candidates ()
   "Obtain candidates list from anaconda."
-  (mapcar (lambda (h)
-            (let ((candidate (plist-get h :name)))
-              (put-text-property 0 1 'doc (plist-get h :doc) candidate)
-              (put-text-property 0 1 'short-doc (plist-get h :short_doc) candidate)
-              (put-text-property 0 1 'annotation (plist-get h :annotation) candidate)
-              (-when-let* ((path (plist-get h :path))
-                           (line (plist-get h :line)))
-                (put-text-property 0 1 'location (cons path line) candidate))
-              candidate))
-          (anaconda-mode-complete)))
+  (--map (propertize (plist-get it :name)
+                     'item it)
+         (anaconda-mode-complete)))
+
+(defun -get-prop (prop candidate)
+  "Return the property PROP of completion candidate CANDIDATE."
+  (let ((item (get-text-property 0 'item candidate)))
+    (plist-get item prop)))
 
 (defun company-anaconda-doc-buffer (candidate)
   "Return documentation buffer for chosen CANDIDATE."
-  (let ((doc (get-text-property 0 'doc candidate)))
+  (let ((doc (-get-prop :doc candidate)))
     (and doc (anaconda-mode-doc-buffer doc))))
 
 (defun company-anaconda-meta (candidate)
   "Return short documentation string for chosen CANDIDATE."
-  (get-text-property 0 'short-doc candidate))
+  (-get-prop :short_doc candidate))
 
 (defun company-anaconda-annotation (candidate)
   "Return annotation string for chosen CANDIDATE."
-  (let ((annotation (get-text-property 0 'annotation candidate)))
+  (let ((annotation (-get-prop :annotation candidate)))
     (if company-anaconda-compact-annotation
         (substring annotation 0 1)
       annotation)))
 
 (defun company-anaconda-location (candidate)
   "Return location (path . line) for chosen CANDIDATE."
-  (get-text-property 0 'location candidate))
+  (-when-let* ((path (-get-prop :path candidate))
+               (line (-get-prop :line candidate)))
+    (cons path line)))
 
 ;;;###autoload
 (defun company-anaconda (command &optional arg)

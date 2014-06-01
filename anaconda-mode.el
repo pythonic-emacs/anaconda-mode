@@ -185,17 +185,18 @@ IGNORED parameter is the string for which completion is required."
 (defun anaconda-mode-view-doc ()
   "Show documentation for context at point."
   (interactive)
-  (anaconda-mode-display-doc (or (anaconda-mode-call-1 "doc")
-                                 (error "No documentation found"))))
+  (display-buffer
+   (anaconda-mode-doc-buffer (or (anaconda-mode-call-1 "doc")
+                                 (error "No documentation found")))))
 
-(defun anaconda-mode-display-doc (doc)
+(defun anaconda-mode-doc-buffer (doc)
   "Display documentation buffer with contents DOC."
   (with-current-buffer (get-buffer-create "*anaconda-doc*")
     (view-mode -1)
     (erase-buffer)
     (insert doc)
     (view-mode 1)
-    (display-buffer (current-buffer))))
+    (current-buffer)))
 
 
 ;;; Usages.
