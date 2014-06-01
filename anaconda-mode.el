@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2013, 2014 by Malyshev Artem
 
-;; Author: Malyshev Artem <proofit404@gmail.com>
+;; Authors: Malyshev Artem <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "24") (json-rpc "0.0.1"))
@@ -27,6 +27,7 @@
 (require 'json-rpc)
 (require 'etags)
 (require 'python)
+(require 'anaconda-nav)
 
 
 ;;; Server.
@@ -116,7 +117,9 @@ Return nil if it run under proper environment."
   "Make remote procedure call for COMMAND.
 ARGS are COMMAND argument passed to remote call."
   (anaconda-mode-start-node)
-  (apply 'json-rpc anaconda-mode-connection command args))
+  ;; use list since not all dash functions operate on vectors
+  (let ((json-array-type 'list))
+    (apply 'json-rpc anaconda-mode-connection command args)))
 
 (defun anaconda-mode-call-1 (command)
   ;; TODO: Remove this function ones plugin system will be implemented.
@@ -134,12 +137,10 @@ ARGS are COMMAND argument passed to remote call."
 (defvar anaconda-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
-    (define-key map [remap find-tag] 'anaconda-mode-find-definition)
-    (define-key map [remap find-tag-other-window] 'anaconda-mode-find-definition-other-window)
-    (define-key map [remap find-tag-other-frame] 'anaconda-mode-find-definition-other-frame)
-    (define-key map (kbd "M-r") 'anaconda-mode-find-reference)
-    (define-key map (kbd "C-x 4 R") 'anaconda-mode-find-reference-other-window)
-    (define-key map (kbd "C-x 5 R") 'anaconda-mode-find-reference-other-frame)
+    (define-key map (kbd "M-r") 'anaconda-mode-usages)
+    (define-key map [remap find-tag] 'anaconda-mode-goto-definitions)
+    (define-key map (kbd "M-a") 'anaconda-mode-goto-assignments)
+    (define-key map (kbd "M-,") 'anaconda-nav-pop-marker)
     map)
   "Keymap for `anaconda-mode'.")
 
@@ -197,106 +198,33 @@ IGNORED parameter is the string for which completion is required."
     (display-buffer (current-buffer))))
 
 
-;;; Jump to definition.
+;;; Usages.
 
-(defun anaconda-mode-locate-definition ()
-  "Request definitions."
-  (anaconda-mode-chose-module
-   "Definition: "
-   (anaconda-mode-call-1 "location")))
-
-(defun anaconda-mode-definition-buffer ()
-  "Get definition buffer or raise error."
-  (apply #'anaconda-mode-file-buffer
-         (or (anaconda-mode-locate-definition)
-             (error "Can't find definition"))))
-
-(defun anaconda-mode-find-definition ()
-  "Find definition at point."
+(defun anaconda-mode-usages ()
+  "Show usages for thing at point."
   (interactive)
-  (switch-to-buffer (anaconda-mode-definition-buffer)))
-
-(defun anaconda-mode-find-definition-other-window ()
-  "Find definition at point in other window."
-  (interactive)
-  (switch-to-buffer-other-window (anaconda-mode-definition-buffer)))
-
-(defun anaconda-mode-find-definition-other-frame ()
-  "Find definition at point in other frame."
-  (interactive)
-  (switch-to-buffer-other-frame (anaconda-mode-definition-buffer)))
+  (anaconda-nav (or (anaconda-mode-call-1 "usages")
+                    (error "No usages found"))))
 
 
-;;; Find reference.
+;;; Definitions.
 
-(defun anaconda-mode-locate-reference ()
-  "Request references."
-  (anaconda-mode-chose-module
-   "Reference: "
-   (anaconda-mode-call-1 "reference")))
-
-(defun anaconda-mode-reference-buffer ()
-  "Get reference buffer or raise error."
-  (apply #'anaconda-mode-file-buffer
-         (or (anaconda-mode-locate-reference)
-             (error "Can't find references"))))
-
-(defun anaconda-mode-find-reference ()
-  "Jump to reference at point."
+(defun anaconda-mode-goto-definitions ()
+  "Goto definition for thing at point."
   (interactive)
-  (switch-to-buffer (anaconda-mode-reference-buffer)))
+  (anaconda-nav (or (anaconda-mode-call-1 "goto_definitions")
+                    (error "No definition found"))
+                t))
 
-(defun anaconda-mode-find-reference-other-window ()
-  "Jump to reference at point in other window."
+
+;;; Assignments.
+
+(defun anaconda-mode-goto-assignments ()
+  "Goto assignment for thing at point."
   (interactive)
-  (switch-to-buffer-other-window (anaconda-mode-reference-buffer)))
-
-(defun anaconda-mode-find-reference-other-frame ()
-  "Jump to reference at point in other frame."
-  (interactive)
-  (switch-to-buffer-other-frame (anaconda-mode-reference-buffer)))
-
-(defun anaconda-mode-chose-module (prompt modules)
-  "Completing read with PROMPT from MODULES.
-Return cons of file name and line."
-  (let ((user-chose (anaconda-mode-user-chose prompt modules)))
-    (when user-chose
-      (list (plist-get user-chose :module_path)
-            (plist-get user-chose :line)
-            (plist-get user-chose :column)))))
-
-(defun anaconda-mode-user-chose (prompt hash)
-  "With PROMPT ask user for HASH value."
-  (when hash
-    (plist-get hash (anaconda-mode-completing-read prompt (key-list hash)))))
-
-(defun anaconda-mode-completing-read (prompt collection)
-  "Call completing engine with PROMPT on COLLECTION."
-  (cond
-   ((eq (length collection) 1)
-    (car collection))
-   ((> (length collection) 1)
-    (completing-read prompt collection))))
-
-(defun key-list (hash)
-  "Return sorted key list of HASH.
-Keys must be a string."
-  (let (keys)
-    (maphash
-     (lambda (k v) (add-to-list 'keys k))
-     hash)
-    (sort keys 'string<)))
-
-(defun anaconda-mode-file-buffer (file line column)
-  "Find FILE no select at specified LINE and COLUMN.
-Save current position in `find-tag-marker-ring'."
-  (let ((buf (find-file-noselect file)))
-    (ring-insert find-tag-marker-ring (point-marker))
-    (with-current-buffer buf
-      (goto-char (point-min))
-      (forward-line (1- line))
-      (move-to-column column)
-      buf)))
+  (anaconda-nav (or (anaconda-mode-call-1 "goto_assignments")
+                    (error "No assignment found"))
+                t))
 
 (provide 'anaconda-mode)
 

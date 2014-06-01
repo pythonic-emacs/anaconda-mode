@@ -1,3 +1,5 @@
+import functools
+
 from anaconda_common import script_method
 
 
@@ -19,9 +21,6 @@ def complete(script):
 
 
 @script_method
-def location(script):
-    """Find names assignment place."""
-    return [details(defn) for defn in all_definitions(script)]
 def doc(script):
     """Documentation for all definitions at point."""
     docs = ['\n'.join([d.module_name + ' - ' + d.description,
@@ -31,37 +30,44 @@ def doc(script):
 
     return ('\n' + '-' * 40 + '\n').join(docs)
 
+
+def process_definitions(f):
+    @functools.wraps(f)
+    def wrapper(script):
+        cache = {script.path: script.source.splitlines()}
+
+        def get_description(d):
+            if d.module_path not in cache:
+                with open(d.module_path, 'r') as file:
+                    cache[d.module_path] = file.read().splitlines()
+
+            return cache[d.module_path][d.line - 1]
+
+        return [{'line': d.line,
+                 'column': d.column,
+                 'name': d.name,
+                 'description': get_description(d),
+                 'module': d.module_name,
+                 'type': d.type,
+                 'path': d.module_path}
+                for d in f(script) if not d.in_builtin_module()]
+
+    return wrapper
+
+
 @script_method
-def reference(script):
-    """Find name reference places."""
-    definitions = all_definitions(script)
-    return [details(defn)
-            for defn in script.usages()
-            if defn not in definitions]
+@process_definitions
+def goto_definitions(script):
+    return script.goto_definitions()
 
 
+@script_method
+@process_definitions
+def goto_assignments(script):
+    return script.goto_assignments()
 
 
-def all_definitions(script):
-    """List definitions with assignments.
-
-    Filter same definitions in favor of more explicit definition.
-    """
-    defns = script.goto_assignments() + script.goto_definitions()
-    return [defn for defn in defns
-            if defn.module_path and defn.type != 'import']
-
-
-def details(definition):
-    """Make hash with definition details."""
-    return {
-        'path': definition.module_path,
-        'line': definition.line,
-        'column': definition.column,
-        'description': definition.description
-    }
-
-
-def first_line(text):
-    """Return text first line."""
-    return text.split('\n', 1)[0]
+@script_method
+@process_definitions
+def usages(script):
+    return script.usages()
