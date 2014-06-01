@@ -23,6 +23,7 @@
 
 ;;; Code:
 
+(require 'cl-lib)
 (require 'dash)
 (require 'anaconda-mode)
 
@@ -30,15 +31,17 @@
   "If not nil, trim eldoc string to frame width.")
 
 (defun anaconda-eldoc--format-params (index params)
-  (concat
-   (-> params
+  (apply
+   'concat
+   (--> params
      (--map-indexed
       (if (= index it-index)
           (propertize it 'face 'eldoc-highlight-function-argument)
-        it))
-     (-interpose ", ")))))
+        it)
+      it)
+     (-interpose ", " it))))
 
-(defun* anaconda-eldoc--format (&key name index params)
+(cl-defun anaconda-eldoc--format (&key name index params)
   (concat
    (propertize name 'face 'font-lock-function-name-face)
    "("
