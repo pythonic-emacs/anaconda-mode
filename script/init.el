@@ -1,9 +1,3 @@
-;;; init --- configuration file
-
-;;; Commentary:
-
-;;; Code:
-
 (require 'cask)
 
 (let ((source-directory (locate-dominating-file load-file-name "Cask")))
@@ -12,6 +6,8 @@
 
 ;; Anaconda settings.
 
+(require 'anaconda-mode)
+
 (let ((envdir (getenv "ENVDIR")))
   (setq python-shell-virtualenv-path envdir))
 
@@ -19,13 +15,9 @@
 
 (setq anaconda-mode-debug t)
 
-(require 'anaconda-mode)
-
 (add-hook 'python-mode-hook 'anaconda-mode)
 
 ;; Company settings.
-
-(require 'cl)
 
 (global-company-mode)
 

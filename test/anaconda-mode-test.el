@@ -1,7 +1,5 @@
 (require 'ert)
 
-;; Test definitions.
-
 (ert-deftest test-anaconda-mode-running ()
   "Test if anaconda_mode running successfully."
   (anaconda-mode-start-node)
