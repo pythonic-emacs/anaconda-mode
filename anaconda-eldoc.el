@@ -2,7 +2,8 @@
 
 ;; Copyright (C) 2013, 2014 by Malyshev Artem
 
-;; Author: Malyshev Artem <proofit404@gmail.com>
+;; Authors: Malyshev Artem <proofit404@gmail.com>
+;;          Fredrik Bergroth <fbergroth@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.0
 
@@ -23,15 +24,33 @@
 
 ;;; Code:
 
+(require 'dash)
 (require 'anaconda-mode)
 
 (defvar anaconda-eldoc-as-single-line nil
   "If not nil, trim eldoc string to frame width.")
 
+(defun anaconda-eldoc--format-params (index params)
+  (concat
+   (-> params
+     (--map-indexed
+      (if (= index it-index)
+          (propertize it 'face 'eldoc-highlight-function-argument)
+        it))
+     (-interpose ", ")))))
+
+(defun* anaconda-eldoc--format (&key name index params)
+  (concat
+   (propertize name 'face 'font-lock-function-name-face)
+   "("
+   (anaconda-eldoc--format-params index params)
+   ")"))
+
 (defun anaconda-eldoc-function ()
   "Show eldoc for context at point."
-  (let ((doc (anaconda-mode-call-1 "eldoc")))
-    (if (and doc anaconda-eldoc-as-single-line)
+  (-when-let* ((res (anaconda-mode-call-1 "eldoc"))
+               (doc (apply 'anaconda-eldoc--format res)))
+    (if anaconda-eldoc-as-single-line
         (substring doc 0 (min (frame-width) (length doc)))
       doc)))
 
