@@ -1,15 +1,24 @@
 import json
+import textwrap
 from anaconda_mode import handle
 
 
-def parse_fixture(name, line, column):
-    path = 'test/jedi/fixtures/{0}.py'.format(name)
-    with open(path) as file:
-        return dict(source=file.read(), line=line, column=column, path=path)
+def parse_fixture(fixture):
+    cursor = '_|_'
+    lines = textwrap.dedent(fixture).splitlines()
+    for i, line in enumerate(lines):
+        column = line.find(cursor)
+        if column >= 0:
+            lines[i] = line.replace(cursor, '')
+            return dict(source='\n'.join(lines),
+                        line=i + 1, column=column)
+
+    raise Exception('No cursor found in fixture')
 
 
-def result_from_fixture(name, line, column, method):
-    params = parse_fixture(name, line, column)
+def send(fixture, method, path=''):
+    params = parse_fixture(fixture)
+    params['path'] = path
     request = make_request(method, params)
     return process(request)[1]['result']
 

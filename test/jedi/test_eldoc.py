@@ -1,20 +1,25 @@
-from test.helpers import result_from_fixture
+from test.helpers import send
 
 
-def test_eldoc():
-    """Should return signature string."""
+def test_eldoc_signature():
+    rv = send('''
+              def f(obj, fp, skipkeys=False, ensure_ascii=True,
+                    check_circular=True, allow_nan=True, cls=None,
+                    indent=None, separators=None, default=None,
+                    sort_keys=False, **kw):
+                  pass
 
-    response = result_from_fixture('eldoc/simple', 8, 5, 'eldoc')
+              f(_|_
+              ''', 'eldoc')
 
-    expected = ("dump(obj, fp, skipkeys = False, ensure_ascii = True, "
-                "check_circular = True, allow_nan = True, cls = None, "
-                "indent = None, separators = None, default = None, "
-                "sort_keys = False, **kw)")
-
-    assert response == expected
+    assert rv == ('f(obj, fp, skipkeys = False, ensure_ascii = True,'
+                  ' check_circular = True, allow_nan = True, cls = None,'
+                  ' indent = None, separators = None, default = None,'
+                  ' sort_keys = False, **kw)')
 
 
-def test_empty_eldoc():
-    """Don't answer eldoc on unknown functions."""
-    response = result_from_fixture('eldoc/broken', 4, 6, 'eldoc')
-    assert response == ''
+def test_eldoc_unknown_fn():
+    rv = send('''
+              unknown_fn(_|_
+              ''', 'eldoc')
+    assert rv == ''

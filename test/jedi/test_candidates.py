@@ -1,28 +1,34 @@
-from test.helpers import result_from_fixture
+from test.helpers import send
+import os
 
 
-def test_autocomplete():
-    """Jedi must complete correct sources."""
+def test_completion_response():
+    path = os.path.abspath('test.py')
+    rv = send('''\
+              def test1(a, b):
+                  """First test function."""
+                  pass
 
-    response = result_from_fixture('candidates/simple', 14, 4, 'complete')
 
-    expected = [
-        {
-            "name": "test1",
-            "short_doc": "First test function.",
-            "doc": """test1(a, b)
+              def test2(c):
+                  """Second test function."""
+                  pass
 
-First test function.""",
-        },
-        {
-            "name": "test2",
-            "short_doc": "Second test function.",
-            "doc": """test2(c)
+              test_|_
+              ''', 'complete', path)
 
-Second test function.
-
-Accept one argument only."""
-        },
-    ]
-
-    assert response == expected
+    assert rv == [{
+        "name": "test1",
+        "doc": 'test1(a, b)\n\nFirst test function.',
+        'short_doc': 'test1(a, b)',
+        'annotation': 'function',
+        'path': path,
+        'line': 1
+    }, {
+        "name": "test2",
+        "doc": 'test2(c)\n\nSecond test function.',
+        'short_doc': 'test2(c)',
+        'annotation': 'function',
+        'path': path,
+        'line': 6
+    }]

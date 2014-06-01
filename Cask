@@ -4,6 +4,8 @@
 
 (development
  (depends-on "cask")
- (depends-on "ert-runner")
  (depends-on "company")
+ (depends-on "dash")
+ (depends-on "ert-runner")
+ (depends-on "json-rpc")
  (depends-on "pyenv-mode"))

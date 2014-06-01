@@ -15,43 +15,30 @@
 
 (ert-deftest test-anaconda-mode-complete ()
   "Test completion at point."
-  (load-fixture "test/jedi/fixtures/candidates/simple.py" 14 4)
+  (load-fixture "simple.py" "\
+def test1(a, b):
+    '''First test function.'''
+    pass
+
+def test2(c):
+    '''Second test function.'''
+    pass
+test_|_")
   (should (equal (anaconda-mode-complete-thing)
                  '("test1" "test2"))))
 
-(ert-deftest test-anaconda-mode-location ()
-  "Test find definition at point."
-  (let ((fixture "test/jedi/fixtures/location/simple.py"))
-    (load-fixture fixture 8 1)
-    (should (equal (anaconda-mode-locate-definition)
-                   (list (fixture-path fixture) 1 0)))))
-
-(ert-deftest test-anaconda-mode-multiple-location ()
-  "Test non determined locations."
-  (let ((fixture "test/jedi/fixtures/location/builtins.py"))
-    (load-fixture fixture 6 1)
-    (should (equal (anaconda-mode-locate-definition)
-                   (list (fixture-path fixture) 2 4)))))
-
-(ert-deftest test-anaconda-mode-reference ()
-  "Test fund references."
-  (let ((fixture "test/jedi/fixtures/reference/simple.py"))
-    (load-fixture fixture 1 4)
-    (should (equal (anaconda-mode-locate-reference)
-                   (list (fixture-path fixture) 4 4)))))
-
 (ert-deftest test-anaconda-mode-doc ()
   "Test documentation string search."
-  (load-fixture "test/jedi/fixtures/doc/simple.py" 1 4)
-  (should (equal (anaconda-mode-doc-string)
-                 "f(a, b = 1)
+  (load-fixture "simple.py" "\
+def f_|_(a, b=1):
+    '''Docstring for f.'''
+    pass")
+  (anaconda-mode-view-doc)
+  (should (equal (with-current-buffer (get-buffer "*anaconda-doc*")
+                   (buffer-string))
+                 "\
+simple - def f
+========================================
+f(a, b = 1)
 
-Document for function f.")))
-
-(ert-deftest test-key-list ()
-  "Should obtain keys from hash."
-  (should (equal '("a" "b")
-                 (let ((hash (make-hash-table)))
-                   (puthash "a" "bar" hash)
-                   (puthash "b" "foo" hash)
-                   (key-list hash)))))
+Docstring for f.")))
