@@ -22,7 +22,14 @@ def complete(script):
 def location(script):
     """Find names assignment place."""
     return [details(defn) for defn in all_definitions(script)]
+def doc(script):
+    """Documentation for all definitions at point."""
+    docs = ['\n'.join([d.module_name + ' - ' + d.description,
+                       '=' * 40,
+                       d.docstring() or "- No docstring -"]).strip()
+            for d in script.goto_definitions()]
 
+    return ('\n' + '-' * 40 + '\n').join(docs)
 
 @script_method
 def reference(script):
@@ -33,13 +40,6 @@ def reference(script):
             if defn not in definitions]
 
 
-@script_method
-def doc(script):
-    """Documentations list for all definitions at point."""
-    return [{'short_doc': first_line(defn.raw_doc),
-             'doc': defn.doc}
-            for defn in script.goto_definitions()
-            if defn.raw_doc]
 
 
 def all_definitions(script):
