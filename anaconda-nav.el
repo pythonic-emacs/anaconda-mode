@@ -38,12 +38,14 @@
 
 (defun anaconda-nav-pop-marker ()
   (interactive)
-  (when (null anaconda-nav--markers)
+  (unless anaconda-nav--markers
     (error "No marker available"))
 
-  (let ((marker (pop anaconda-nav--markers)))
-    (switch-to-buffer (or (marker-buffer marker)
-                          (error "Buffer no longer available")))
+  (let* ((marker (pop anaconda-nav--markers))
+        (buffer (marker-buffer marker)))
+    (unless (buffer-live-p buffer)
+      (error "Buffer no longer available"))
+    (switch-to-buffer buffer)
     (goto-char (marker-position marker))
     (set-marker marker nil)))
 
