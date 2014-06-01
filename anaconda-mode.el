@@ -140,8 +140,8 @@ ARGS are COMMAND argument passed to remote call."
     (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
     (define-key map (kbd "M-r") 'anaconda-mode-usages)
     (define-key map [remap find-tag] 'anaconda-mode-goto-definitions)
-    (define-key map (kbd "M-a") 'anaconda-mode-goto-assignments)
-    (define-key map (kbd "M-,") 'anaconda-nav-pop-marker)
+    (define-key map [remap tags-loop-continue] 'anaconda-mode-goto-assignments)
+    (define-key map [remap pop-tag-mark] 'anaconda-nav-pop-marker)
     map)
   "Keymap for `anaconda-mode'.")
 
