@@ -31,8 +31,8 @@
     (define-key map (kbd "RET") 'anaconda-nav-jump)
     (define-key map (kbd "n") 'anaconda-nav-next)
     (define-key map (kbd "p") 'anaconda-nav-prev)
-    (define-key map (kbd "<SPC>") 'anaconda-nav-scroll-down)
-    (define-key map (kbd "C-<SPC>") 'anaconda-nav-scroll-up)
+    (define-key map (kbd "SPC") 'anaconda-nav-scroll-down)
+    (define-key map (kbd "DEL") 'anaconda-nav-scroll-up)
     map)
   "Keymap for `anaconda-nav-mode'.")
 
