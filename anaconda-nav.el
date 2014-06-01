@@ -159,4 +159,5 @@
   (use-local-map anaconda-nav-mode-map))
 
 (provide 'anaconda-nav)
+
 ;;; anaconda-nav.el ends here
