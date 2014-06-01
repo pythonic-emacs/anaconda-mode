@@ -105,7 +105,7 @@
     (setq anaconda-mode-connection nil)))
 
 (defun anaconda-mode-need-restart ()
-  "Check if current `anaconda-mode-process'.
+  "Check if current `anaconda-mode-process' need restart with new args.
 Return nil if it run under proper environment."
   (and (anaconda-mode-running-p)
        (not (equal (process-command anaconda-mode-process)
