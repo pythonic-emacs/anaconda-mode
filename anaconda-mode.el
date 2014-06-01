@@ -184,27 +184,17 @@ IGNORED parameter is the string for which completion is required."
 (defun anaconda-mode-view-doc ()
   "Show documentation for context at point."
   (interactive)
-  (let ((doc (anaconda-mode-doc-string)))
-    (if doc
-        (display-buffer (anaconda-mode-doc-buffer doc))
-      (error "Can't find documentation"))))
+  (anaconda-mode-display-doc (or (anaconda-mode-call-1 "doc")
+                                 (error "No documentation found"))))
 
-(defun anaconda-mode-doc-string ()
-  "Request documentation string.
-Allow user to chose what doc he want to read."
-  (anaconda-mode-user-chose
-   "Doc: "
-   (anaconda-mode-call-1 "doc")))
-
-(defun anaconda-mode-doc-buffer (doc)
-  "Create buffer for viewing DOC."
-  (let ((buf (get-buffer-create "*anaconda-doc*")))
-    (with-current-buffer buf
-      (view-mode -1)
-      (erase-buffer)
-      (insert doc)
-      (view-mode 1)
-      buf)))
+(defun anaconda-mode-display-doc (doc)
+  "Display documentation buffer with contents DOC."
+  (with-current-buffer (get-buffer-create "*anaconda-doc*")
+    (view-mode -1)
+    (erase-buffer)
+    (insert doc)
+    (view-mode 1)
+    (display-buffer (current-buffer))))
 
 
 ;;; Jump to definition.
