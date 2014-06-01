@@ -5,6 +5,7 @@
 ;;; Code:
 
 (require 'dash)
+(require 'cl-lib)
 
 (defvar anaconda-nav-mode-map
   (let ((map (make-sparse-keymap)))
@@ -77,7 +78,7 @@
    'mouse-face 'highlight))
 
 (defun anaconda-nav--item-description (item)
-  (destructuring-bind (&key column name description type &allow-other-keys) item
+  (cl-destructuring-bind (&key column name description type &allow-other-keys) item
     (cond ((string= type "module") "«module definition»")
           (t (let ((to (+ column (length name))))
                (when (string= name (substring description column to))
@@ -97,12 +98,12 @@
   (interactive "p")
   (with-current-buffer (get-buffer-create "*anaconda-nav*")
     (goto-char (cond (reset (point-min))
-                     ((minusp argp) (line-beginning-position))
-                     ((plusp argp) (line-end-position))
+                     ((cl-minusp argp) (line-beginning-position))
+                     ((cl-plusp argp) (line-end-position))
                      ((point))))
 
     (--dotimes (abs argp)
-      (--if-let (anaconda-nav--next-item (plusp argp))
+      (--if-let (anaconda-nav--next-item (cl-plusp argp))
           (goto-char it)
         (error "No more matches")))
 
@@ -118,9 +119,10 @@
   (run-with-idle-timer 0.5 nil 'isearch-dehighlight))
 
 (defun anaconda-nav-goto-item (item preview)
-  (destructuring-bind (&key line column name path &allow-other-keys) item
+  (cl-destructuring-bind (&key line column name path &allow-other-keys) item
     (with-current-buffer (find-file-noselect path)
-      (goto-line line)
+      (goto-char (point-min))
+      (forward-line (1- line))
       (forward-char column)
       (anaconda-nav--flash-result name)
       (if preview

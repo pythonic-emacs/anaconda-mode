@@ -26,7 +26,7 @@
 (require 'company)
 (require 'anaconda-mode)
 (require 'dash)
-(eval-when-compile (require 'cl))
+(require 'cl-lib)
 
 (defvar company-anaconda-compact-annotation t
   "Show only the first character of type in annotations.")
@@ -82,7 +82,7 @@ Properly detect strings, comments and attribute access."
   "Jedi backend for company-mode.
 See `company-backends' for more info about COMMAND and ARG."
   (interactive (list 'interactive))
-  (case command
+  (cl-case command
     (init (company-anaconda-init))
     (interactive (company-begin-backend 'company-anaconda))
     (prefix (company-anaconda-prefix))
