@@ -14,4 +14,4 @@ def eldoc(script):
             'params': [p.description for p in sgn.params]
         }
 
-    return []
+    return {}

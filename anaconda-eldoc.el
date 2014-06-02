@@ -33,13 +33,12 @@
 (defun anaconda-eldoc--format-params (index params)
   (apply
    'concat
-   (--> params
+   (->> params
      (--map-indexed
       (if (= index it-index)
           (propertize it 'face 'eldoc-highlight-function-argument)
-        it)
-      it)
-     (-interpose ", " it))))
+        it))
+     (-interpose ", "))))
 
 (cl-defun anaconda-eldoc--format (&key name index params)
   (concat
