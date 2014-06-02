@@ -16,7 +16,7 @@ def parse_fixture(fixture):
     raise Exception('No cursor found in fixture')
 
 
-def send(fixture, method, path=''):
+def send(fixture, method, path=None):
     params = parse_fixture(fixture)
     params['path'] = path
     request = make_request(method, params)
