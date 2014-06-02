@@ -27,5 +27,4 @@ def test_eldoc_unknown_fn():
               unknown_fn(_|_
               ''', 'eldoc')
 
-    # [] translates directly to nil, making it more useful than {} or None
-    assert rv == []
+    assert rv == {}
