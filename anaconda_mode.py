@@ -34,7 +34,6 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         logger.info('Processing request...')
-
         content_len = self.headers.get('content-length')
         if content_len is not None:
             data = self.rfile.read(int(content_len))
@@ -56,17 +55,6 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         return status, response.json
 
 
-def setup_file_logger(logfile):
-    if not os.path.isdir(LOG_DIR):
-        os.makedirs(LOG_DIR)
-
-    handler = logging.FileHandler(os.path.join(LOG_DIR, logfile))
-    handler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(logging.BASIC_FORMAT)
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
-
-
 @click.command()
 @click.option('--bind', default='', help='Interface address to bind.')
 @click.option('--port', type=int, default=8000, help='Server port.')
@@ -75,8 +63,8 @@ def setup_file_logger(logfile):
 def main(bind, port, debug):
     """Runs anaconda server."""
     if debug:
-        logger.setLevel(logging.DEBUG)
-        setup_file_logger('development.log')
+        logging.basicConfig(level=logging.DEBUG,
+                            filename=os.path.join(LOG_DIR, 'development.log'))
 
     logger.info('Starting anaconda_mode server...')
     server = HTTPServer((bind, port), HTTPRequestHandler)
