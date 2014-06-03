@@ -5,7 +5,7 @@ Code navigation, documentation lookup and completion for Python.
 ## Requirements
 
 * emacs 24.3
-* python 2.6, 2.7, 3.2, 3.3 or 3.4
+* python 2.6, 2.7, 3.3 or 3.4
 
 ## Features
 
