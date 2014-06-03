@@ -39,8 +39,7 @@ def test_server_start(server_cls):
     server = server_cls.return_value
     runner = CliRunner()
     result = runner.invoke(anaconda_mode.main, ['--bind', 'localhost',
-                                                '--port', '666',
-                                                '--debug'])
+                                                '--port', '666'])
     assert server.serve_forever.called
     assert result.output == 'anaconda_mode server started\n'
 
