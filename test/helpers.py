@@ -1,6 +1,6 @@
 import json
 import textwrap
-from anaconda_mode import handle
+import anaconda_mode
 
 
 def parse_fixture(fixture):
@@ -33,5 +33,5 @@ def make_request(method, params):
 
 
 def process(request):
-    status, response = handle(request)
-    return status, json.loads(response)
+    code, response = anaconda_mode.HTTPRequestHandler.process_request(request)
+    return code, json.loads(response)

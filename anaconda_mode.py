@@ -1,11 +1,17 @@
-from __future__ import print_function
-
 import logging
 import os
 import sys
 
+PY3 = sys.version_info[0] == 3
+
+if PY3:
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+else:
+    from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+
 BASE_DIR = os.path.dirname(__file__)
 LOG_DIR = os.path.join(BASE_DIR, 'log')
+logger = logging.getLogger(__name__)
 
 # Add every directory inside vendor/ to sys.path.
 for file in os.listdir('vendor'):
@@ -16,100 +22,67 @@ for file in os.listdir('vendor'):
 import click  # isort:skip
 from jsonrpc import dispatcher, JSONRPCResponseManager  # isort:skip
 
-try:
-    from http.server import BaseHTTPRequestHandler, HTTPServer
-except ImportError:
-    from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-
-
-logger = logging.getLogger(__name__)
-
 # FIXME: This must be an positional argument.  See #28.
-import anaconda_jedi   # isort:skip
-import anaconda_eldoc  # isort:skip
+import anaconda_jedi   # noqa isort:skip
+import anaconda_eldoc  # noqa isort:skip
 
 
-def run_server(ip, port):
-    """Run anaconda server."""
-
-    logger.info('Starting anaconda_mode server...')
-
-    address = (ip, port)
-
-    node = HTTPServer(address, RequestHandler)
-
-    print('anaconda_mode server started')
-
-    node.serve_forever()
-
-
-class RequestHandler(BaseHTTPRequestHandler):
+class HTTPRequestHandler(BaseHTTPRequestHandler):
 
     protocol_version = 'HTTP/1.1'
     error_message_format = ''
 
     def do_POST(self):
-        """Process client POST request."""
-
         logger.info('Processing request...')
 
         content_len = self.headers.get('content-length')
         if content_len is not None:
             data = self.rfile.read(int(content_len))
-            status, response = handle(data)
+            data = data.decode('utf-8')
+            status, response = self.process_request(data)
         else:
             status, response = 400, 'Missing content-length header'
 
-        self.send_response(status)
         response = response.encode('utf-8')
+        self.send_response(status)
         self.send_header("Content-Length", len(response))
         self.end_headers()
         self.wfile.write(response)
 
-
-def handle(request):
-    """Perform json rpc call."""
-
-    response = JSONRPCResponseManager.handle(request, dispatcher)
-    status = 500 if response.error else 200
-    return status, response.json
+    @staticmethod
+    def process_request(request):
+        response = JSONRPCResponseManager.handle(request, dispatcher)
+        status = 500 if response.error else 200
+        return status, response.json
 
 
-def setup_logger(logfile):
-    """Set logger handler, formatter params.
-
-    Create logging directory if necessary.
-
-    :param logfile: log file name
-    :type logfile: str
-    """
-
-    logger.setLevel(logging.DEBUG)
-
+def setup_file_logger(logfile):
     if not os.path.isdir(LOG_DIR):
-        os.mkdir(LOG_DIR)
+        os.makedirs(LOG_DIR)
 
     handler = logging.FileHandler(os.path.join(LOG_DIR, logfile))
     handler.setLevel(logging.DEBUG)
-
     formatter = logging.Formatter(logging.BASIC_FORMAT)
     handler.setFormatter(formatter)
-
     logger.addHandler(handler)
 
 
 @click.command()
-@click.option('--ip', default='127.0.0.1', help='Server IP.')
+@click.option('--bind', default='', help='Interface address to bind.')
 @click.option('--port', type=int, default=8000, help='Server port.')
 @click.option('--debug', default=False, is_flag=True,
               help='Enable debug logging.')
-def main(ip, port, debug):
+def main(bind, port, debug):
     """Runs anaconda server."""
     if debug:
-        setup_logger('development.log')
+        logger.setLevel(logging.DEBUG)
+        setup_file_logger('development.log')
 
-    run_server(ip, port)
+    logger.info('Starting anaconda_mode server...')
+    server = HTTPServer((bind, port), HTTPRequestHandler)
 
+    click.echo('anaconda_mode server started')
+    server.serve_forever()
 
 if __name__ == '__main__':
     main()
