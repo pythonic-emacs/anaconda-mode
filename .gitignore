@@ -7,4 +7,5 @@ MANIFEST
 [#]*[#]
 __pycache__/
 log/
+!log/.gitkeep
 .coverage
