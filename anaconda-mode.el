@@ -51,7 +51,7 @@
 (defun anaconda-mode-python-args ()
   "Python arguments to run anaconda_mode server."
   (delq nil (list "anaconda_mode.py"
-                  "--ip" anaconda-mode-host
+                  "--bind" anaconda-mode-host
                   "--port" (number-to-string anaconda-mode-port)
                   (when anaconda-mode-debug "--debug"))))
 
