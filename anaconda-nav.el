@@ -32,11 +32,13 @@
     (define-key map (kbd "RET") 'anaconda-nav-jump)
     (define-key map (kbd "n") 'anaconda-nav-next)
     (define-key map (kbd "p") 'anaconda-nav-prev)
+    (define-key map (kbd "q") 'anaconda-nav-quit)
     map)
   "Keymap for `anaconda-nav-mode'.")
 
 (defvar anaconda-nav--last-marker nil)
 (defvar anaconda-nav--markers ())
+(defvar anaconda-nav--window-configuration nil)
 
 (defun anaconda-nav-next ()
   (interactive)
@@ -45,6 +47,11 @@
 (defun anaconda-nav-prev ()
   (interactive)
   (anaconda-nav-next-error -1 nil t))
+
+(defun anaconda-nav-quit ()
+  (interactive)
+  (quit-window)
+  (anaconda-nav--restore-window-configuration))
 
 (defun anaconda-nav-pop-marker ()
   (interactive)
@@ -67,7 +74,7 @@
 (defun anaconda-nav (result &optional jump-if-single-item)
   (setq anaconda-nav--last-marker (point-marker))
   (if (and jump-if-single-item (= 1 (length result)))
-      (anaconda-nav-goto-item (car result) nil)
+      (anaconda-nav-display-item (car result) nil)
     (with-current-buffer (get-buffer-create "*anaconda-nav*")
       (view-mode -1)
       (erase-buffer)
@@ -80,6 +87,8 @@
 
       (goto-char (point-min))
       (anaconda-nav-mode)
+      (setq anaconda-nav--window-configuration (current-window-configuration))
+      (delete-other-windows)
       (switch-to-buffer-other-window (current-buffer)))))
 
 (defun anaconda-nav--insert-module (header &rest items)
@@ -128,7 +137,7 @@
 
     (setq-local overlay-arrow-position (copy-marker (line-beginning-position)))
     (--when-let (get-text-property (point) 'anaconda-nav-item)
-      (anaconda-nav-goto-item it preview))))
+      (anaconda-nav-display-item it preview))))
 
 (defun anaconda-nav--flash-result (name)
   (isearch-highlight (point)
@@ -137,23 +146,29 @@
                        (point-at-eol)))
   (run-with-idle-timer 0.5 nil 'isearch-dehighlight))
 
-(defun anaconda-nav-goto-item (item preview)
+(defun anaconda-nav-display-item (item preview)
   (cl-destructuring-bind (&key line column name path &allow-other-keys) item
     (with-current-buffer (find-file-noselect path)
       (goto-char (point-min))
       (forward-line (1- line))
       (forward-char column)
       (anaconda-nav--flash-result name)
-      (if preview
-          (set-window-point (display-buffer (current-buffer)) (point))
+      (set-window-point (display-buffer (current-buffer)) (point))
+      (unless preview
+        (anaconda-nav--switch-to-buffer (current-buffer))))))
 
-        ;; Push marker
-        (when (markerp anaconda-nav--last-marker)
-          (push anaconda-nav--last-marker anaconda-nav--markers)
-          (setq anaconda-nav--last-marker nil))
+(defun anaconda-nav--switch-to-buffer (buffer)
+  (when (markerp anaconda-nav--last-marker)
+    (push anaconda-nav--last-marker anaconda-nav--markers)
+    (setq anaconda-nav--last-marker nil))
 
-        (switch-to-buffer (current-buffer))))))
+  (anaconda-nav--restore-window-configuration)
+  (switch-to-buffer buffer))
 
+(defun anaconda-nav--restore-window-configuration ()
+  (when anaconda-nav--window-configuration
+    (set-window-configuration anaconda-nav--window-configuration)
+    (setq anaconda-nav--window-configuration nil)))
 
 (define-derived-mode anaconda-nav-mode special-mode "anaconda-nav"
   (use-local-map anaconda-nav-mode-map))
