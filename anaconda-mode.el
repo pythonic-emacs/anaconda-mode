@@ -204,8 +204,8 @@ IGNORED parameter is the string for which completion is required."
 (defun anaconda-mode-usages ()
   "Show usages for thing at point."
   (interactive)
-  (anaconda-nav (or (anaconda-mode-call-1 "usages")
-                    (error "No usages found"))))
+  (anaconda-nav-navigate (or (anaconda-mode-call-1 "usages")
+                             (error "No usages found"))))
 
 
 ;;; Definitions.
@@ -213,9 +213,9 @@ IGNORED parameter is the string for which completion is required."
 (defun anaconda-mode-goto-definitions ()
   "Goto definition for thing at point."
   (interactive)
-  (anaconda-nav (or (anaconda-mode-call-1 "goto_definitions")
-                    (error "No definition found"))
-                t))
+  (anaconda-nav-navigate (or (anaconda-mode-call-1 "goto_definitions")
+                             (error "No definition found"))
+                         t))
 
 
 ;;; Assignments.
@@ -223,9 +223,9 @@ IGNORED parameter is the string for which completion is required."
 (defun anaconda-mode-goto-assignments ()
   "Goto assignment for thing at point."
   (interactive)
-  (anaconda-nav (or (anaconda-mode-call-1 "goto_assignments")
-                    (error "No assignment found"))
-                t))
+  (anaconda-nav-navigate (or (anaconda-mode-call-1 "goto_assignments")
+                             (error "No assignment found"))
+                         t))
 
 (provide 'anaconda-mode)
 
