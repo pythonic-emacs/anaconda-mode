@@ -66,13 +66,11 @@
   "Navigate RESULT, jump if only one item and GOTO-IF-SINGLE-ITEM is non-nil."
   (setq anaconda-nav--last-marker (point-marker))
   (if (and goto-if-single-item (= 1 (length result)))
-      (progn
-        (anaconda-nav--push-last-marker)
-        (switch-to-buffer (anaconda-nav--item-buffer (car result))))
-    (progn
-      (setq anaconda-nav--window-configuration (current-window-configuration))
-      (delete-other-windows)
-      (switch-to-buffer-other-window (anaconda-nav--prepare-buffer result)))))
+      (progn (anaconda-nav--push-last-marker)
+             (switch-to-buffer (anaconda-nav--item-buffer (car result))))
+    (setq anaconda-nav--window-configuration (current-window-configuration))
+    (delete-other-windows)
+    (switch-to-buffer-other-window (anaconda-nav--prepare-buffer result))))
 
 ;;; Rendering buffer
 (defun anaconda-nav--prepare-buffer (result)
