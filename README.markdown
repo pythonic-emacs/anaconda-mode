@@ -50,13 +50,16 @@ Here ara interactive command available with anaconda-mode
 
 Keybinding  | Description
 ------------|--------------------------------------------
-M-.         | anaconda-mode-find-definition
-C-x 4 .     | anaconda-mode-find-definition-other-frame
-C-x 5 .     | anaconda-mode-find-definition-other-window
+M-.         | anaconda-mode-goto-definitions
+M-,         | anaconda-mode-goto-assignments
+M-*         | anaconda-nav-pop-marker
 M-?         | anaconda-mode-view-doc
-M-r         | anaconda-mode-find-reference
-C-x 4 R     | anaconda-mode-find-reference-other-window
-C-x 5 R     | anaconda-mode-find-reference-other-frame
+M-r         | anaconda-mode-usages
+
+If goto definitions, assignments or usages cause multiple candidates
+you'll see advanced anaconda navigator buffer.
+
+![navigator](static/navigator.png)
 
 ## Contribs
 
@@ -80,7 +83,7 @@ Anaconda backend for [company-mode](http://company-mode.github.io).
 (add-to-list 'company-backends 'company-anaconda)
 ```
 
-![screenshot1](screenshots/snapshot1.png)
+![company-anaconda](static/company-anaconda.png)
 
 ## Known Issues
 
