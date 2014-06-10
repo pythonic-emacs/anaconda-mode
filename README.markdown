@@ -1,4 +1,4 @@
-# anaconda-mode [![Build Status](https://travis-ci.org/proofit404/anaconda-mode.png?branch=master)](https://travis-ci.org/proofit404/anaconda-mode) [![Dependency Status](https://gemnasium.com/proofit404/anaconda-mode.png)](https://gemnasium.com/proofit404/anaconda-mode) [![Coverage Status](https://coveralls.io/repos/proofit404/anaconda-mode/badge.png)](https://coveralls.io/r/proofit404/anaconda-mode)
+# anaconda-mode [![Build Status](https://travis-ci.org/anaconda-mode/anaconda-mode.png?branch=master)](https://travis-ci.org/anaconda-mode/anaconda-mode) [![Dependency Status](https://gemnasium.com/anaconda-mode/anaconda-mode.png)](https://gemnasium.com/anaconda-mode/anaconda-mode) [![Coverage Status](https://coveralls.io/repos/anaconda-mode/anaconda-mode/badge.png)](https://coveralls.io/r/anaconda-mode/anaconda-mode)
 
 Code navigation, documentation lookup and completion for Python.
 
