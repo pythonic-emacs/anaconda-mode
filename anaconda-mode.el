@@ -138,8 +138,7 @@ ARGS are COMMAND argument passed to remote call."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
     (define-key map (kbd "M-r") 'anaconda-mode-usages)
-    (define-key map [remap find-tag] 'anaconda-mode-goto-definitions)
-    (define-key map [remap tags-loop-continue] 'anaconda-mode-goto-assignments)
+    (define-key map [remap find-tag] 'anaconda-mode-goto)
     (define-key map [remap pop-tag-mark] 'anaconda-nav-pop-marker)
     map)
   "Keymap for `anaconda-mode'.")
@@ -208,7 +207,7 @@ IGNORED parameter is the string for which completion is required."
                              (error "No usages found"))))
 
 
-;;; Definitions.
+;;; Definitions and assignments.
 
 (defun anaconda-mode-goto-definitions ()
   "Goto definition for thing at point."
@@ -217,14 +216,19 @@ IGNORED parameter is the string for which completion is required."
                              (error "No definition found"))
                          t))
 
-
-;;; Assignments.
-
 (defun anaconda-mode-goto-assignments ()
   "Goto assignment for thing at point."
   (interactive)
   (anaconda-nav-navigate (or (anaconda-mode-call-1 "goto_assignments")
                              (error "No assignment found"))
+                         t))
+
+(defun anaconda-mode-goto ()
+  "Goto definition or fallback to assignment for thing at point."
+  (interactive)
+  (anaconda-nav-navigate (or (anaconda-mode-call-1 "goto_definitions")
+                             (anaconda-mode-call-1 "goto_assignments")
+                             (error "No definition found"))
                          t))
 
 (provide 'anaconda-mode)
