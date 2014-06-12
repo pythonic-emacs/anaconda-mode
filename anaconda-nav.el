@@ -44,7 +44,8 @@
       (error "Buffer no longer available"))
     (switch-to-buffer buffer)
     (goto-char (marker-position marker))
-    (set-marker marker nil)))
+    (set-marker marker nil)
+    (anaconda-nav--cleanup-buffers)))
 
 (defun anaconda-nav--push-last-marker ()
   "Add last marker to markers."
@@ -52,8 +53,31 @@
     (push anaconda-nav--last-marker anaconda-nav--markers)
     (setq anaconda-nav--last-marker nil)))
 
-;;; Window configuration
+(defun anaconda-nav--all-markers ()
+  "Markers including last-marker."
+  (if anaconda-nav--last-marker
+      (cons anaconda-nav--last-marker anaconda-nav--markers)
+    anaconda-nav--markers))
+
+;;; Window and buffer management
 (defvar anaconda-nav--window-configuration nil)
+(defvar anaconda-nav--created-buffers ())
+
+(defun anaconda-nav--cleanup-buffers ()
+  "Kill unmodified buffers (without markers) created by anaconda-nav."
+  (let* ((marker-buffers (-map 'marker-buffer (anaconda-nav--all-markers)))
+         (result (--separate (-contains? marker-buffers it)
+                             anaconda-nav--created-buffers)))
+    (setq anaconda-nav--created-buffers (car result))
+    (-each (cadr result) 'kill-buffer-if-not-modified)))
+
+(defun anaconda-nav--get-or-create-buffer (path)
+  "Get buffer for PATH, and record if buffer was created."
+  (or (find-buffer-visiting path)
+      (let ((created-buffer (find-file-noselect path)))
+        (anaconda-nav--cleanup-buffers)
+        (push created-buffer anaconda-nav--created-buffers)
+        created-buffer)))
 
 (defun anaconda-nav--restore-window-configuration ()
   "Restore window configuration."
@@ -72,7 +96,7 @@
     (delete-other-windows)
     (switch-to-buffer-other-window (anaconda-nav--prepare-buffer result))))
 
-;;; Rendering buffer
+;;; Rendering results
 (defun anaconda-nav--prepare-buffer (result)
   "Render RESULT in the navigation buffer."
   (with-current-buffer (get-buffer-create "*anaconda-nav*")
@@ -142,7 +166,7 @@
 (defun anaconda-nav--item-buffer (item)
   "Get buffer of ITEM and position the point."
   (cl-destructuring-bind (&key line column name path &allow-other-keys) item
-    (with-current-buffer (find-file-noselect path)
+    (with-current-buffer (anaconda-nav--get-or-create-buffer path)
       (goto-char (point-min))
       (forward-line (1- line))
       (forward-char column)
