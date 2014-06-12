@@ -94,7 +94,10 @@
 
 (defun anaconda-nav--insert-module (header &rest items)
   "Insert a module consisting of a HEADER with ITEMS."
-  (insert (car header) "\n")
+  (insert (propertize (car header)
+                      'face 'bold
+                      'anaconda-nav-module t)
+          "\n")
   (--each items (insert (anaconda-nav--format-item it) "\n"))
   (insert "\n"))
 
@@ -128,21 +131,25 @@
                      ((point))))
 
     (--dotimes (abs argp)
-      (--if-let (anaconda-nav--find-item (cl-plusp argp))
-          (goto-char it)
-        (error "No more matches")))
+      (anaconda-nav--goto-property 'anaconda-nav-item (cl-plusp argp)))
 
     (setq-local overlay-arrow-position (copy-marker (line-beginning-position)))
     (--when-let (get-text-property (point) 'anaconda-nav-item)
       (pop-to-buffer (anaconda-nav--item-buffer it)))))
 
-(defun anaconda-nav--find-item (forwardp)
-  "Find next item in direction FORWARDP."
+(defun anaconda-nav--goto-property (prop forwardp)
+  "Goto next property PROP in direction FORWARDP."
+  (--if-let (anaconda-nav--find-property prop forwardp)
+      (goto-char it)
+    (error "No more matches")))
+
+(defun anaconda-nav--find-property (prop forwardp)
+  "Find next property PROP in direction FORWARDP."
   (let ((search (if forwardp #'next-single-property-change
                   #'previous-single-property-change)))
-    (-when-let (pos (funcall search (point) 'anaconda-nav-item))
-      (if (get-text-property pos 'anaconda-nav-item) pos
-        (funcall search pos 'anaconda-nav-item)))))
+    (-when-let (pos (funcall search (point) prop))
+      (if (get-text-property pos prop) pos
+        (funcall search pos prop)))))
 
 (defun anaconda-nav--item-buffer (item)
   "Get buffer of ITEM and position the point."
@@ -169,9 +176,24 @@
     (define-key map (kbd "RET") 'anaconda-nav-goto-item)
     (define-key map (kbd "n") 'next-error)
     (define-key map (kbd "p") 'previous-error)
+    (define-key map (kbd "M-n") 'anaconda-nav-next-module)
+    (define-key map (kbd "M-p") 'anaconda-nav-previous-module)
     (define-key map (kbd "q") 'anaconda-nav-quit)
     map)
   "Keymap for `anaconda-nav-mode'.")
+
+(defun anaconda-nav-next-module ()
+  "Visit first error of next module."
+  (interactive)
+  (anaconda-nav--goto-property 'anaconda-nav-module t)
+  (next-error))
+
+(defun anaconda-nav-previous-module ()
+  "Visit first error of previous module."
+  (interactive)
+  (anaconda-nav--goto-property 'anaconda-nav-item nil)
+  (anaconda-nav--goto-property 'anaconda-nav-module nil)
+  (next-error))
 
 (defun anaconda-nav-quit ()
   "Quit `anaconda-nav-mode' and restore window configuration."
