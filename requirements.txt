@@ -4,4 +4,4 @@
 
 jedi==0.8.0-final0
 json-rpc==1.6
-click==1.1
+click==2.1
