@@ -4,7 +4,7 @@
 
 ;; Authors: Malyshev Artem <proofit404@gmail.com>
 ;;          Fredrik Bergroth <fbergroth@gmail.com>
-;; URL: https://github.com/proofit404/anaconda-mode
+;; URL: https://github.com/anaconda-mode/anaconda-mode
 ;; Version: 0.1.0
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -50,24 +50,21 @@
 
 (defun anaconda-eldoc-function ()
   "Show eldoc for context at point."
-  (-when-let* ((res (anaconda-mode-call-1 "eldoc"))
+  (-when-let* ((res (anaconda-rpc-script "eldoc"))
                (doc (apply 'anaconda-eldoc--format res)))
     (if anaconda-eldoc-as-single-line
         (substring doc 0 (min (frame-width) (length doc)))
       doc)))
 
-;;;###autoload
-(define-minor-mode anaconda-eldoc
-  "ElDoc for anaconda-mode."
-  :lighter ""
-  :keymap nil
-  (if anaconda-eldoc
-      (progn
-        (make-local-variable 'eldoc-documentation-function)
-        (setq-local eldoc-documentation-function 'anaconda-eldoc-function)
-        (eldoc-mode 1))
-    (kill-local-variable 'eldoc-documentation-function)
-    (eldoc-mode -1)))
+(defun anaconda-eldoc-handler (step)
+  "Anaconda eldoc plugin handler."
+  (pcase step
+    (`buffer-start
+     (setq-local eldoc-documentation-function 'anaconda-eldoc-function)
+     (eldoc-mode 1))
+    (`buffer-stop
+     (kill-local-variable 'eldoc-documentation-function)
+     (eldoc-mode -1))))
 
 (provide 'anaconda-eldoc)
 

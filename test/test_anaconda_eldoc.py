@@ -1,5 +1,7 @@
 from test.helpers import send
 
+import anaconda_eldoc  # noqa
+
 
 def test_eldoc_signature():
     rv = send('''

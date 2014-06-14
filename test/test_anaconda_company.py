@@ -1,5 +1,7 @@
-from test.helpers import send
 import os
+from test.helpers import send
+
+import anaconda_company  # noqa
 
 
 def test_completion_response():

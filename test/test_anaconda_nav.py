@@ -1,6 +1,8 @@
 import os
 from test.helpers import send
 
+import anaconda_nav  # noqa
+
 
 def test_usages():
     rv = send('''\
@@ -45,6 +47,6 @@ def test_goto_assignments():
               else if c: x = 3
               else:      x = 4
               x_|_
-              ''', 'goto_assignments')
+              ''', 'goto_definitions')
 
     assert sorted(r['line'] for r in rv) == [1, 2, 3, 4]

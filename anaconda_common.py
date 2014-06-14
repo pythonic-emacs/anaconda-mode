@@ -1,6 +1,7 @@
-from jsonrpc import dispatcher
-import jedi
 import functools
+
+import jedi
+from jsonrpc import dispatcher
 
 
 def script_method(f):

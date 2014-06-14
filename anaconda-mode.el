@@ -4,7 +4,7 @@
 
 ;; Authors: Malyshev Artem <proofit404@gmail.com>
 ;;          Fredrik Bergroth <fbergroth@gmail.com>
-;; URL: https://github.com/proofit404/anaconda-mode
+;; URL: https://github.com/anaconda-mode/anaconda-mode
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "24") (json-rpc "0.0.1") (cl-lib "0.5.0"))
 
@@ -28,7 +28,6 @@
 (require 'json-rpc)
 (require 'etags)
 (require 'python)
-(require 'anaconda-nav)
 
 
 ;;; Server.
@@ -42,24 +41,7 @@
 (defvar anaconda-mode-port 24970
   "Port for anaconda_mode connection.")
 
-(defun anaconda-mode-python ()
-  "Detect python executable."
-  (let ((virtualenv python-shell-virtualenv-path))
-    (if virtualenv
-        (concat (file-name-as-directory virtualenv) "bin/python")
-      "python")))
-
-(defun anaconda-mode-python-args ()
-  "Python arguments to run anaconda_mode server."
-  (delq nil (list "anaconda_mode.py"
-                  "--bind" anaconda-mode-host
-                  "--port" (number-to-string anaconda-mode-port)
-                  (when anaconda-mode-debug "--debug"))))
-
-(defun anaconda-mode-command ()
-  "Shell command to run anaconda_mode server."
-  (cons (anaconda-mode-python)
-	(anaconda-mode-python-args)))
+(defvar anaconda-mode-plugins '(company nav doc eldoc))
 
 (defvar anaconda-mode-directory
   (file-name-directory load-file-name)
@@ -70,6 +52,38 @@
 
 (defvar anaconda-mode-connection nil
   "Json Rpc connection to anaconda_mode process.")
+
+(defun anaconda-mode-python ()
+  "Detect python executable."
+  ;; TODO: (f-join it "bin" "python")?
+  (--if-let python-shell-virtualenv-path
+      (concat (file-name-as-directory it) "bin/python")
+    "python"))
+
+(defun anaconda-mode-plugin-paths ()
+  "List of paths for anaconda plugins."
+  (->> anaconda-mode-plugins
+    (--map (->> it
+             symbol-name
+             (concat "anaconda-")
+             locate-library
+             file-name-directory))
+    -distinct))
+
+(defun anaconda-mode-python-args ()
+  "Python arguments to run anaconda_mode server."
+  (-flatten
+   (list "anaconda_mode.py"
+         "--bind" anaconda-mode-host
+         "--port" (number-to-string anaconda-mode-port)
+         (--mapcat `("--path" ,it) (anaconda-mode-plugin-paths))
+         (--mapcat `("--plugin" ,(symbol-name it)) anaconda-mode-plugins)
+         (when anaconda-mode-debug "--debug"))))
+
+(defun anaconda-mode-command ()
+  "Shell command to run anaconda_mode server."
+  (cons (anaconda-mode-python)
+        (anaconda-mode-python-args)))
 
 (defun anaconda-mode-running-p ()
   "Check for running anaconda_mode server."
@@ -88,7 +102,8 @@
                  (anaconda-mode-python-args)))
     (accept-process-output anaconda-mode-process)
     (setq anaconda-mode-connection
-          (json-rpc-connect anaconda-mode-host anaconda-mode-port))))
+          (json-rpc-connect anaconda-mode-host anaconda-mode-port))
+    (anaconda-mode-notify-plugins 'start)))
 
 (defun anaconda-mode-start-node ()
   "Start anaconda_mode server."
@@ -102,7 +117,8 @@
   (when (anaconda-mode-running-p)
     (kill-process anaconda-mode-process)
     (json-rpc-close anaconda-mode-connection)
-    (setq anaconda-mode-connection nil)))
+    (setq anaconda-mode-connection nil)
+    (anaconda-mode-notify-plugins 'stop)))
 
 (defun anaconda-mode-need-restart ()
   "Check if current `anaconda-mode-process' need restart with new args.
@@ -114,19 +130,17 @@ Return nil if it run under proper environment."
 
 ;;; Interaction.
 
-(defun anaconda-mode-call (command &rest args)
-  "Make remote procedure call for COMMAND.
-ARGS are COMMAND argument passed to remote call."
+(defun anaconda-rpc (method &rest params)
+  "Call rpc method METHOD with params PARAMS."
   (anaconda-mode-start-node)
   ;; use list since not all dash functions operate on vectors
   (let ((json-array-type 'list))
-    (apply 'json-rpc anaconda-mode-connection command args)))
+    (apply 'json-rpc anaconda-mode-connection method params)))
 
-(defun anaconda-mode-call-1 (command)
-  ;; TODO: Remove this function ones plugin system will be implemented.
-  ;; See #28.
-  (anaconda-mode-call
-   command
+(defun anaconda-rpc-script (method)
+  "Call rpc script method METHOD."
+  (anaconda-rpc
+   method
    (buffer-substring-no-properties (point-min) (point-max))
    (line-number-at-pos (point))
    (current-column)
@@ -135,14 +149,7 @@ ARGS are COMMAND argument passed to remote call."
 
 ;;; Minor mode.
 
-(defvar anaconda-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
-    (define-key map (kbd "M-r") 'anaconda-mode-usages)
-    (define-key map [remap find-tag] 'anaconda-mode-goto-definitions)
-    (define-key map [remap tags-loop-continue] 'anaconda-mode-goto-assignments)
-    (define-key map [remap pop-tag-mark] 'anaconda-nav-pop-marker)
-    map)
+(defvar anaconda-mode-map (make-sparse-keymap)
   "Keymap for `anaconda-mode'.")
 
 ;;;###autoload
@@ -152,81 +159,18 @@ ARGS are COMMAND argument passed to remote call."
 \\{anaconda-mode-map}"
   :lighter " Anaconda"
   :keymap anaconda-mode-map
-  (if anaconda-mode
-      (add-hook 'completion-at-point-functions
-                'anaconda-mode-complete-at-point nil t)
-    (remove-hook 'completion-at-point-functions
-                 'anaconda-mode-complete-at-point t)))
+  (anaconda-mode-start-node)
+  (anaconda-mode-notify-plugins
+   (if anaconda-mode 'buffer-start 'buffer-stop)))
 
-
-;;; Code completion.
-
-(defun anaconda-mode-complete-at-point ()
-  "Complete at point with anaconda_mode."
-  (let* ((bounds (bounds-of-thing-at-point 'symbol))
-         (start (or (car bounds) (point)))
-         (stop (or (cdr bounds) (point))))
-    (list start stop
-          (completion-table-dynamic
-           'anaconda-mode-complete-thing))))
-
-(defun anaconda-mode-complete-thing (&rest ignored)
-  "Complete python thing at point.
-IGNORED parameter is the string for which completion is required."
-  (mapcar (lambda (candidate) (plist-get candidate :name))
-          (anaconda-mode-complete)))
-
-(defun anaconda-mode-complete ()
-  "Request completion candidates."
-  (anaconda-mode-call-1 "complete"))
-
-
-;;; View documentation.
-
-(defun anaconda-mode-view-doc ()
-  "Show documentation for context at point."
-  (interactive)
-  (display-buffer
-   (anaconda-mode-doc-buffer (or (anaconda-mode-call-1 "doc")
-                                 (error "No documentation found")))))
-
-(defun anaconda-mode-doc-buffer (doc)
-  "Display documentation buffer with contents DOC."
-  (with-current-buffer (get-buffer-create "*anaconda-doc*")
-    (view-mode -1)
-    (erase-buffer)
-    (insert doc)
-    (view-mode 1)
-    (current-buffer)))
-
-
-;;; Usages.
-
-(defun anaconda-mode-usages ()
-  "Show usages for thing at point."
-  (interactive)
-  (anaconda-nav-navigate (or (anaconda-mode-call-1 "usages")
-                             (error "No usages found"))))
-
-
-;;; Definitions.
-
-(defun anaconda-mode-goto-definitions ()
-  "Goto definition for thing at point."
-  (interactive)
-  (anaconda-nav-navigate (or (anaconda-mode-call-1 "goto_definitions")
-                             (error "No definition found"))
-                         t))
-
-
-;;; Assignments.
-
-(defun anaconda-mode-goto-assignments ()
-  "Goto assignment for thing at point."
-  (interactive)
-  (anaconda-nav-navigate (or (anaconda-mode-call-1 "goto_assignments")
-                             (error "No assignment found"))
-                         t))
+(defun anaconda-mode-notify-plugins (step)
+  "Notify plugins of STEP through their handler."
+  (--each anaconda-mode-plugins
+    (let* ((library (concat "anaconda-" (symbol-name it)))
+           (handler (intern (concat library "-handler"))))
+      (require (intern library))
+      (when (fboundp handler)
+        (funcall handler step)))))
 
 (provide 'anaconda-mode)
 

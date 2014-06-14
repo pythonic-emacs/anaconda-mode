@@ -1,6 +1,7 @@
 from test.helpers import send
-
 from textwrap import dedent
+
+import anaconda_doc  # noqa
 
 
 def test_doc_fn_with_docstring():

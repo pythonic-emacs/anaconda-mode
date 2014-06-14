@@ -1,10 +1,10 @@
-;;; company-anaconda.el --- Anaconda backend for company-mode
+;;; anaconda-company.el --- Anaconda plugin for company-mode
 
 ;; Copyright (C) 2013, 2014 by Malyshev Artem
 
 ;; Authors: Malyshev Artem <proofit404@gmail.com>
 ;;          Fredrik Bergroth <fbergroth@gmail.com>
-;; URL: https://github.com/proofit404/anaconda-mode
+;; URL: https://github.com/anaconda-mode/anaconda-mode
 ;; Version: 0.1.0
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -26,15 +26,12 @@
 
 (require 'company)
 (require 'anaconda-mode)
+(require 'anaconda-doc)
 (require 'dash)
 (require 'cl-lib)
 
 (defvar company-anaconda-compact-annotation t
   "Show only the first character of type in annotations.")
-
-(defun company-anaconda-init ()
-  "Initialize company-anaconda buffer."
-  (setq-local company-tooltip-align-annotations t))
 
 (defun company-anaconda-prefix ()
   "Grab prefix at point.
@@ -49,7 +46,7 @@ Properly detect strings, comments and attribute access."
   "Obtain candidates list from anaconda."
   (--map (propertize (plist-get it :name)
                      'item it)
-         (anaconda-mode-complete)))
+         (anaconda-rpc-script "complete")))
 
 (defun -get-prop (prop candidate)
   "Return the property PROP of completion candidate CANDIDATE."
@@ -59,7 +56,7 @@ Properly detect strings, comments and attribute access."
 (defun company-anaconda-doc-buffer (candidate)
   "Return documentation buffer for chosen CANDIDATE."
   (let ((doc (-get-prop :doc candidate)))
-    (and doc (anaconda-mode-doc-buffer doc))))
+    (and doc (anaconda-doc-buffer doc))))
 
 (defun company-anaconda-meta (candidate)
   "Return short documentation string for chosen CANDIDATE."
@@ -78,13 +75,11 @@ Properly detect strings, comments and attribute access."
                (line (-get-prop :line candidate)))
     (cons path line)))
 
-;;;###autoload
 (defun company-anaconda (command &optional arg)
   "Jedi backend for company-mode.
 See `company-backends' for more info about COMMAND and ARG."
   (interactive (list 'interactive))
   (cl-case command
-    (init (company-anaconda-init))
     (interactive (company-begin-backend 'company-anaconda))
     (prefix (company-anaconda-prefix))
     (candidates (company-anaconda-candidates))
@@ -94,6 +89,20 @@ See `company-backends' for more info about COMMAND and ARG."
     (location (company-anaconda-location arg))
     (sorted t)))
 
-(provide 'company-anaconda)
+(defun anaconda-company-handler (step)
+  "Anaconda company plugin handler."
+  (pcase step
+    (`buffer-start
+     (setq-local company-backends
+                 (-difference (cons 'company-anaconda company-backends)
+                              '(company-ropemacs)))
+     (setq-local company-tooltip-align-annotations t)
+     (company-mode 1))
+    (`buffer-stop
+     (kill-local-variable 'company-backends)
+     (kill-local-variable 'company-tooltip-align-annotations)
+     (company-mode -1))))
 
-;;; company-anaconda.el ends here
+(provide 'anaconda-company)
+
+;;; anaconda-company.el ends here
