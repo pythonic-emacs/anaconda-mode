@@ -157,40 +157,6 @@ ARGS are COMMAND argument passed to remote call."
     (remove-hook 'completion-at-point-functions
                  'anaconda-mode-complete-at-point t)))
 
-
-;;; Usages.
-
-(defun anaconda-mode-usages ()
-  "Show usages for thing at point."
-  (interactive)
-  (anaconda-nav-navigate (or (anaconda-mode-call-1 "usages")
-                             (error "No usages found"))))
-
-
-;;; Definitions and assignments.
-
-(defun anaconda-mode-goto-definitions ()
-  "Goto definition for thing at point."
-  (interactive)
-  (anaconda-nav-navigate (or (anaconda-mode-call-1 "goto_definitions")
-                             (error "No definition found"))
-                         t))
-
-(defun anaconda-mode-goto-assignments ()
-  "Goto assignment for thing at point."
-  (interactive)
-  (anaconda-nav-navigate (or (anaconda-mode-call-1 "goto_assignments")
-                             (error "No assignment found"))
-                         t))
-
-(defun anaconda-mode-goto ()
-  "Goto definition or fallback to assignment for thing at point."
-  (interactive)
-  (anaconda-nav-navigate (or (anaconda-mode-call-1 "goto_definitions")
-                             (anaconda-mode-call-1 "goto_assignments")
-                             (error "No definition found"))
-                         t))
-
 (provide 'anaconda-mode)
 
 ;;; anaconda-mode.el ends here

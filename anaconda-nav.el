@@ -27,6 +27,7 @@
 
 (require 'dash)
 (require 'cl-lib)
+(require 'anaconda-mode)
 
 ;;; Markers
 (defvar anaconda-nav--last-marker nil)
@@ -235,6 +236,26 @@
   (setq next-error-function 'anaconda-nav-next-error)
   (setq next-error-last-buffer (current-buffer))
   (next-error-follow-minor-mode 1))
+
+(defun anaconda-nav-handler (step)
+  (pcase step
+    (`start
+     (define-key anaconda-mode-map (kbd "M-r") 'anaconda-nav-show-usages)
+     (define-key anaconda-mode-map [remap find-tag] 'anaconda-nav-goto-definitions)
+     (define-key anaconda-mode-map [remap pop-tag-mark] 'anaconda-nav-pop-marker))))
+
+(defun anaconda-nav-show-usages ()
+  "Show usages for thing at point."
+  (interactive)
+  (anaconda-nav-navigate (or (anaconda-rpc-script "usages")
+                             (error "No usages found"))))
+
+(defun anaconda-nav-goto-definitions ()
+  "Goto definitions or fallback to assignments for thing at point."
+  (interactive)
+  (anaconda-nav-navigate (or (anaconda-rpc-script "goto_definitions")
+                             (error "No definition found"))
+                         t))
 
 (provide 'anaconda-nav)
 

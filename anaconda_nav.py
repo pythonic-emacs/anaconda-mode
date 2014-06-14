@@ -30,13 +30,7 @@ def process_definitions(f):
 @script_method
 @process_definitions
 def goto_definitions(script):
-    return script.goto_definitions()
-
-
-@script_method
-@process_definitions
-def goto_assignments(script):
-    return script.goto_assignments()
+    return script.goto_definitions() or script.goto_assignments()
 
 
 @script_method
