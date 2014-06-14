@@ -158,25 +158,6 @@ ARGS are COMMAND argument passed to remote call."
                  'anaconda-mode-complete-at-point t)))
 
 
-;;; View documentation.
-
-(defun anaconda-mode-view-doc ()
-  "Show documentation for context at point."
-  (interactive)
-  (display-buffer
-   (anaconda-mode-doc-buffer (or (anaconda-mode-call-1 "doc")
-                                 (error "No documentation found")))))
-
-(defun anaconda-mode-doc-buffer (doc)
-  "Display documentation buffer with contents DOC."
-  (with-current-buffer (get-buffer-create "*anaconda-doc*")
-    (view-mode -1)
-    (erase-buffer)
-    (insert doc)
-    (view-mode 1)
-    (current-buffer)))
-
-
 ;;; Usages.
 
 (defun anaconda-mode-usages ()
