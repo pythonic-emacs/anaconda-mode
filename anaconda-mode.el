@@ -158,28 +158,6 @@ ARGS are COMMAND argument passed to remote call."
                  'anaconda-mode-complete-at-point t)))
 
 
-;;; Code completion.
-
-(defun anaconda-mode-complete-at-point ()
-  "Complete at point with anaconda_mode."
-  (let* ((bounds (bounds-of-thing-at-point 'symbol))
-         (start (or (car bounds) (point)))
-         (stop (or (cdr bounds) (point))))
-    (list start stop
-          (completion-table-dynamic
-           'anaconda-mode-complete-thing))))
-
-(defun anaconda-mode-complete-thing (&rest ignored)
-  "Complete python thing at point.
-IGNORED parameter is the string for which completion is required."
-  (mapcar (lambda (candidate) (plist-get candidate :name))
-          (anaconda-mode-complete)))
-
-(defun anaconda-mode-complete ()
-  "Request completion candidates."
-  (anaconda-mode-call-1 "complete"))
-
-
 ;;; View documentation.
 
 (defun anaconda-mode-view-doc ()
