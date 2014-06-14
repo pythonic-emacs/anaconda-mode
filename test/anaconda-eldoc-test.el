@@ -3,7 +3,7 @@
 (require 'anaconda-eldoc)
 
 (ert-deftest test-anaconda-eldoc-init ()
-  (anaconda-eldoc 1)
+  (anaconda-eldoc-handler 'buffer-start)
   (should (eq eldoc-documentation-function
               'anaconda-eldoc-function)))
 
