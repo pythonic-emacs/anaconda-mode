@@ -4,7 +4,7 @@
 
 ;; Authors: Malyshev Artem <proofit404@gmail.com>
 ;;          Fredrik Bergroth <fbergroth@gmail.com>
-;; URL: https://github.com/proofit404/anaconda-mode
+;; URL: https://github.com/anaconda-mode/anaconda-mode
 ;; Version: 0.1.0
 
 ;; This program is free software; you can redistribute it and/or modify

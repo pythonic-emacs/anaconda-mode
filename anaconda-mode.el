@@ -4,7 +4,7 @@
 
 ;; Authors: Malyshev Artem <proofit404@gmail.com>
 ;;          Fredrik Bergroth <fbergroth@gmail.com>
-;; URL: https://github.com/proofit404/anaconda-mode
+;; URL: https://github.com/anaconda-mode/anaconda-mode
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "24") (json-rpc "0.0.1") (cl-lib "0.5.0"))
 
