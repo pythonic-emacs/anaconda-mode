@@ -1,29 +1,17 @@
-import logging
-import os
-import sys
-
-PY3 = sys.version_info[0] == 3
-
-if PY3:
+try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
-else:
+except:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
-BASE_DIR = os.path.dirname(__file__)
-logger = logging.getLogger(__name__)
-
-# Add every directory inside vendor/ to sys.path.
-for file in os.listdir('vendor'):
-    path = os.path.join(BASE_DIR, 'vendor', file)
-    if os.path.isdir(path) and path not in sys.path:
-        sys.path.append(path)
-
-import click  # isort:skip
-from jsonrpc import dispatcher, JSONRPCResponseManager  # isort:skip
+import click
+from jsonrpc import dispatcher, JSONRPCResponseManager
 
 # FIXME: This must be an positional argument.  See #28.
-import anaconda_jedi   # noqa isort:skip
-import anaconda_eldoc  # noqa isort:skip
+import anaconda_jedi
+import anaconda_eldoc
+
+import logging
+logger = logging.getLogger(__name__)
 
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
