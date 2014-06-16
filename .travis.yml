@@ -1,12 +1,19 @@
 language: python
 
+env:
+  global:
+    - PATH=$HOME/.cask/bin:$PATH
+
 before_install:
-  - curl -L http://bootstrap.saltstack.org | sudo sh
-  - sudo cp -r salt/states /srv/states
-  - sudo cp salt/minion /etc/salt/minion
+  - sudo add-apt-repository -y ppa:cassou/emacs
+  - sudo add-apt-repository -y ppa:ubuntu-elisp
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq emacs24
+  - curl -fsSkL https://raw.github.com/cask/cask/master/go | python
 
 install:
-  - sudo salt-call state.highstate pillar="{'build_dir':'$TRAVIS_BUILD_DIR'}" --local
+  - cask install
+  - pip install tox coveralls
 
 script:
   - tox
