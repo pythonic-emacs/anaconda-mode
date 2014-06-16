@@ -10,7 +10,6 @@ else:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
 BASE_DIR = os.path.dirname(__file__)
-LOG_DIR = os.path.join(BASE_DIR, 'log')
 logger = logging.getLogger(__name__)
 
 # Add every directory inside vendor/ to sys.path.
@@ -63,8 +62,7 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 def main(bind, port, debug):
     """Runs anaconda server."""
     if debug:
-        logging.basicConfig(level=logging.DEBUG,
-                            filename=os.path.join(LOG_DIR, 'development.log'))
+        logging.basicConfig(level=logging.DEBUG, filename='anaconda_mode.log')
 
     logger.info('Starting anaconda_mode server...')
     server = HTTPServer((bind, port), HTTPRequestHandler)

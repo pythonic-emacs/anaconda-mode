@@ -1,3 +1,4 @@
+*.log
 *.elc
 *.pyc
 *~
@@ -6,6 +7,4 @@
 MANIFEST
 [#]*[#]
 __pycache__/
-log/
-!log/.gitkeep
 .coverage
