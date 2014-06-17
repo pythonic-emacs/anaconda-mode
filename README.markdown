@@ -14,6 +14,7 @@ Code navigation, documentation lookup and completion for Python.
 * find references
 * view documentation
 * virtualenv
+* eldoc
 
 ## Install
 
@@ -51,7 +52,6 @@ Here ara interactive command available with anaconda-mode
 Keybinding  | Description
 ------------|--------------------------------------------
 M-.         | anaconda-mode-goto-definitions
-M-,         | anaconda-mode-goto-assignments
 M-*         | anaconda-nav-pop-marker
 M-?         | anaconda-mode-view-doc
 M-r         | anaconda-mode-usages
@@ -61,18 +61,13 @@ you'll see advanced anaconda navigator buffer.
 
 ![navigator](static/navigator.png)
 
-## Contribs
+## eldoc
 
-Anaconda doesn't has internal contrib interface yet.  But any way you
-can use additionally packages with manual setup.  To turn on any of
-its add corresponding code snippet to your configuration.
-
-#### anaconda-eldoc
-
-ElDoc documentation lookup with `anaconda-mode`.
+`anaconda-mode` provide document function to `eldoc-mode`.  All you
+need is enable `eldoc-mode` in addition to previous setup.
 
 ```lisp
-(add-hook 'python-mode-hook 'anaconda-eldoc)
+(add-hook 'python-mode-hook 'eldoc-mode)
 ```
 
 ## Known Issues
