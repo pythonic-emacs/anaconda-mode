@@ -4,8 +4,6 @@
   (cask-initialize source-directory)
   (add-to-list 'load-path source-directory))
 
-;; Anaconda settings.
-
 (require 'anaconda-mode)
 
 (let ((envdir (getenv "ENVDIR")))
@@ -17,12 +15,6 @@
 
 (add-hook 'python-mode-hook 'anaconda-mode)
 
-;; ElDoc settings.
-
-(require 'anaconda-eldoc)
-
-(add-hook 'python-mode-hook 'anaconda-eldoc)
-
-;; Pyenv settings.
+(add-hook 'python-mode-hook 'eldoc-mode)
 
 (pyenv-mode)

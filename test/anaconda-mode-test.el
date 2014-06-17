@@ -40,3 +40,15 @@ simple - def f
 f(a, b = 1)
 
 Docstring for f.")))
+
+(ert-deftest test-anaconda-eldoc-existing ()
+  (load-fixture "simple.py" "\
+def fn(a, b):
+    pass
+fn(_|_")
+  (should (equal (anaconda-eldoc-function)
+                 "fn(a, b)")))
+
+(ert-deftest test-anaconda-eldoc-invalid ()
+  (load-fixture "simple.py" "invalid(_|_")
+  (should-not (anaconda-eldoc-function)))
