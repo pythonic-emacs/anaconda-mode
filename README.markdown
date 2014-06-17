@@ -75,16 +75,6 @@ ElDoc documentation lookup with `anaconda-mode`.
 (add-hook 'python-mode-hook 'anaconda-eldoc)
 ```
 
-#### company-anaconda
-
-Anaconda backend for [company-mode](http://company-mode.github.io).
-
-```lisp
-(add-to-list 'company-backends 'company-anaconda)
-```
-
-![company-anaconda](static/company-anaconda.png)
-
 ## Known Issues
 
 If you're using proxy server, you have to make sure that the proxy is

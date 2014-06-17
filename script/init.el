@@ -17,12 +17,6 @@
 
 (add-hook 'python-mode-hook 'anaconda-mode)
 
-;; Company settings.
-
-(global-company-mode)
-
-(add-to-list 'company-backends 'company-anaconda)
-
 ;; ElDoc settings.
 
 (require 'anaconda-eldoc)
