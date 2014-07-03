@@ -1,17 +1,21 @@
-Anaconda mode
-=============
-
-.. image:: https://travis-ci.org/anaconda-mode/anaconda-mode.png
+.. |travis| image:: https://travis-ci.org/anaconda-mode/anaconda-mode.png
     :target: https://travis-ci.org/anaconda-mode/anaconda-mode
     :alt: Build Status
 
-.. image:: https://gemnasium.com/anaconda-mode/anaconda-mode.png
-   :target: https://gemnasium.com/anaconda-mode/anaconda-mode
-   :alt: Dependency Status
+.. |gemnasium| image:: https://gemnasium.com/anaconda-mode/anaconda-mode.png
+    :target: https://gemnasium.com/anaconda-mode/anaconda-mode
+    :alt: Dependency Status
 
-.. image:: https://coveralls.io/repos/anaconda-mode/anaconda-mode/badge.png
-   :target: https://coveralls.io/r/anaconda-mode/anaconda-mode
-   :alt: Coverage Status
+.. |coveralls| image:: https://coveralls.io/repos/anaconda-mode/anaconda-mode/badge.png
+    :target: https://coveralls.io/r/anaconda-mode/anaconda-mode
+    :alt: Coverage Status
+
+================================================
+ Anaconda mode |coveralls| |gemnasium| |travis|
+================================================
+
+.. image:: static/logo.png
+    :align: center
 
 Code navigation, documentation lookup and completion for Python.
 
@@ -37,12 +41,13 @@ All you need is install the package from Melpa_::
 Usage
 -----
 
-By default ``anaconda-mode`` starts its HTTP server on port ``24970``
-for interaction with Python process.  You may want to close this port
-for incoming network connections.  This server will start
-automatically when you call any anaconda command like reference search
-or documentation lookup.  To start ``anaconda-mode`` automatically in
-all python buffers add following to your configuration.
+By default ``anaconda-mode`` starts its HTTP server on first
+accessible port from ``24970`` for interaction with Python process.
+You may want to close this port for incoming network connections.
+This server will start automatically when you call any anaconda
+command like reference search or documentation lookup.  To start
+``anaconda-mode`` automatically in all python buffers add following to
+your configuration.
 
 .. code:: lisp
 
