@@ -2,6 +2,7 @@ import jedi
 import click
 import logging
 import functools
+import socket
 from jsonrpc import dispatcher, JSONRPCResponseManager
 
 try:
@@ -140,18 +141,26 @@ def eldoc(script):
 
 @click.command()
 @click.option('--bind', default='', help='Interface address to bind.')
-@click.option('--port', type=int, default=8000, help='Server port.')
-@click.option('--debug', default=False, is_flag=True,
-              help='Enable debug logging.')
-def main(bind, port, debug):
+@click.option('--debug', default=False, is_flag=True, help='Enable logging.')
+def main(bind, debug):
     """Runs anaconda server."""
     if debug:
         logging.basicConfig(level=logging.DEBUG, filename='anaconda_mode.log')
 
     logger.info('Starting anaconda_mode server...')
-    server = HTTPServer((bind, port), HTTPRequestHandler)
 
-    click.echo('anaconda_mode server started')
+    port = 24970
+    server = None
+
+    while server is None:
+
+        try:
+            server = HTTPServer((bind, port), HTTPRequestHandler)
+        except (OSError, socket.error):
+            port += 1
+
+    click.echo('anaconda_mode port {0}'.format(port), nl=False)
+
     server.serve_forever()
 
 

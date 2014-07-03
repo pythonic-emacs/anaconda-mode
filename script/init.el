@@ -1,3 +1,9 @@
+;;; init.el --- minimal anaconda-mode configuration
+
+;;; Commentary:
+
+;;; Code:
+
 (require 'cask)
 
 (let ((source-directory (locate-dominating-file load-file-name "Cask")))
@@ -9,8 +15,6 @@
 (let ((envdir (getenv "ENVDIR")))
   (setq python-shell-virtualenv-path envdir))
 
-(setq anaconda-mode-port 8887)
-
 (setq anaconda-mode-debug t)
 
 (add-hook 'python-mode-hook 'anaconda-mode)
@@ -18,3 +22,7 @@
 (add-hook 'python-mode-hook 'eldoc-mode)
 
 (pyenv-mode)
+
+(provide 'init)
+
+;;; init.el ends here

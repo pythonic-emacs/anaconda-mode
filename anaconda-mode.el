@@ -39,7 +39,7 @@
 (defvar anaconda-mode-host "localhost"
   "Target host with anaconda_mode server.")
 
-(defvar anaconda-mode-port 24970
+(defvar anaconda-mode-port nil
   "Port for anaconda_mode connection.")
 
 (defun anaconda-mode-python ()
@@ -52,7 +52,6 @@
   "Python arguments to run anaconda_mode server."
   (delq nil (list "anaconda_mode.py"
                   "--bind" anaconda-mode-host
-                  "--port" (number-to-string anaconda-mode-port)
                   (when anaconda-mode-debug "--debug"))))
 
 (defun anaconda-mode-command ()
@@ -73,6 +72,7 @@
 (defun anaconda-mode-running-p ()
   "Check for running anaconda_mode server."
   (and anaconda-mode-process
+       anaconda-mode-port
        (not (null (process-live-p anaconda-mode-process)))
        (json-rpc-live-p anaconda-mode-connection)))
 
@@ -82,12 +82,22 @@
     (setq anaconda-mode-process
           (apply 'start-process
                  "anaconda_mode"
-                 "*anaconda*"
+                 nil
                  (anaconda-mode-python)
                  (anaconda-mode-python-args)))
+    (set-process-filter anaconda-mode-process
+                        'anaconda-mode-process-filter)
     (accept-process-output anaconda-mode-process)
     (setq anaconda-mode-connection
           (json-rpc-connect anaconda-mode-host anaconda-mode-port))))
+
+(defun anaconda-mode-process-filter (process output)
+  "Filter anaconda_mode PROCESS OUTPUT function."
+  (-if-let (port (cadr (s-match "anaconda_mode port \\([0-9][0-9]*\\)" output)))
+      (progn
+          (setq anaconda-mode-port (string-to-number port))
+          (set-process-filter process nil))
+    (error "Could not start anaconda_mode server")))
 
 (defun anaconda-mode-start-node ()
   "Start anaconda_mode server."
