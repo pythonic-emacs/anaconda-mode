@@ -1,8 +1,12 @@
+import anaconda_mode
 import io
 import mock
-import anaconda_mode
+import os
 from click.testing import CliRunner
-from test.helpers import process, make_request
+from test.helpers import process, make_request, send
+from textwrap import dedent
+
+# HTTP server.
 
 
 def status_of(method, params):
@@ -72,3 +76,149 @@ def test_http_handler():
                                     'Server: Weight gain 4000',
                                     'Date: Ice age',
                                     'Content-Length: 8', '', 'response'])
+
+# Completion.
+
+
+def test_completion_response():
+    path = os.path.abspath('test.py')
+    rv = send('''\
+              def test1(a, b):
+                  """First test function."""
+                  pass
+
+
+              def test2(c):
+                  """Second test function."""
+                  pass
+
+              test_|_
+              ''', 'complete', path)
+
+    assert rv == [{
+        "name": "test1",
+        "doc": 'test1(a, b)\n\nFirst test function.',
+        'info': 'First test function.',
+        'type': 'function',
+        'path': path,
+        'line': 1
+    }, {
+        "name": "test2",
+        "doc": 'test2(c)\n\nSecond test function.',
+        'info': 'Second test function.',
+        'type': 'function',
+        'path': path,
+        'line': 6
+    }]
+
+# Definitions.
+
+
+def test_goto_definitions():
+    path = os.path.abspath('test.py')
+    rv = send('''\
+              def fn(a, b):
+                  pass
+              fn_|_(1, 2)
+              ''', 'goto_definitions', path)
+
+    assert rv == [{
+        'line': 1,
+        'column': 0,
+        'name': 'fn',
+        'description': 'def fn(a, b):',
+        'module': 'test',
+        'type': 'function',
+        'path': path
+    }]
+
+
+def test_unknown_definition():
+    rv = send('''\
+              raise_|_
+              ''', 'goto_definitions')
+
+    assert rv == []
+
+
+def test_goto_assignments():
+    rv = send('''\
+              if a:      x = 1
+              else if b: x = 2
+              else if c: x = 3
+              else:      x = 4
+              x_|_
+              ''', 'goto_assignments')
+
+    assert sorted(r['line'] for r in rv) == [1, 2, 3, 4]
+
+# Documentation.
+
+
+def test_doc_fn_with_docstring():
+    rv = send('''
+              def f_|_(a, b=1):
+                  """Some docstring."""
+                  pass
+              ''', 'doc', 'some_module.py')
+
+    assert rv == dedent('''\
+        some_module - def f
+        ========================================
+        f(a, b = 1)
+
+        Some docstring.''')
+
+
+def test_doc_fn_without_docstring():
+    rv = send('''
+              def f_|_(a, b=1):
+                  pass
+              ''', 'doc', 'other_module.py')
+
+    assert rv == dedent('''\
+        other_module - def f
+        ========================================
+        f(a, b = 1)''')
+
+# Usages.
+
+
+def test_usages():
+    rv = send('''\
+              import json
+              json.dumps_|_
+              ''', 'usages', 'test.py')
+
+    assert set(['test', 'json']) <= set(r['module'] for r in rv)
+
+# ElDoc.
+
+
+def test_eldoc_signature():
+    rv = send('''
+              def f(obj, fp, skipkeys=False, ensure_ascii=True,
+                    check_circular=True, allow_nan=True, cls=None,
+                    indent=None, separators=None, default=None,
+                    sort_keys=False, **kw):
+                  pass
+
+              f(123, _|_
+              ''', 'eldoc')
+
+    assert rv == {
+        'name': 'f',
+        'index': 1,
+        'params': ['obj', 'fp', 'skipkeys = False', 'ensure_ascii = True',
+                   'check_circular = True', 'allow_nan = True', 'cls = None',
+                   'indent = None', 'separators = None', 'default = None',
+                   'sort_keys = False', '**kw']
+    }
+
+
+def test_eldoc_unknown_fn():
+    rv = send('''
+              unknown_fn(_|_
+              ''', 'eldoc')
+
+    assert rv == {}
