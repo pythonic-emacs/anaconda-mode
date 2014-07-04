@@ -18,14 +18,26 @@
   (should (string= (anaconda-mode-python)
                    (getenv "ENVPYTHON"))))
 
-(ert-deftest test-anaconda-mode-process-filter ()
-  (let ((output "anaconda_mode port 24970"))
-    (should (numberp anaconda-mode-port))
-    (should-not (process-filter anaconda-mode-process))))
+(ert-deftest test-anaconda-mode-set-port ()
+  (let* ((output "anaconda_mode port 24970")
+         (buffer (generate-new-buffer "cat"))
+         (process (start-process "-" buffer "cat" "--help"))
+         (anaconda-mode-port nil))
+    (with-current-buffer buffer
+      (erase-buffer)
+      (insert output))
+    (anaconda-mode-set-port process)
+    (should (numberp anaconda-mode-port))))
 
-(ert-deftest test-anaconda-mode-process-filter-error ()
-  (let ((output "Process anaconda_mode finished"))
-    (should-error (anaconda-mode-process-filter nil output))))
+(ert-deftest test-anaconda-mode-set-port-error ()
+  (let* ((output "Process anaconda_mode finished")
+         (buffer (generate-new-buffer "cat"))
+         (process (start-process "-" buffer "cat" "--help"))
+         (anaconda-mode-port nil))
+    (with-current-buffer buffer
+      (erase-buffer)
+      (insert output))
+    (should-error (anaconda-mode-set-port process))))
 
 ;;; Completion.
 

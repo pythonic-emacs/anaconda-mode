@@ -2,7 +2,7 @@
 
 ;; Copyright (C) 2013, 2014 by Malyshev Artem
 
-;; Authors: Malyshev Artem <proofit404@gmail.com>
+;; Author: Malyshev Artem <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "24") (json-rpc "0.0.1") (cl-lib "0.5.0") (dash "2.6.0") (f "0.16.2"))
@@ -71,9 +71,9 @@
 
 (defun anaconda-mode-running-p ()
   "Check for running anaconda_mode server."
-  (and anaconda-mode-process
-       anaconda-mode-port
-       (not (null (process-live-p anaconda-mode-process)))
+  (and anaconda-mode-port
+       anaconda-mode-process
+       (process-live-p anaconda-mode-process)
        (json-rpc-live-p anaconda-mode-connection)))
 
 (defun anaconda-mode-bootstrap ()
@@ -82,22 +82,21 @@
     (setq anaconda-mode-process
           (apply 'start-process
                  "anaconda_mode"
-                 nil
+                 "*anaconda*"
                  (anaconda-mode-python)
                  (anaconda-mode-python-args)))
-    (set-process-filter anaconda-mode-process
-                        'anaconda-mode-process-filter)
     (accept-process-output anaconda-mode-process)
+    (anaconda-mode-set-port anaconda-mode-process)
     (setq anaconda-mode-connection
           (json-rpc-connect anaconda-mode-host anaconda-mode-port))))
 
-(defun anaconda-mode-process-filter (process output)
-  "Filter anaconda_mode PROCESS OUTPUT function."
-  (-if-let (port (cadr (s-match "anaconda_mode port \\([0-9][0-9]*\\)" output)))
-      (progn
-          (setq anaconda-mode-port (string-to-number port))
-          (set-process-filter process nil))
-    (error "Could not start anaconda_mode server")))
+(defun anaconda-mode-set-port (process)
+  "Set `anaconda-mode-port' from PROCESS output."
+  (with-current-buffer (process-buffer process)
+    (--if-let (s-match "anaconda_mode port \\([0-9][0-9]*\\)" (buffer-string))
+        (setq anaconda-mode-port (string-to-number (cadr it)))
+      (display-buffer (process-buffer process))
+      (error "Could not start anaconda_mode server"))))
 
 (defun anaconda-mode-start-node ()
   "Start anaconda_mode server."
