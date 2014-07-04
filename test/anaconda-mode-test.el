@@ -39,6 +39,13 @@
       (insert output))
     (should-error (anaconda-mode-set-port process))))
 
+(ert-deftest test-anaconda-mode-clean-own-buffer ()
+  (anaconda-mode-start-node)
+  (let (anaconda-mode-port)
+    (anaconda-mode-start-node)
+    (with-current-buffer "*anaconda*"
+      (should (eq 1 (length (s-lines (buffer-string))))))))
+
 ;;; Completion.
 
 (ert-deftest test-anaconda-mode-complete ()
@@ -86,6 +93,11 @@ fn(_|_")
 (ert-deftest test-anaconda-eldoc-invalid ()
   (load-fixture "simple.py" "invalid(_|_")
   (should-not (anaconda-eldoc-function)))
+
+(ert-deftest test-anaconda-eldoc-ignore-errors ()
+  (let ((anaconda-mode-directory (f-root))
+        (anaconda-mode-port nil))
+    (should-not (anaconda-eldoc-function))))
 
 (provide 'anaconda-mode-test)
 

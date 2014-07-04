@@ -78,6 +78,9 @@
 
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
+  (--when-let (get-buffer "*anaconda*")
+    (with-current-buffer it
+      (erase-buffer)))
   (let ((default-directory anaconda-mode-directory))
     (setq anaconda-mode-process
           (apply 'start-process
@@ -425,7 +428,7 @@ IGNORED parameter is the string for which completion is required."
 (defvar anaconda-eldoc-as-single-line nil
   "If not nil, trim eldoc string to frame width.")
 
-(defun anaconda-eldoc--format-params (args index)
+(defun anaconda-eldoc-format-params (args index)
   "Build colorized ARGS string with current arg pointed to INDEX."
   (apply
    'concat
@@ -436,20 +439,21 @@ IGNORED parameter is the string for which completion is required."
         it))
      (-interpose ", "))))
 
-(cl-defun anaconda-eldoc--format (&key name index params)
+(cl-defun anaconda-eldoc-format (&key name index params)
   (concat
    (propertize name 'face 'font-lock-function-name-face)
    "("
-   (anaconda-eldoc--format-params params index)
+   (anaconda-eldoc-format-params params index)
    ")"))
 
 (defun anaconda-eldoc-function ()
   "Show eldoc for context at point."
-  (-when-let* ((res (anaconda-mode-call "eldoc"))
-               (doc (apply 'anaconda-eldoc--format res)))
-    (if anaconda-eldoc-as-single-line
-        (substring doc 0 (min (frame-width) (length doc)))
-      doc)))
+  (ignore-errors
+    (-when-let* ((res (anaconda-mode-call "eldoc"))
+                 (doc (apply 'anaconda-eldoc-format res)))
+      (if anaconda-eldoc-as-single-line
+          (substring doc 0 (min (frame-width) (length doc)))
+        doc))))
 
 
 ;;; Anaconda minor mode.
