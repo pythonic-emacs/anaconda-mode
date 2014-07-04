@@ -69,6 +69,9 @@
 (defvar anaconda-mode-connection nil
   "Json Rpc connection to anaconda_mode process.")
 
+(defvar anaconda-mode-buffer "*anaconda*"
+  "Buffer for anaconda-mode process output.")
+
 (defun anaconda-mode-running-p ()
   "Check for running anaconda_mode server."
   (and anaconda-mode-port
@@ -78,14 +81,13 @@
 
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
-  (--when-let (get-buffer "*anaconda*")
-    (with-current-buffer it
-      (erase-buffer)))
+  (with-current-buffer (get-buffer-create anaconda-mode-buffer)
+    (erase-buffer))
   (let ((default-directory anaconda-mode-directory))
     (setq anaconda-mode-process
           (apply 'start-process
                  "anaconda_mode"
-                 "*anaconda*"
+                 anaconda-mode-buffer
                  (anaconda-mode-python)
                  (anaconda-mode-python-args)))
     (accept-process-output anaconda-mode-process)
