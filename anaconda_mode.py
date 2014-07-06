@@ -1,6 +1,5 @@
 import jedi
 import click
-import logging
 import functools
 import socket
 from jsonrpc import dispatcher, JSONRPCResponseManager
@@ -10,8 +9,6 @@ try:
 except:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
 
-logger = logging.getLogger(__name__)
-
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
 
@@ -19,7 +16,6 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
     error_message_format = ''
 
     def do_POST(self):
-        logger.info('Processing request...')
         content_len = self.headers.get('content-length')
         if content_len is not None:
             data = self.rfile.read(int(content_len))
@@ -141,13 +137,8 @@ def eldoc(script):
 
 @click.command()
 @click.option('--bind', default='', help='Interface address to bind.')
-@click.option('--debug', default=False, is_flag=True, help='Enable logging.')
-def main(bind, debug):
+def main(bind):
     """Runs anaconda server."""
-    if debug:
-        logging.basicConfig(level=logging.DEBUG, filename='anaconda_mode.log')
-
-    logger.info('Starting anaconda_mode server...')
 
     port = 24970
     server = None

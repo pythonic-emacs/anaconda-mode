@@ -33,9 +33,6 @@
 
 ;;; Server.
 
-(defvar anaconda-mode-debug nil
-  "Turn on anaconda_mode debug logging.")
-
 (defvar anaconda-mode-host "localhost"
   "Target host with anaconda_mode server.")
 
@@ -50,9 +47,7 @@
 
 (defun anaconda-mode-python-args ()
   "Python arguments to run anaconda_mode server."
-  (delq nil (list "anaconda_mode.py"
-                  "--bind" anaconda-mode-host
-                  (when anaconda-mode-debug "--debug"))))
+  (list "anaconda_mode.py" "--bind" anaconda-mode-host))
 
 (defun anaconda-mode-command ()
   "Shell command to run anaconda_mode server."

@@ -1,10 +1,9 @@
-*.log
-*.elc
-*.pyc
-*~
+__pycache__/
 .cask/
 .tox/
 MANIFEST
-[#]*[#]
-__pycache__/
 .coverage
+[#]*[#]
+*.elc
+*.pyc
+*~
