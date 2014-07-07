@@ -33,30 +33,15 @@
 
 ;;; Server.
 
+(defvar anaconda-mode-directory
+  (file-name-directory load-file-name)
+  "Directory containing anaconda_mode package.")
+
 (defvar anaconda-mode-host "localhost"
   "Target host with anaconda_mode server.")
 
 (defvar anaconda-mode-port nil
   "Port for anaconda_mode connection.")
-
-(defun anaconda-mode-python ()
-  "Detect python executable."
-  (--if-let python-shell-virtualenv-path
-      (f-join it "bin" "python")
-    "python"))
-
-(defun anaconda-mode-python-args ()
-  "Python arguments to run anaconda_mode server."
-  (list "anaconda_mode.py" anaconda-mode-host))
-
-(defun anaconda-mode-command ()
-  "Shell command to run anaconda_mode server."
-  (cons (anaconda-mode-python)
-	(anaconda-mode-python-args)))
-
-(defvar anaconda-mode-directory
-  (file-name-directory load-file-name)
-  "Directory containing anaconda_mode package.")
 
 (defvar anaconda-mode-process nil
   "Currently running anaconda_mode process.")
@@ -64,8 +49,11 @@
 (defvar anaconda-mode-connection nil
   "Json Rpc connection to anaconda_mode process.")
 
-(defvar anaconda-mode-buffer "*anaconda*"
-  "Buffer for anaconda-mode process output.")
+(defun anaconda-mode-python ()
+  "Detect python executable."
+  (--if-let python-shell-virtualenv-path
+      (f-join it "bin" "python")
+    "python"))
 
 (defun anaconda-mode-running-p ()
   "Check for running anaconda_mode server."
@@ -76,55 +64,54 @@
 
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
-  (with-current-buffer (get-buffer-create anaconda-mode-buffer)
-    (erase-buffer))
   (let ((default-directory anaconda-mode-directory))
     (setq anaconda-mode-process
-          (apply 'start-process
-                 "anaconda_mode"
-                 anaconda-mode-buffer
-                 (anaconda-mode-python)
-                 (anaconda-mode-python-args)))
+          (start-process
+           "anaconda_mode"
+           nil
+           (anaconda-mode-python)
+           "anaconda_mode.py"))
+    (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
     (accept-process-output anaconda-mode-process)
-    (anaconda-mode-set-port anaconda-mode-process)
+    (set-process-filter anaconda-mode-process nil)
+    (unless anaconda-mode-port
+      (error "Unable to run anaconda_mode.py"))
     (setq anaconda-mode-connection
           (json-rpc-connect anaconda-mode-host anaconda-mode-port))))
 
-(defun anaconda-mode-set-port (process)
-  "Set `anaconda-mode-port' from PROCESS output."
-  (with-current-buffer (process-buffer process)
-    (--if-let (s-match "anaconda_mode port \\([0-9][0-9]*\\)" (buffer-string))
-        (setq anaconda-mode-port (string-to-number (cadr it)))
-      (display-buffer (process-buffer process))
-      (error "Could not start anaconda_mode server"))))
+(defun anaconda-mode-process-filter (process output)
+  "Set `anaconda-mode-port' from PROCESS OUTPUT."
+  (--when-let (s-match "anaconda_mode port \\([0-9][0-9]*\\)" output)
+    (setq anaconda-mode-port (string-to-number (cadr it)))))
 
-(defun anaconda-mode-start-node ()
-  "Start anaconda_mode server."
+(defun anaconda-mode-start ()
+  "Start anaconda_mode.py server."
   (when (anaconda-mode-need-restart)
-    (anaconda-mode-stop-node))
+    (anaconda-mode-stop))
   (unless (anaconda-mode-running-p)
     (anaconda-mode-bootstrap)))
 
-(defun anaconda-mode-stop-node ()
-  "Stop anaconda-mode server."
+(defun anaconda-mode-stop ()
+  "Stop anaconda_mode.py server."
   (when (anaconda-mode-running-p)
     (kill-process anaconda-mode-process)
     (json-rpc-close anaconda-mode-connection)
-    (setq anaconda-mode-connection nil)))
+    (setq anaconda-mode-connection nil)
+    (setq anaconda-mode-port nil)))
 
 (defun anaconda-mode-need-restart ()
   "Check if current `anaconda-mode-process' need restart with new args.
 Return nil if it run under proper environment."
   (and (anaconda-mode-running-p)
-       (not (equal (process-command anaconda-mode-process)
-                   (anaconda-mode-command)))))
+       (not (equal (car (process-command anaconda-mode-process))
+                   (anaconda-mode-python)))))
 
 
 ;;; Interaction.
 
 (defun anaconda-mode-call (command)
   "Make remote procedure call for COMMAND."
-  (anaconda-mode-start-node)
+  (anaconda-mode-start)
   ;; use list since not all dash functions operate on vectors
   (let ((json-array-type 'list))
     (json-rpc
