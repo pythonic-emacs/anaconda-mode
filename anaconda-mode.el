@@ -109,6 +109,8 @@ Return nil if it run under proper environment."
 
 (defun anaconda-mode-connect ()
   "Connect to anaconda_mode.py server."
+  (when (anaconda-mode-need-reconnect)
+    (anaconda-mode-disconnect))
   (unless (anaconda-mode-connected-p)
     (setq anaconda-mode-connection
           (json-rpc-connect anaconda-mode-host anaconda-mode-port))))
@@ -123,6 +125,14 @@ Return nil if it run under proper environment."
   "Check if `anaconda-mode' connected to server."
   (and anaconda-mode-connection
        (json-rpc-live-p anaconda-mode-connection)))
+
+(defun anaconda-mode-need-reconnect ()
+  "Check if current `anaconda-mode-connection' need to be reconnected."
+  (and (anaconda-mode-connected-p)
+       (or (not (equal (json-rpc-host anaconda-mode-connection)
+                       anaconda-mode-host))
+           (not (equal (json-rpc-port anaconda-mode-connection)
+                       anaconda-mode-port)))))
 
 
 ;;; Interaction.

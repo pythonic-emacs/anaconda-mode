@@ -49,6 +49,22 @@
   (anaconda-mode-disconnect)
   (should-not (anaconda-mode-connected-p)))
 
+(ert-deftest test-anaconda-mode-need-reconnect ()
+  "Anaconda mode should reconnect when connnection settings changes."
+  (anaconda-mode-connect)
+  (let ((anaconda-mode-port 21))
+    (should (anaconda-mode-need-reconnect))))
+
+(ert-deftest test-anaconda-mode-reconnect ()
+  "Anaconda mode need to reconnect on settings change.
+Even if settings are broken."
+  (anaconda-mode-connect)
+  (let ((anaconda-mode-port 21))
+    ;; Error must occur here since FTP reject JSONRPC connections.
+    ;; But this signify that we really try to restart on settings
+    ;; change.
+    (should-error (anaconda-mode-connect))))
+
 ;;; Interaction.
 
 (ert-deftest test-anaconda-mode-remote ()
