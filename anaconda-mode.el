@@ -47,7 +47,7 @@
 
 (defun anaconda-mode-python-args ()
   "Python arguments to run anaconda_mode server."
-  (list "anaconda_mode.py" "--bind" anaconda-mode-host))
+  (list "anaconda_mode.py" anaconda-mode-host))
 
 (defun anaconda-mode-command ()
   "Shell command to run anaconda_mode server."

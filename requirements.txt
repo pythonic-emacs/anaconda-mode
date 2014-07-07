@@ -1,7 +1,2 @@
-# This is dummy requirements.txt used for gemnasium servise.  All
-# necessary dependencies bundled together with anaconda-mode.  You
-# doesn't need to install any packages by hand.
-
 jedi==0.8.0-final0
 json-rpc==1.6
-click==2.1

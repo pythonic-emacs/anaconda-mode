@@ -44,7 +44,7 @@
   (let (anaconda-mode-port)
     (anaconda-mode-start-node)
     (with-current-buffer "*anaconda*"
-      (should (eq 1 (length (s-lines (buffer-string))))))))
+      (should (eq 2 (length (s-lines (buffer-string))))))))
 
 ;;; Completion.
 

@@ -1,11 +1,10 @@
+from test.helpers import process, make_request, send
+from textwrap import dedent
 import anaconda_mode
 import io
 import mock
 import os
 import socket
-from click.testing import CliRunner
-from test.helpers import process, make_request, send
-from textwrap import dedent
 
 # HTTP server.
 
@@ -39,18 +38,18 @@ def test_incomplete_content():
     assert status_of_req('{"aaa": 1, "bbb": 2}') == 500
 
 
-def test_server_start():
+def test_server_start(capfd):
     with mock.patch('anaconda_mode.HTTPServer') as cls:
         server = mock.Mock()
         cls.side_effect = [OSError('Address already in use'),
                            socket.error('Address already in use'),
                            server]
 
-        runner = CliRunner()
-        result = runner.invoke(anaconda_mode.main, ['--bind', 'localhost'])
+        anaconda_mode.main()
+        resout, reserr = capfd.readouterr()
 
         assert server.serve_forever.called
-        assert result.output == 'anaconda_mode port 24972'
+        assert resout == 'anaconda_mode port 24972\n'
 
 
 def test_http_handler():

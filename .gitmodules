@@ -4,6 +4,3 @@
 [submodule "vendor/jsonrpc"]
 	path = vendor/jsonrpc
 	url = https://github.com/pavlov99/json-rpc.git
-[submodule "vendor/click"]
-	path = vendor/click
-	url = https://github.com/mitsuhiko/click.git

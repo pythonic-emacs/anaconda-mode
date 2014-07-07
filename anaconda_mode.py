@@ -1,13 +1,15 @@
-import jedi
-import click
-import functools
-import socket
+from __future__ import print_function
 from jsonrpc import dispatcher, JSONRPCResponseManager
 
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
 except:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+
+import jedi
+import functools
+import socket
+import sys
 
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
@@ -135,23 +137,20 @@ def eldoc(script):
     return {}
 
 
-@click.command()
-@click.option('--bind', default='', help='Interface address to bind.')
-def main(bind):
+def main():
     """Runs anaconda server."""
 
+    host = sys.argv[1] if len(sys.argv) == 2 else ''
     port = 24970
     server = None
 
     while server is None:
-
         try:
-            server = HTTPServer((bind, port), HTTPRequestHandler)
+            server = HTTPServer((host, port), HTTPRequestHandler)
         except (OSError, socket.error):
             port += 1
 
-    click.echo('anaconda_mode port {0}'.format(port), nl=False)
-
+    print('anaconda_mode port', port)
     server.serve_forever()
 
 
