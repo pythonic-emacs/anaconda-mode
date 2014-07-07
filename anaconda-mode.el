@@ -37,6 +37,9 @@
   (file-name-directory load-file-name)
   "Directory containing anaconda_mode package.")
 
+(defvar anaconda-mode-remote-p nil
+  "Determine whatever connect to remove server or a local machine.")
+
 (defvar anaconda-mode-host "localhost"
   "Target host with anaconda_mode server.")
 
@@ -122,6 +125,20 @@ Return nil if it run under proper environment."
 
 
 ;;; Interaction.
+
+(defun anaconda-mode-remote (host port)
+  "Suggest anaconda_mode.py running on HOST at PORT."
+  (interactive (list (read-string "Host: ") (read-number "Port: ")))
+  (setq anaconda-mode-remote-p t
+        anaconda-mode-host host
+        anaconda-mode-port port))
+
+(defun anaconda-mode-local ()
+  "Suggest anaconda_mode.py running on localhost."
+  (interactive)
+  (setq anaconda-mode-remote-p nil
+        anaconda-mode-host "localhost"
+        anaconda-mode-port nil))
 
 (defun anaconda-mode-call (command)
   "Make remote procedure call for COMMAND."

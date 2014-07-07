@@ -49,6 +49,28 @@
   (anaconda-mode-disconnect)
   (should-not (anaconda-mode-connected-p)))
 
+;;; Interaction.
+
+(ert-deftest test-anaconda-mode-remote ()
+  "Test anaconda mode setup remote environment properly."
+  (let (anaconda-mode-remote-p
+        anaconda-mode-host
+        anaconda-mode-port)
+    (anaconda-mode-remote "127.0.0.1" "24971")
+    (should anaconda-mode-remote-p)
+    (should (equal anaconda-mode-host "127.0.0.1"))
+    (should (equal anaconda-mode-port "24971"))))
+
+(ert-deftest test-anaconda-mode-local ()
+  "Test anaconda mode setup local environment properly."
+  (let ((anaconda-mode-remote-p t)
+        (anaconda-mode-host "127.0.0.1")
+        (anaconda-mode-port "24971"))
+    (anaconda-mode-local)
+    (should-not anaconda-mode-remote-p)
+    (should (equal anaconda-mode-host "localhost"))
+    (should-not anaconda-mode-port)))
+
 ;;; Completion.
 
 (ert-deftest test-anaconda-mode-complete ()
