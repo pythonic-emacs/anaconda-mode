@@ -5,29 +5,49 @@
 ;;; Code:
 
 (require 'ert)
+(require 'anaconda-mode)
 
 ;;; Server.
 
-(ert-deftest test-anaconda-mode-running ()
-  "Test if anaconda_mode running successfully."
+(ert-deftest test-anaconda-mode-start ()
+  "Test if anaconda_mode.py start successfully."
   (anaconda-mode-start)
   (should (anaconda-mode-running-p)))
 
-(ert-deftest test-anaconda-mode-virtualenv ()
-  "Check that anaconda_mode start with proper python executable."
-  (should (string= (anaconda-mode-python)
-                   (getenv "ENVPYTHON"))))
+(ert-deftest test-anaconda-mode-stop ()
+  "Test anaconda_mode.py stop successfully."
+  (anaconda-mode-stop)
+  (should-not (anaconda-mode-running-p)))
+
+(ert-deftest test-anaconda-mode-python ()
+  "Check that anaconda_mode detect proper python executable."
+  (let ((python-shell-virtualenv-path (getenv "ENVDIR")))
+    (should (string= (anaconda-mode-python)
+                     (getenv "ENVPYTHON")))))
 
 (ert-deftest test-anaconda-mode-process-filter ()
+  "Anaconda mode process filter should detect process port."
   (let* ((output "anaconda_mode port 24970\n")
          (anaconda-mode-port nil))
     (anaconda-mode-process-filter nil output)
     (should (numberp anaconda-mode-port))))
 
 (ert-deftest test-anaconda-mode-process-filter-error ()
-  (let* ((output "Process anaconda_mode finished")
-         (anaconda-mode-port nil))
+  "Anaconda mode process filter should ignore any trash output."
+  (let* ((output "Process anaconda_mode finished"))
     (should-not (anaconda-mode-process-filter nil output))))
+
+;;; Connection.
+
+(ert-deftest test-anaconda-mode-connect ()
+  "Anaconda mode should successfully connect to server."
+  (anaconda-mode-connect)
+  (should (anaconda-mode-connected-p)))
+
+(ert-deftest test-anaconda-mode-disconnect ()
+  "Anaconda mode should successfully disconnect."
+  (anaconda-mode-disconnect)
+  (should-not (anaconda-mode-connected-p)))
 
 ;;; Completion.
 

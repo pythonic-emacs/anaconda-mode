@@ -55,12 +55,30 @@
       (f-join it "bin" "python")
     "python"))
 
+(defun anaconda-mode-start ()
+  "Start anaconda_mode.py server."
+  (when (anaconda-mode-need-restart)
+    (anaconda-mode-stop))
+  (unless (anaconda-mode-running-p)
+    (anaconda-mode-bootstrap)))
+
+(defun anaconda-mode-stop ()
+  "Stop anaconda_mode.py server."
+  (when (anaconda-mode-running-p)
+    (kill-process anaconda-mode-process)
+    (setq anaconda-mode-process nil)))
+
 (defun anaconda-mode-running-p ()
   "Check for running anaconda_mode server."
-  (and anaconda-mode-port
-       anaconda-mode-process
-       (process-live-p anaconda-mode-process)
-       (json-rpc-live-p anaconda-mode-connection)))
+  (and anaconda-mode-process
+       (process-live-p anaconda-mode-process)))
+
+(defun anaconda-mode-need-restart ()
+  "Check if current `anaconda-mode-process' need restart with new args.
+Return nil if it run under proper environment."
+  (and (anaconda-mode-running-p)
+       (not (equal (car (process-command anaconda-mode-process))
+                   (anaconda-mode-python)))))
 
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
@@ -75,36 +93,32 @@
     (accept-process-output anaconda-mode-process)
     (set-process-filter anaconda-mode-process nil)
     (unless anaconda-mode-port
-      (error "Unable to run anaconda_mode.py"))
-    (setq anaconda-mode-connection
-          (json-rpc-connect anaconda-mode-host anaconda-mode-port))))
+      (error "Unable to run anaconda_mode.py"))))
 
 (defun anaconda-mode-process-filter (process output)
   "Set `anaconda-mode-port' from PROCESS OUTPUT."
   (--when-let (s-match "anaconda_mode port \\([0-9][0-9]*\\)" output)
     (setq anaconda-mode-port (string-to-number (cadr it)))))
 
-(defun anaconda-mode-start ()
-  "Start anaconda_mode.py server."
-  (when (anaconda-mode-need-restart)
-    (anaconda-mode-stop))
-  (unless (anaconda-mode-running-p)
-    (anaconda-mode-bootstrap)))
+
+;;; Connection.
 
-(defun anaconda-mode-stop ()
-  "Stop anaconda_mode.py server."
-  (when (anaconda-mode-running-p)
-    (kill-process anaconda-mode-process)
+(defun anaconda-mode-connect ()
+  "Connect to anaconda_mode.py server."
+  (unless (anaconda-mode-connected-p)
+    (setq anaconda-mode-connection
+          (json-rpc-connect anaconda-mode-host anaconda-mode-port))))
+
+(defun anaconda-mode-disconnect ()
+  "Disconnect from anaconda_mode.py server."
+  (when (anaconda-mode-connected-p)
     (json-rpc-close anaconda-mode-connection)
-    (setq anaconda-mode-connection nil)
-    (setq anaconda-mode-port nil)))
+    (setq anaconda-mode-connection nil)))
 
-(defun anaconda-mode-need-restart ()
-  "Check if current `anaconda-mode-process' need restart with new args.
-Return nil if it run under proper environment."
-  (and (anaconda-mode-running-p)
-       (not (equal (car (process-command anaconda-mode-process))
-                   (anaconda-mode-python)))))
+(defun anaconda-mode-connected-p ()
+  "Check if `anaconda-mode' connected to server."
+  (and anaconda-mode-connection
+       (json-rpc-live-p anaconda-mode-connection)))
 
 
 ;;; Interaction.
@@ -112,6 +126,7 @@ Return nil if it run under proper environment."
 (defun anaconda-mode-call (command)
   "Make remote procedure call for COMMAND."
   (anaconda-mode-start)
+  (anaconda-mode-connect)
   ;; use list since not all dash functions operate on vectors
   (let ((json-array-type 'list))
     (json-rpc

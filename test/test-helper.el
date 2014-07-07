@@ -10,13 +10,6 @@
   (cask-initialize source-directory)
   (add-to-list 'load-path source-directory))
 
-(require 'anaconda-mode)
-
-(let ((envdir (getenv "ENVDIR")))
-  (setq python-shell-virtualenv-path envdir))
-
-(setq anaconda-mode-debug t)
-
 (defun load-fixture (filename source)
   "Load FILENAME fixture filled with SOURCE."
   (setq buffer-file-name (expand-file-name filename))
