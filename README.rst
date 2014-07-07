@@ -41,26 +41,47 @@ All you need is install the package from Melpa_::
 Usage
 -----
 
-By default ``anaconda-mode`` starts its HTTP server on first
-accessible port from ``24970`` for interaction with Python process.
-You may want to close this port for incoming network connections.
-This server will start automatically when you call any anaconda
-command like reference search or documentation lookup.  To start
-``anaconda-mode`` automatically in all python buffers add following to
-your configuration.
-
-.. code:: lisp
-
-    (add-hook 'python-mode-hook 'anaconda-mode)
-
-Anaconda mode detect active virtual environment through value of
+Anaconda mode comes with ``anaconda_mode.py`` server.  This server
+allow you to use jedi_ package over jsonrpc api.  Server choice first
+available port starting from 24970.  If no host was specified loopback
+interface will be used.  Anaconda mode will run this server
+automatically on first call of any anaconda-mode command.  Anaconda
+mode detect active virtual environment through value of
 ``python-shell-virtualenv-path`` variable defined in ``python.el``
 library.  When you set it to actual virtualenv path next anaconda-mode
-command you call will restart its python process in proper environment
-before performing this call.  This allow anaconda processing
-virtualenv site-packages with minimum number of actions from your
+command you call will restart server process in proper environment
+before performing this call.  This allow anaconda processing virtual
+environment site-packages with minimum number of actions from your
 side.  I strongly recommended you to use `pyenv-mode`_ or similar
 package to hold ``python-shell-virtualenv-path`` in actual state.
+
+Tramp and vagrant
+`````````````````
+
+It's possible to use anaconda-mode on remote server when you connect
+to it using tramp.  Setup process differs from local usage.  You need
+to login on remote machine and install anaconda-mode server.  You can
+download it directly from Melpa_ and unpack it to some directory.  If
+you use virtual environment on remote server then you need to activate
+it before we continue.  Now run ``anaconda_mode.py`` from shell::
+
+    . venv/bin/activate
+    python anaconda_mode.py 0.0.0.0
+
+To tell anaconda-mode to connect to that server you need to run
+following command::
+
+    M-x anaconda-mode-remote
+
+It will ask you to enter host and port information for remote server.
+In case of vagrant you can specify ``127.0.0.1`` as host part.  To get
+proper completion you need to open your files with tramp addresses
+even for vagrant setup.  This caused because of different relative
+paths on your local machine and inside vagrant.  To stop this behavior
+and enable ``anaconda_mode.py`` server starts locally run command
+below::
+
+    M-x anaconda-mode-local
 
 Interactive commands
 ````````````````````
@@ -77,7 +98,13 @@ M-r         anaconda-mode-usages
 ==========  ==============================
 
 If goto definitions, assignments or usages cause multiple candidates
-you'll see advanced anaconda navigator buffer.
+you'll see advanced anaconda navigator buffer.  You can automatically
+enable ``anaconda-mode`` in all python buffers with following code in
+your configuration
+
+.. code:: lisp
+
+    (add-hook 'python-mode-hook 'anaconda-mode)
 
 ElDoc
 `````
@@ -120,3 +147,4 @@ Thanks
 
 .. _Melpa: http://melpa.milkbox.net/
 .. _pyenv-mode: https://github.com/proofit404/pyenv-mode
+.. _jedi: http://jedi.jedidjah.ch/en/latest/
