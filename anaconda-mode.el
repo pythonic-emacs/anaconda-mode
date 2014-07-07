@@ -26,6 +26,7 @@
 
 (require 'python)
 (require 'json-rpc)
+(require 'tramp)
 (require 'cl-lib)
 (require 'dash)
 (require 'f)
@@ -142,7 +143,8 @@ Return nil if it run under proper environment."
 
 (defun anaconda-mode-call (command)
   "Make remote procedure call for COMMAND."
-  (anaconda-mode-start)
+  (unless anaconda-mode-remote-p
+    (anaconda-mode-start))
   (anaconda-mode-connect)
   ;; use list since not all dash functions operate on vectors
   (let ((json-array-type 'list))
@@ -152,7 +154,15 @@ Return nil if it run under proper environment."
      (buffer-substring-no-properties (point-min) (point-max))
      (line-number-at-pos (point))
      (current-column)
-     (or (buffer-file-name) ""))))
+     (anaconda-mode-file-name))))
+
+(defun anaconda-mode-file-name ()
+  "Return appropriate buffer file name both for local and tramp files."
+  (if (tramp-tramp-file-p (buffer-file-name))
+      (tramp-file-name-localname
+       (tramp-dissect-file-name
+        (buffer-file-name)))
+    (buffer-file-name)))
 
 
 ;;; Code completion.

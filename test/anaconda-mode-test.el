@@ -71,6 +71,14 @@
     (should (equal anaconda-mode-host "localhost"))
     (should-not anaconda-mode-port)))
 
+(ert-deftest test-anaconda-mode-file-name-local ()
+  (let ((buffer-file-name "test.py"))
+    (should (equal "test.py" (anaconda-mode-file-name)))))
+
+(ert-deftest test-anaconda-mode-file-name-tramp ()
+  (let ((buffer-file-name "/ssh:news@news.my.domain:/opt/news/etc/test.py"))
+    (should (equal "/opt/news/etc/test.py" (anaconda-mode-file-name)))))
+
 ;;; Completion.
 
 (ert-deftest test-anaconda-mode-complete ()
