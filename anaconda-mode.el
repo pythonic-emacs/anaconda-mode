@@ -137,6 +137,7 @@ Return nil if it run under proper environment."
 
 ;;; Interaction.
 
+;;;###autoload
 (defun anaconda-mode-remote (host port)
   "Suggest anaconda_mode.py running on HOST at PORT."
   (interactive (list (read-string "Host: ") (read-number "Port: ")))
@@ -144,6 +145,7 @@ Return nil if it run under proper environment."
         anaconda-mode-host host
         anaconda-mode-port port))
 
+;;;###autoload
 (defun anaconda-mode-local ()
   "Suggest anaconda_mode.py running on localhost."
   (interactive)
