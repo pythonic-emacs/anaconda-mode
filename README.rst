@@ -34,9 +34,22 @@ following features
 Installation
 ------------
 
+package.el
+``````````
+
 All you need is install the package from Melpa_::
 
     M-x package-install RET anaconda-mode RET
+
+manual
+``````
+
+``vendor`` directory used to build Melpa_ package only.  If you setup
+from git you can't use git submodules for dependency resolution.
+Clone this repository somewhere, add it to you ``load-path`` and do
+following command from project root::
+
+    pip install -r requirements.txt -t .
 
 Usage
 -----
