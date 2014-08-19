@@ -1,2 +1,2 @@
-jedi==0.8.0-final0
+jedi==0.8.1-final0
 json-rpc==1.6
