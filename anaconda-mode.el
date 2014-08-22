@@ -96,6 +96,7 @@ Return nil if it run under proper environment."
     (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
     (accept-process-output anaconda-mode-process)
     (set-process-filter anaconda-mode-process nil)
+    (set-process-query-on-exit-flag anaconda-mode-process nil)
     (unless anaconda-mode-port
       (error "Unable to run anaconda_mode.py"))))
 
