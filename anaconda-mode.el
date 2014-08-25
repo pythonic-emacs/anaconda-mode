@@ -114,7 +114,9 @@ Return nil if it run under proper environment."
     (anaconda-mode-disconnect))
   (unless (anaconda-mode-connected-p)
     (setq anaconda-mode-connection
-          (json-rpc-connect anaconda-mode-host anaconda-mode-port))))
+          (json-rpc-connect anaconda-mode-host anaconda-mode-port))
+    (set-process-query-on-exit-flag
+     (json-rpc-process anaconda-mode-connection) nil)))
 
 (defun anaconda-mode-disconnect ()
   "Disconnect from anaconda_mode.py server."
