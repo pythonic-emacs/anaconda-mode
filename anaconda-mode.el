@@ -56,8 +56,20 @@
 (defun anaconda-mode-python ()
   "Detect python executable."
   (--if-let python-shell-virtualenv-path
-      (f-join it "bin" "python")
+      (if (eq system-type 'windows-nt)
+          "cmd.exe"
+          (f-join it "bin" "python")
+        )
     "python"))
+
+(defun anaconda-mode-python-args ()
+  "Additional python executable args"
+  (--if-let python-shell-virtualenv-path
+      (if (eq system-type 'windows-nt)
+          (list "/c" (concat (f-join it "Scripts" "activate.bat") " & " (f-join it "Scripts" "python.exe") ) )
+          )
+    )
+  )
 
 (defun anaconda-mode-start ()
   "Start anaconda_mode.py server."
@@ -88,17 +100,25 @@ Return nil if it run under proper environment."
   "Run anaconda-mode-command process."
   (let ((default-directory anaconda-mode-directory))
     (setq anaconda-mode-process
-          (start-process
-           "anaconda_mode"
-           nil
-           (anaconda-mode-python)
-           "anaconda_mode.py"))
+          (apply 'start-process (append
+                                 (list "anaconda_mode" nil (anaconda-mode-python))
+                                 (anaconda-mode-python-args)
+                                 (list "anaconda_mode.py")
+                                 )
+                 )
+          )
     (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
     (accept-process-output anaconda-mode-process)
     (set-process-filter anaconda-mode-process nil)
     (set-process-query-on-exit-flag anaconda-mode-process nil)
     (unless anaconda-mode-port
-      (error "Unable to run anaconda_mode.py"))))
+      (progn
+        (error "Unable to run anaconda_mode.py")
+        (anaconda-mode-stop)
+        )
+      )
+    )
+  )
 
 (defun anaconda-mode-process-filter (process output)
   "Set `anaconda-mode-port' from PROCESS OUTPUT."
