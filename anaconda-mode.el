@@ -47,6 +47,9 @@
 (defvar anaconda-mode-port nil
   "Port for anaconda_mode connection.")
 
+(defvar anaconda-mode-process-output nil
+  "Anaconda process output.")
+
 (defvar anaconda-mode-process nil
   "Currently running anaconda_mode process.")
 
@@ -56,19 +59,27 @@
 (defun anaconda-mode-python ()
   "Detect python executable."
   (--if-let python-shell-virtualenv-path
-      (if (eq system-type 'windows-nt)
+      (if (and (eq system-type 'windows-nt) (file-exists-p (f-join it "Scripts" "activate.bat")))
           "cmd.exe"
           (f-join it "bin" "python")
         )
     "python"))
 
 (defun anaconda-mode-python-args ()
-  "Additional python executable args"
-  (--if-let python-shell-virtualenv-path
-      (if (eq system-type 'windows-nt)
-          (list "/c" (concat (f-join it "Scripts" "activate.bat") " & " (f-join it "Scripts" "python.exe") ) )
+  "Python executable args."
+  (let ((python-args (list "anaconda_mode.py")))
+    (--if-let python-shell-virtualenv-path
+        (if (and (eq system-type 'windows-nt)
+                 (file-exists-p (f-join it "Scripts" "activate.bat")))
+            (append (list "/c"
+                          (concat (f-join it "Scripts" "activate.bat")
+                                  " & "
+                                  (f-join it "Scripts" "python.exe")
+                                  ))
+                    python-args)
+          python-args
           )
-    )
+      python-args))
   )
 
 (defun anaconda-mode-start ()
@@ -93,8 +104,8 @@
   "Check if current `anaconda-mode-process' need restart with new args.
 Return nil if it run under proper environment."
   (and (anaconda-mode-running-p)
-       (not (equal (car (process-command anaconda-mode-process))
-                   (anaconda-mode-python)))))
+       (not (equal (process-command anaconda-mode-process)
+                   (cons (anaconda-mode-python) (anaconda-mode-python-args))))))
 
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
@@ -103,25 +114,22 @@ Return nil if it run under proper environment."
           (apply 'start-process (append
                                  (list "anaconda_mode" nil (anaconda-mode-python))
                                  (anaconda-mode-python-args)
-                                 (list "anaconda_mode.py")
-                                 )
-                 )
-          )
+                                 )))
     (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
-    (accept-process-output anaconda-mode-process)
+    (accept-process-output anaconda-mode-process 5)
     (set-process-filter anaconda-mode-process nil)
     (set-process-query-on-exit-flag anaconda-mode-process nil)
-    (unless anaconda-mode-port
+    (if anaconda-mode-port
+        (setq anaconda-mode-process-output nil)
       (progn
-        (error "Unable to run anaconda_mode.py")
+        (error (concat "Unable to run anaconda_mode.py - Process output:\n" anaconda-mode-process-output))
         (anaconda-mode-stop)
-        )
-      )
-    )
-  )
+        (setq anaconda-mode-port nil)
+        (setq anaconda-mode-process-output nil)))))
 
 (defun anaconda-mode-process-filter (process output)
   "Set `anaconda-mode-port' from PROCESS OUTPUT."
+  (setq anaconda-mode-process-output output)
   (--when-let (s-match "anaconda_mode port \\([0-9][0-9]*\\)" output)
     (setq anaconda-mode-port (string-to-number (cadr it)))))
 
