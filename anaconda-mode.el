@@ -56,7 +56,9 @@
 (defun anaconda-mode-python ()
   "Detect python executable."
   (--if-let python-shell-virtualenv-path
-      (f-join it "bin" "python")
+      (if (file-exists-p (f-join it "Scripts" "python.exe"))
+        (f-join it "Scripts" "python")
+      (f-join it "bin" "python"))
     "python"))
 
 (defun anaconda-mode-start ()
