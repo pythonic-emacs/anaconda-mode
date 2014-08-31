@@ -151,6 +151,7 @@ def main():
             port += 1
 
     print('anaconda_mode port', port)
+    sys.stdout.flush()
     server.serve_forever()
 
 
