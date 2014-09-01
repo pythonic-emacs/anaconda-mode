@@ -157,6 +157,7 @@ Thanks
 * Bo Lin **@sadboy**
 * Vasilij Schneidermann **@wasamasa**
 * Fredrik Bergroth **@fbergroth**
+* Fabio Corneti **@fabiocorneti**
 
 .. _Melpa: http://melpa.milkbox.net/
 .. _pyenv-mode: https://github.com/proofit404/pyenv-mode
