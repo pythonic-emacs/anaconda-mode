@@ -121,6 +121,15 @@ test_|_")
   (should (equal (anaconda-mode-complete-thing)
                  '("test1" "test2"))))
 
+(ert-deftest test-anaconda-mode-complete-with-tabulation ()
+  "Test completion at point with tab indentation."
+  (load-fixture "simple.py" "\
+import sys
+if True:
+	sys.api_|_")
+  (should (equal (anaconda-mode-complete-thing)
+                 '("api_version"))))
+
 ;;; Documentation.
 
 (ert-deftest test-anaconda-mode-doc ()

@@ -170,7 +170,7 @@ Return nil if it run under proper environment."
      command
      (buffer-substring-no-properties (point-min) (point-max))
      (line-number-at-pos (point))
-     (current-column)
+     (- (point) (line-beginning-position))
      (anaconda-mode-file-name))))
 
 (defun anaconda-mode-file-name ()
