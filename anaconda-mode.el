@@ -55,11 +55,11 @@
 
 (defun anaconda-mode-python ()
   "Detect python executable."
-  (--if-let python-shell-virtualenv-path
-      (if (file-exists-p (f-join it "Scripts" "pythonw.exe"))
-          (f-join it "Scripts" "pythonw")
-        (f-join it "bin" "python"))
-    "python"))
+  (let ((python (if (eq system-type 'windows-nt) "pythonw" "python"))
+        (bin-dir (if (eq system-type 'windows-nt) "Scripts" "bin")))
+    (--if-let python-shell-virtualenv-path
+        (f-join it bin-dir python)
+      python)))
 
 (defun anaconda-mode-start ()
   "Start anaconda_mode.py server."
