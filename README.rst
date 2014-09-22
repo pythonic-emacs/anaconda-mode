@@ -51,6 +51,13 @@ following command from project root::
 
     pip install -r requirements.txt -t .
 
+prelude
+```````
+
+``anaconda-mode`` included into `Emacs Prelude`_ distribution.  You
+can use it as well.  Look at ``prelude-python`` module to see more
+details.
+
 Usage
 -----
 
@@ -162,3 +169,4 @@ Thanks
 .. _Melpa: http://melpa.milkbox.net/
 .. _pyenv-mode: https://github.com/proofit404/pyenv-mode
 .. _jedi: http://jedi.jedidjah.ch/en/latest/
+.. _emacs prelude: https://github.com/bbatsov/prelude
