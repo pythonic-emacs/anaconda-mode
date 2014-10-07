@@ -148,6 +148,13 @@ f(a, b = 1)
 
 Docstring for f.")))
 
+(ert-deftest test-anaconda-mode-doc-window-focus ()
+  "Test documentation window focus."
+  (load-fixture "simple.py" "from os import path_|_")
+  (anaconda-mode-view-doc)
+  (should (equal "*anaconda-doc*"
+                 (buffer-name))))
+
 ;;; ElDoc.
 
 (ert-deftest test-anaconda-eldoc-existing ()
