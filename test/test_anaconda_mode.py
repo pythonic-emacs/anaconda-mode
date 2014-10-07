@@ -1,4 +1,5 @@
-from test.helpers import process, make_request, send
+from __future__ import absolute_import
+from .test_helper import process, make_request, send
 from textwrap import dedent
 import anaconda_mode
 import io
