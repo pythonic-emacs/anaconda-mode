@@ -92,7 +92,7 @@ Return nil if it run under proper environment."
     (setq anaconda-mode-process
           (start-process
            "anaconda_mode"
-           nil
+           "*anaconda-mode*"
            (anaconda-mode-python)
            "anaconda_mode.py"))
     (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
