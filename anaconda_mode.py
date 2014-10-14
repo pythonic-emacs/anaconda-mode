@@ -17,6 +17,10 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     error_message_format = ''
 
+    def log_request(*args):
+        """Ignore non error logging messages."""
+        pass
+
     def do_POST(self):
         content_len = self.headers.get('content-length')
         if content_len is not None:

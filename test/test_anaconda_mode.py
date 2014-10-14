@@ -69,9 +69,6 @@ def test_http_handler():
         def date_time_string(self):
             return 'Ice age'
 
-        def log_request(*args):
-            pass
-
     handler = TestHandler()
     handler.do_POST()
     response = handler.wfile.getvalue().decode('utf-8')
