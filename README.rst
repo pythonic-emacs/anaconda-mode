@@ -136,15 +136,10 @@ you need is enable ``eldoc-mode`` in addition to previous setup.
 
     (add-hook 'python-mode-hook 'eldoc-mode)
 
-Known Issues
-------------
+Bug Reports
+-----------
 
-If you're using proxy server, you have to make sure that the proxy is
-not used for communication with anaconda-mode:
-
-.. code:: shell
-
-    export no_proxy="localhost,127.0.0.1"
+Please attach ``*anaconda-mode*`` buffer content to every created issue.
 
 Contributions
 -------------
