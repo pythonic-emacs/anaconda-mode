@@ -21,7 +21,7 @@ Code navigation, documentation lookup and completion for Python.
 
 .. figure:: static/goto-definitions.png
 
-This mode support 2.6, 2.7, 3.3 and 3.4 Python versions and provide
+This package support 2.6, 2.7, 3.3 and 3.4 Python versions and provide
 following features
 
 * context-sensitive code completion
@@ -58,50 +58,40 @@ prelude
 can use it as well.  Look at ``prelude-python`` module to see more
 details.
 
+Configuration
+-------------
+
+You can automatically enable ``anaconda-mode`` in all python buffers
+with following code in your configuration:
+
+.. code:: lisp
+
+    (add-hook 'python-mode-hook 'anaconda-mode)
+
+ElDoc
+`````
+
+``anaconda-mode`` provide document function to ``eldoc-mode``.  All
+you need is enable ``eldoc-mode`` in addition to previous setup.
+
+.. code:: lisp
+
+    (add-hook 'python-mode-hook 'eldoc-mode)
+
 Usage
 -----
 
-Anaconda mode comes with ``anaconda_mode.py`` server.  This server
-allow you to use jedi_ package over jsonrpc api.  Server choice first
-available port starting from 24970.  If no host was specified loopback
-interface will be used.  Anaconda mode will run this server
-automatically on first call of any anaconda-mode command.  Anaconda
-mode detect active virtual environment through value of
+To start completion press ``C-M-i``.  This is standard emacs binding
+for ``complete-at-point`` function.  You can use company-mode_ with
+company-anaconda_ backend to get more intelligent ui.  Or
+auto-complete-mode_ with ac-anaconda_ as last try.
+
+Anaconda mode detect active virtual environment through value of
 ``python-shell-virtualenv-path`` variable defined in ``python.el``
 library.  When you set it to actual virtualenv path next anaconda-mode
-command you call will restart server process in proper environment
-before performing this call.  This allow anaconda processing virtual
-environment site-packages with minimum number of actions from your
-side.  I strongly recommended you to use `pyenv-mode`_ or similar
+command you call will use this environment for completion candidates
+search.  I strongly recommended you to use `pyenv-mode`_ or similar
 package to hold ``python-shell-virtualenv-path`` in actual state.
-
-Tramp and vagrant
-`````````````````
-
-It's possible to use anaconda-mode on remote server when you connect
-to it using tramp.  Setup process differs from local usage.  You need
-to login on remote machine and install anaconda-mode server.  You can
-download it directly from Melpa_ and unpack it to some directory.  If
-you use virtual environment on remote server then you need to activate
-it before we continue.  Now run ``anaconda_mode.py`` from shell::
-
-    . venv/bin/activate
-    python anaconda_mode.py 0.0.0.0
-
-To tell anaconda-mode to connect to that server you need to run
-following command::
-
-    M-x anaconda-mode-remote
-
-It will ask you to enter host and port information for remote server.
-In case of vagrant you can specify ``127.0.0.1`` as host part.  To get
-proper completion you need to open your files with tramp addresses
-even for vagrant setup.  This caused because of different relative
-paths on your local machine and inside vagrant.  To stop this behavior
-and enable ``anaconda_mode.py`` server starts locally run command
-below::
-
-    M-x anaconda-mode-local
 
 Interactive commands
 ````````````````````
@@ -118,23 +108,40 @@ M-r         anaconda-mode-usages
 ==========  ==============================
 
 If goto definitions, assignments or usages cause multiple candidates
-you'll see advanced anaconda navigator buffer.  You can automatically
-enable ``anaconda-mode`` in all python buffers with following code in
-your configuration
+you'll see advanced anaconda navigator buffer.
 
-.. code:: lisp
-
-    (add-hook 'python-mode-hook 'anaconda-mode)
-
-ElDoc
+Tramp
 `````
 
-``anaconda-mode`` provide document function to ``eldoc-mode``.  All
-you need is enable ``eldoc-mode`` in addition to previous setup.
+**Not properly implemented yet**
 
-.. code:: lisp
+It's possible to use anaconda-mode on remote server when you connect
+to it using tramp.  In case of vagrant you need to use ``127.0.0.1``
+as tramp address.
 
-    (add-hook 'python-mode-hook 'eldoc-mode)
+Implementation details
+----------------------
+
+Anaconda mode comes with ``anaconda_mode.py`` server.  This server
+allow you to use jedi_ python library over jsonrpc api.  Server choice
+first available port starting from 24970.  Anaconda mode will run this
+server automatically on first call of any anaconda-mode command.
+
+This mean that usage results depends on your project installation.  To
+make it available for ``anaconda-mode`` you have two options:
+
+* add your project to Emacs``PYTHONPATH``:
+
+::
+
+   M-x setenv RET PYTHONPATH RET /path/to/project
+
+* install your project into its virtual environment
+
+.. code:: shell
+
+    . env/bin/activate
+    pip install -e .
 
 Bug Reports
 -----------
@@ -165,3 +172,7 @@ Thanks
 .. _pyenv-mode: https://github.com/proofit404/pyenv-mode
 .. _jedi: http://jedi.jedidjah.ch/en/latest/
 .. _emacs prelude: https://github.com/bbatsov/prelude
+.. _company-mode: http://company-mode.github.io/
+.. _company-anaconda: https://github.com/proofit404/company-anaconda
+.. _auto-complete-mode: https://github.com/auto-complete/auto-complete
+.. _ac-anaconda: https://github.com/proofit404/ac-anaconda
