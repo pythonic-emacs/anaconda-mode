@@ -86,13 +86,6 @@ for ``complete-at-point`` function.  You can use company-mode_ with
 company-anaconda_ backend to get more intelligent ui.  Or
 auto-complete-mode_ with ac-anaconda_ as last try.
 
-Anaconda mode detect active virtual environment through value of
-``python-shell-virtualenv-path`` variable defined in ``python.el``
-library.  When you set it to actual virtualenv path next anaconda-mode
-command you call will use this environment for completion candidates
-search.  I strongly recommended you to use `pyenv-mode`_ or similar
-package to hold ``python-shell-virtualenv-path`` in actual state.
-
 Interactive commands
 ````````````````````
 
@@ -127,21 +120,37 @@ allow you to use jedi_ python library over jsonrpc api.  Server choice
 first available port starting from 24970.  Anaconda mode will run this
 server automatically on first call of any anaconda-mode command.
 
-This mean that usage results depends on your project installation.  To
-make it available for ``anaconda-mode`` you have two options:
+This mean that completion results and reference search depends on your
+project installation.  To make it available for ``anaconda-mode`` you
+have few options.
 
-* add your project to Emacs ``PYTHONPATH``:
+PYTHONPATH
+``````````
 
+Add your project to Emacs ``PYTHONPATH``.  If you store project
+dependencies somewhere on you machine add its too.
 ::
 
-   M-x setenv RET PYTHONPATH RET /path/to/project
+    M-x setenv RET PYTHONPATH RET /path/to/project:/path/to/dependency
 
-* install your project into its virtual environment
+VIRTUALENV
+``````````
 
-.. code:: shell
+Use virtual environment to isolate your project dependencies form
+other system.  You can additionally install you project in editable
+mode into virtual environment.  This will improve usage references
+search.  Then activate this virtual environment inside Emacs.
 
-    . env/bin/activate
-    pip install -e .
+.. code:: lisp
+
+    (setq python-shell-virtualenv-path "/path/to/virtualenv")
+
+I strongly recommended you to use `pyenv-mode`_ or similar package to
+hold ``python-shell-virtualenv-path`` in actual state.
+
+Each action above applies to ``anaconda-mode`` server immediately.
+Next ``anaconda-mode`` command you call will use this environment for
+completion candidates search.
 
 Bug Reports
 -----------
