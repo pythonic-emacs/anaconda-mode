@@ -130,7 +130,7 @@ server automatically on first call of any anaconda-mode command.
 This mean that usage results depends on your project installation.  To
 make it available for ``anaconda-mode`` you have two options:
 
-* add your project to Emacs``PYTHONPATH``:
+* add your project to Emacs ``PYTHONPATH``:
 
 ::
 
