@@ -19,7 +19,7 @@
   (anaconda-mode-stop)
   (should-not (anaconda-mode-running-p)))
 
-(ert-deftest test-anaconda-mode-restart ()
+(ert-deftest test-anaconda-mode-restart-virtualenv ()
   "Test if anaconda-mode local server react on VIRTUAL_ENV change."
   (anaconda-mode-start)
   (let ((python-shell-virtualenv-path (getenv "ENVDIR")))
@@ -28,6 +28,12 @@
     (anaconda-mode-start)
     (should (s-equals? (car (process-command anaconda-mode-process))
                        (getenv "ENVPYTHON")))))
+
+(ert-deftest test-anaconda-mode-restart-python-path ()
+  "Check if anaconda-mode server react on PYTHONPATH change."
+  (anaconda-mode-start)
+  (let ((process-environment '("PYTHONPATH=/usr/lib/python3.4")))
+    (should (anaconda-mode-need-restart))))
 
 (ert-deftest test-anaconda-mode-python ()
   "Check that anaconda_mode detect proper python executable."

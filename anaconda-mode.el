@@ -50,6 +50,9 @@
 (defvar anaconda-mode-process nil
   "Currently running anaconda_mode process.")
 
+(defvar anaconda-mode-process-pythonpath nil
+  "PYTHONPATH value used to start anaconda_mode server last time.")
+
 (defvar anaconda-mode-connection nil
   "Json Rpc connection to anaconda_mode process.")
 
@@ -60,6 +63,10 @@
     (--if-let python-shell-virtualenv-path
         (f-join it bin-dir python)
       python)))
+
+(defun anaconda-mode-pythonpath ()
+  "Get current PYTHONPATH value."
+  (getenv "PYTHONPATH"))
 
 (defun anaconda-mode-start ()
   "Start anaconda_mode.py server."
@@ -82,9 +89,20 @@
 (defun anaconda-mode-need-restart ()
   "Check if current `anaconda-mode-process' need restart with new args.
 Return nil if it run under proper environment."
+  (or (anaconda-mode-virtualenv-has-been-changed)
+      (anaconda-mode-pythonpath-has-been-changed)))
+
+(defun anaconda-mode-virtualenv-has-been-changed ()
+  "Determine if virtual environment has been changed."
   (and (anaconda-mode-running-p)
        (not (equal (car (process-command anaconda-mode-process))
                    (anaconda-mode-python)))))
+
+(defun anaconda-mode-pythonpath-has-been-changed ()
+  "Determine if PYTHONPATH has been changed."
+  (and (anaconda-mode-running-p)
+       (not (equal anaconda-mode-process-pythonpath
+                   (anaconda-mode-pythonpath)))))
 
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
@@ -95,6 +113,7 @@ Return nil if it run under proper environment."
            "*anaconda-mode*"
            (anaconda-mode-python)
            "anaconda_mode.py"))
+    (setq anaconda-mode-process-pythonpath (anaconda-mode-pythonpath))
     (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
     (accept-process-output anaconda-mode-process)
     (set-process-filter anaconda-mode-process nil)
