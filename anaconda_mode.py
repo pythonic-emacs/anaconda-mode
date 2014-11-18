@@ -1,4 +1,9 @@
 from __future__ import print_function
+
+import sys
+if '' not in sys.path:
+    sys.path.append('')  # Ensure we can import, e.g., jsonrpc from CWD
+
 from jsonrpc import dispatcher, JSONRPCResponseManager
 
 try:
@@ -9,7 +14,6 @@ except:
 import jedi
 import functools
 import socket
-import sys
 
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
