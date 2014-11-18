@@ -2,7 +2,7 @@ from __future__ import print_function
 
 import sys
 if '' not in sys.path:
-    sys.path.append('')  # Ensure we can import, e.g., jsonrpc from CWD
+    sys.path.insert(0, '')  # Ensure we can import, e.g., jsonrpc from CWD
 
 from jsonrpc import dispatcher, JSONRPCResponseManager
 
