@@ -5,4 +5,5 @@
 (development
  (depends-on "cask")
  (depends-on "ert-runner")
- (depends-on "pyenv-mode"))
+ (depends-on "pyenv-mode")
+ (depends-on "undercover"))
