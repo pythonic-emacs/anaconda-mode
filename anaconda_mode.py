@@ -4,6 +4,16 @@ import sys
 if '' not in sys.path:
     sys.path.insert(0, '')  # Ensure we can import, e.g., jsonrpc from CWD
 
+sys.path.insert(0, os.path.abspath(os.path.join( 
+    os.path.dirname(__file__),
+    "vendor")))
+
+sys.path.insert(0, os.path.abspath(os.path.join( 
+    os.path.dirname(__file__),
+    "vendor",
+    "jedi")))
+
+
 from jsonrpc import dispatcher, JSONRPCResponseManager
 
 try:
