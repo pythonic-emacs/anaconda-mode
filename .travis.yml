@@ -17,6 +17,7 @@ install:
 
 script:
   - tox
+  - cask exec ert-runner
 
 after_success:
   - coveralls-merge emacs-coveralls.json

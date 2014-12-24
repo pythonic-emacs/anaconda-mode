@@ -7,7 +7,22 @@
 (require 'ert)
 (require 'anaconda-mode)
 
-;;; Server.
+;; Constants.
+
+(defvar project-path (locate-dominating-file load-file-name "anaconda-mode.el"))
+(defvar envdir (f-join project-path ".tox" "py34"))
+(defvar envpython (f-join envdir "bin" "python"))
+
+;; Helpers.
+
+(defun load-fixture (filename source)
+  "Load FILENAME fixture filled with SOURCE."
+  (setq buffer-file-name (expand-file-name filename))
+  (insert source)
+  (search-backward "_|_")
+  (delete-char 3))
+
+;; Server.
 
 (ert-deftest test-anaconda-mode-start ()
   "Test if anaconda_mode.py start successfully."
@@ -22,12 +37,10 @@
 (ert-deftest test-anaconda-mode-restart-virtualenv ()
   "Test if anaconda-mode local server react on VIRTUAL_ENV change."
   (anaconda-mode-start)
-  (let ((python-shell-virtualenv-path (getenv "ENVDIR")))
-    (should-not (s-equals? (car (process-command anaconda-mode-process))
-                           (getenv "ENVPYTHON")))
-    (anaconda-mode-start)
-    (should (s-equals? (car (process-command anaconda-mode-process))
-                       (getenv "ENVPYTHON")))))
+  (should-not (s-equals? envpython (car (process-command anaconda-mode-process))))
+  (let ((python-shell-virtualenv-path envdir))
+    (anaconda-mode-start))
+  (should (s-equals? envpython (car (process-command anaconda-mode-process)))))
 
 (ert-deftest test-anaconda-mode-restart-python-path ()
   "Check if anaconda-mode server react on PYTHONPATH change."
@@ -37,9 +50,8 @@
 
 (ert-deftest test-anaconda-mode-python ()
   "Check that anaconda_mode detect proper python executable."
-  (let ((python-shell-virtualenv-path (getenv "ENVDIR")))
-    (should (string= (anaconda-mode-python)
-                     (getenv "ENVPYTHON")))))
+  (let ((python-shell-virtualenv-path envdir))
+    (should (string= envpython (anaconda-mode-python)))))
 
 (ert-deftest test-anaconda-mode-process-filter ()
   "Anaconda mode process filter should detect process port."
@@ -53,7 +65,7 @@
   (let* ((output "Process anaconda_mode finished"))
     (should-not (anaconda-mode-process-filter nil output))))
 
-;;; Connection.
+;; Connection.
 
 (ert-deftest test-anaconda-mode-connect ()
   "Anaconda mode should successfully connect to server."
@@ -81,7 +93,7 @@ Even if settings are broken."
     ;; change.
     (should-error (anaconda-mode-connect))))
 
-;;; Interaction.
+;; Interaction.
 
 (ert-deftest test-anaconda-mode-remote ()
   "Test anaconda mode setup remote environment properly."
@@ -111,7 +123,7 @@ Even if settings are broken."
   (let ((buffer-file-name "/ssh:news@news.my.domain:/opt/news/etc/test.py"))
     (should (equal "/opt/news/etc/test.py" (anaconda-mode-file-name)))))
 
-;;; Completion.
+;; Completion.
 
 (ert-deftest test-anaconda-mode-complete ()
   "Test completion at point."
@@ -136,7 +148,7 @@ if True:
   (should (equal (anaconda-mode-complete-thing)
                  '("api_version"))))
 
-;;; Documentation.
+;; Documentation.
 
 (ert-deftest test-anaconda-mode-doc ()
   "Test documentation string search."
@@ -161,7 +173,7 @@ Docstring for f.")))
   (should (equal "*anaconda-doc*"
                  (buffer-name))))
 
-;;; ElDoc.
+;; ElDoc.
 
 (ert-deftest test-anaconda-eldoc-existing ()
   (load-fixture "simple.py" "\
@@ -180,7 +192,7 @@ fn(_|_")
         (anaconda-mode-port nil))
     (should-not (anaconda-eldoc-function))))
 
-;;; Minor mode.
+;; Minor mode.
 
 (ert-deftest test-anaconda-mode-enable ()
   (with-temp-buffer
