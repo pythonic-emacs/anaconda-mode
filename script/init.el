@@ -12,11 +12,6 @@
 
 (require 'anaconda-mode)
 
-(let ((envdir (getenv "ENVDIR")))
-  (setq python-shell-virtualenv-path envdir))
-
-(setq anaconda-mode-debug t)
-
 (add-hook 'python-mode-hook 'anaconda-mode)
 
 (add-hook 'python-mode-hook 'eldoc-mode)
