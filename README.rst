@@ -2,17 +2,17 @@
     :target: https://travis-ci.org/proofit404/anaconda-mode
     :alt: Build Status
 
-.. |gemnasium| image:: https://gemnasium.com/proofit404/anaconda-mode.png
-    :target: https://gemnasium.com/proofit404/anaconda-mode
-    :alt: Dependency Status
-
 .. |coveralls| image:: https://coveralls.io/repos/proofit404/anaconda-mode/badge.png
     :target: https://coveralls.io/r/proofit404/anaconda-mode
     :alt: Coverage Status
 
-================================================
- Anaconda mode |travis| |gemnasium| |coveralls|
-================================================
+.. |requires| image:: https://requires.io/github/proofit404/anaconda-mode/requirements.svg
+     :target: https://requires.io/github/proofit404/anaconda-mode/requirements
+     :alt: Requirements Status
+
+==============================================
+ Anaconda mode |travis| |coveralls| |requires|
+==============================================
 
 .. image:: static/logo.png
     :align: center
