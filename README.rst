@@ -44,12 +44,8 @@ All you need is install the package from Melpa_::
 manual
 ``````
 
-``vendor`` directory used to build Melpa_ package only.  If you setup
-from git you can't use git submodules for dependency resolution.
-Clone this repository somewhere, add it to you ``load-path`` and do
-following command from project root::
-
-    pip install -r requirements.txt -t .
+Clone this repository somewhere and add this directory to you
+``load-path``.
 
 prelude
 ```````
@@ -57,6 +53,12 @@ prelude
 ``anaconda-mode`` included into `Emacs Prelude`_ distribution.  You
 can use it as well.  Look at ``prelude-python`` module to see more
 details.
+
+spacemacs
+`````````
+
+``anaconda-mode`` included into Spacemacs_ distribution.  You can use
+it as well.  Look at ``python`` language contrib to see more details.
 
 Configuration
 -------------
@@ -183,6 +185,7 @@ Thanks
 .. _pyenv-mode: https://github.com/proofit404/pyenv-mode
 .. _jedi: http://jedi.jedidjah.ch/en/latest/
 .. _emacs prelude: https://github.com/bbatsov/prelude
+.. _spacemacs: https://github.com/syl20bnr/spacemacs
 .. _company-mode: http://company-mode.github.io/
 .. _company-anaconda: https://github.com/proofit404/company-anaconda
 .. _auto-complete-mode: https://github.com/auto-complete/auto-complete
