@@ -1,19 +1,25 @@
 from __future__ import print_function
 
+import functools
+import socket
 import sys
-if '' not in sys.path:
-    sys.path.insert(0, '')  # Ensure we can import, e.g., jsonrpc from CWD
-
-from jsonrpc import dispatcher, JSONRPCResponseManager
-
 try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
 except:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from os.path import dirname, exists, join
+from subprocess import Popen
+
+project_path = dirname(__file__)
+
+sys.path.insert(0, project_path)
+
+if not exists(join(project_path, 'jedi')):
+    pip = Popen(['pip', 'install', '-t', '.', 'jedi==0.8.1-final0', 'json-rpc==1.6'])
+    pip.communicate()
 
 import jedi
-import functools
-import socket
+from jsonrpc import dispatcher, JSONRPCResponseManager
 
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
