@@ -7,15 +7,16 @@ try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
 except:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from os.path import dirname, exists, join
+from os.path import abspath, dirname, exists, join
 from subprocess import Popen
 
-project_path = dirname(__file__)
+project_path = dirname(abspath(__file__))
 
 sys.path.insert(0, project_path)
 
 if not exists(join(project_path, 'jedi')):
-    pip = Popen(['pip', 'install', '-t', '.', 'jedi==0.8.1-final0', 'json-rpc==1.6'])
+    pip = Popen(['pip', 'install', '-t', project_path, 'jedi==0.8.1-final0',
+                 'json-rpc==1.6'])
     pip.communicate()
 
 import jedi
