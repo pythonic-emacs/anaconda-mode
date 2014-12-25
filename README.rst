@@ -7,8 +7,8 @@
     :alt: Coverage Status
 
 .. |requires| image:: https://requires.io/github/proofit404/anaconda-mode/requirements.svg
-     :target: https://requires.io/github/proofit404/anaconda-mode/requirements
-     :alt: Requirements Status
+    :target: https://requires.io/github/proofit404/anaconda-mode/requirements
+    :alt: Requirements Status
 
 ==============================================
  Anaconda mode |travis| |coveralls| |requires|
