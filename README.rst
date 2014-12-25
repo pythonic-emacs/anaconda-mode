@@ -10,9 +10,19 @@
     :target: https://requires.io/github/proofit404/anaconda-mode/requirements
     :alt: Requirements Status
 
-==============================================
- Anaconda mode |travis| |coveralls| |requires|
-==============================================
+.. |melpa| image:: http://melpa.org/packages/anaconda-mode-badge.svg
+    :target: http://melpa.org/#/anaconda-mode
+    :alt: Melpa
+
+.. |melpa-stable| image:: http://stable.melpa.org/packages/anaconda-mode-badge.svg
+    :target: http://stable.melpa.org/#/anaconda-mode
+    :alt: Melpa Stable
+
+=============
+Anaconda mode
+=============
+
+|travis| |coveralls| |requires| |melpa| |melpa-stable|
 
 .. image:: static/logo.png
     :align: center
