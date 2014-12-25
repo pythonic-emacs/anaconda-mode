@@ -117,15 +117,14 @@ Return nil if it run under proper environment."
            "anaconda_mode.py"))
     (setq anaconda-mode-process-pythonpath (anaconda-mode-pythonpath))
     (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
-    (accept-process-output anaconda-mode-process)
+    (while (null anaconda-mode-port)
+      (accept-process-output anaconda-mode-process))
     (set-process-filter anaconda-mode-process nil)
-    (set-process-query-on-exit-flag anaconda-mode-process nil)
-    (unless anaconda-mode-port
-      (error "Unable to run anaconda_mode.py"))))
+    (set-process-query-on-exit-flag anaconda-mode-process nil)))
 
 (defun anaconda-mode-process-filter (process output)
   "Set `anaconda-mode-port' from PROCESS OUTPUT."
-  (--when-let (s-match "anaconda_mode port \\([0-9][0-9]*\\)" output)
+  (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
     (setq anaconda-mode-port (string-to-number (cadr it)))))
 
 
