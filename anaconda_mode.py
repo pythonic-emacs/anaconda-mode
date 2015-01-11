@@ -7,20 +7,35 @@ try:
     from http.server import BaseHTTPRequestHandler, HTTPServer
 except:
     from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
-from os.path import abspath, dirname, exists, join
+from os.path import abspath, dirname
 from subprocess import Popen
 
 project_path = dirname(abspath(__file__))
 
 sys.path.insert(0, project_path)
 
-if not exists(join(project_path, 'jedi')):
-    pip = Popen(['pip', 'install', '-t', project_path, 'jedi==0.8.1-final0',
-                 'json-rpc==1.6'])
-    pip.communicate()
+missing_dependencies = []
 
-import jedi
-from jsonrpc import dispatcher, JSONRPCResponseManager
+try:
+    import jedi
+except ImportError:
+    missing_dependencies.append('jedi==0.8.1')
+
+try:
+    import jsonrpc
+except ImportError:
+    missing_dependencies.append('json-rpc==1.8.1')
+
+if missing_dependencies:
+    command = ['pip', 'install', '-t', project_path] + missing_dependencies
+    pip = Popen(command)
+    pip.communicate()
+    assert pip.returncode is 0, 'PyPi installation fails.'
+    import jedi
+    import jsonrpc
+
+assert jedi.__version__ == '0.8.1', 'Jedi version does not match 0.8.1'
+assert jsonrpc.__version__ == '1.8.1', 'JSON RPC version does not match 1.8.1'
 
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
@@ -49,13 +64,14 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 
     @staticmethod
     def process_request(request):
-        response = JSONRPCResponseManager.handle(request, dispatcher)
+        response = jsonrpc.JSONRPCResponseManager.handle(
+            request, jsonrpc.dispatcher)
         status = 500 if response.error else 200
         return status, response.json
 
 
 def script_method(f):
-    @dispatcher.add_method
+    @jsonrpc.dispatcher.add_method
     @functools.wraps(f)
     def wrapper(source, line, column, path):
         try:
