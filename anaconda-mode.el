@@ -36,6 +36,10 @@
 
 ;;; Server.
 
+(defvar anaconda-mode-server
+  (f-join (f-dirname load-file-name) "anaconda_mode.py")
+  "Script file with anaconda_mode server.")
+
 (defvar anaconda-mode-remote-p nil
   "Determine whatever connect to remove server or a local machine.")
 
@@ -109,7 +113,7 @@ Return nil if it run under proper environment."
          "anaconda_mode"
          "*anaconda-mode*"
          (anaconda-mode-python)
-         "anaconda_mode.py"))
+         anaconda-mode-server))
   (setq anaconda-mode-process-pythonpath (anaconda-mode-pythonpath))
   (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
   (while (null anaconda-mode-port)
