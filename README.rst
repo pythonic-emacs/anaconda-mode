@@ -44,6 +44,8 @@ following features
 Installation
 ------------
 
+To use this package you need to install ``pip``.
+
 package.el
 ``````````
 
