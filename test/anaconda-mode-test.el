@@ -55,15 +55,19 @@
 
 (ert-deftest test-anaconda-mode-process-filter ()
   "Anaconda mode process filter should detect process port."
-  (let* ((output "anaconda_mode port 24970\n")
+  (let* ((process (start-process "*python*" "*python*" "python" "-V"))
+         (output "anaconda_mode port 24970\n")
          (anaconda-mode-port nil))
-    (anaconda-mode-process-filter nil output)
+    (anaconda-mode-process-filter process output)
     (should (numberp anaconda-mode-port))))
 
 (ert-deftest test-anaconda-mode-process-filter-error ()
   "Anaconda mode process filter should ignore any trash output."
-  (let* ((output "Process anaconda_mode finished"))
-    (should-not (anaconda-mode-process-filter nil output))))
+  (let* ((process (start-process "*python*" "*python*" "python" "-V"))
+         (output "Process anaconda_mode finished")
+         (anaconda-mode-port nil))
+    (anaconda-mode-process-filter process output)
+    (should-not anaconda-mode-port)))
 
 ;; Connection.
 

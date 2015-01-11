@@ -36,10 +36,6 @@
 
 ;;; Server.
 
-(defvar anaconda-mode-directory
-  (file-name-directory load-file-name)
-  "Directory containing anaconda_mode package.")
-
 (defvar anaconda-mode-remote-p nil
   "Determine whatever connect to remove server or a local machine.")
 
@@ -108,24 +104,32 @@ Return nil if it run under proper environment."
 
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
-  (let ((default-directory anaconda-mode-directory))
-    (setq anaconda-mode-process
-          (start-process
-           "anaconda_mode"
-           "*anaconda-mode*"
-           (anaconda-mode-python)
-           "anaconda_mode.py"))
-    (setq anaconda-mode-process-pythonpath (anaconda-mode-pythonpath))
-    (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
-    (while (null anaconda-mode-port)
-      (accept-process-output anaconda-mode-process))
-    (set-process-filter anaconda-mode-process nil)
-    (set-process-query-on-exit-flag anaconda-mode-process nil)))
+  (setq anaconda-mode-process
+        (start-process
+         "anaconda_mode"
+         "*anaconda-mode*"
+         (anaconda-mode-python)
+         "anaconda_mode.py"))
+  (setq anaconda-mode-process-pythonpath (anaconda-mode-pythonpath))
+  (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
+  (while (null anaconda-mode-port)
+    (accept-process-output anaconda-mode-process)
+    (unless (anaconda-mode-running-p)
+      (error "Unable to run anaconda-mode server")))
+  (set-process-filter anaconda-mode-process nil)
+  (set-process-query-on-exit-flag anaconda-mode-process nil))
 
 (defun anaconda-mode-process-filter (process output)
   "Set `anaconda-mode-port' from PROCESS OUTPUT."
   (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
-    (setq anaconda-mode-port (string-to-number (cadr it)))))
+    (setq anaconda-mode-port (string-to-number (cadr it))))
+  ;; Mimic default filter.
+  (when (buffer-live-p (process-buffer process))
+    (with-current-buffer (process-buffer process)
+      (save-excursion
+        (goto-char (process-mark process))
+        (insert output)
+        (set-marker (process-mark process) (point))))))
 
 
 ;;; Connection.
