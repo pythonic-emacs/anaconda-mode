@@ -1,8 +1,8 @@
 ;;; anaconda-mode.el --- Code navigation, documentation lookup and completion for Python
 
-;; Copyright (C) 2013-2015 by Malyshev Artem
+;; Copyright (C) 2013-2015 by Artem Malyshev
 
-;; Author: Malyshev Artem <proofit404@gmail.com>
+;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "24") (json-rpc "0.0.1") (cl-lib "0.5.0") (dash "2.6.0") (f "0.16.2"))
