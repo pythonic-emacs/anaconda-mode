@@ -19,7 +19,7 @@ missing_dependencies = []
 try:
     import jedi
 except ImportError:
-    missing_dependencies.append('jedi==0.8.1')
+    missing_dependencies.append('jedi==0.8.1-final0')
 
 try:
     import jsonrpc
@@ -34,7 +34,7 @@ if missing_dependencies:
     import jedi
     import jsonrpc
 
-assert jedi.__version__ == '0.8.1', 'Jedi version does not match 0.8.1'
+assert jedi.__version__ == '0.8.1-final0', 'Jedi version does not match 0.8.1-final0'
 assert jsonrpc.__version__ == '1.8.1', 'JSON RPC version does not match 1.8.1'
 
 
