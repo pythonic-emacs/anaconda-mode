@@ -19,12 +19,12 @@ missing_dependencies = []
 try:
     import jedi
 except ImportError:
-    missing_dependencies.append('jedi==0.8.1-final0')
+    missing_dependencies.append('jedi')
 
 try:
     import jsonrpc
 except ImportError:
-    missing_dependencies.append('json-rpc==1.8.1')
+    missing_dependencies.append('json-rpc')
 
 if missing_dependencies:
     command = ['pip', 'install', '-t', project_path] + missing_dependencies
@@ -34,8 +34,8 @@ if missing_dependencies:
     import jedi
     import jsonrpc
 
-assert jedi.__version__ == '0.8.1-final0', 'Jedi version does not match 0.8.1-final0'
-assert jsonrpc.__version__ == '1.8.1', 'JSON RPC version does not match 1.8.1'
+print('Jedi version:', jedi.__version__)
+print('JSON RPC version:', jsonrpc.__version__)
 
 
 class HTTPRequestHandler(BaseHTTPRequestHandler):
