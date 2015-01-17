@@ -182,7 +182,7 @@ Issues
 This occurs due to `distutils bug
 <http://bugs.python.org/issue22269>`_ when ``pip -t`` option conflict
 with ``distutils.cfg`` ``prefix`` option.  If you install ``pip`` with
-``homebrew`` you are onfire.  There are few options to avoid this
+``homebrew`` you are on fire.  There are few options to avoid this
 issue.
 
 - install ``anaconda-mode`` dependencies manually
