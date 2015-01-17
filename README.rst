@@ -169,7 +169,24 @@ completion candidates search.
 Bug Reports
 -----------
 
-Please attach ``*anaconda-mode*`` buffer content to every created issue.
+Please attach ``*anaconda-mode*`` buffer content to every created
+issue.
+
+Issues
+------
+
+::
+
+    DistutilsOptionError: must supply either home or prefix/exec-prefix -- not both
+
+This occurs due to `distutils bug
+<http://bugs.python.org/issue22269>`_ when ``pip -t`` option conflict
+with ``distutils.cfg`` ``prefix`` option.  If you install ``pip`` with
+``homebrew`` you are onfire.  There are few options to avoid this
+issue.
+
+- install ``anaconda-mode`` dependencies manually
+- remove ``prefix`` option from ``distutils.cfg``
 
 Contributions
 -------------
