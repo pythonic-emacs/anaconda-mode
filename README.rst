@@ -185,7 +185,9 @@ with ``distutils.cfg`` ``prefix`` option.  If you install ``pip`` with
 ``homebrew`` you are on fire.  There are few options to avoid this
 issue.
 
-- install ``anaconda-mode`` dependencies manually
+- install ``anaconda-mode`` `dependencies
+  <https://github.com/proofit404/anaconda-mode/blob/master/requirements.txt>`_
+  manually
 - remove ``prefix`` option from ``distutils.cfg``
 
 Contributions
