@@ -1,3 +1,13 @@
+"""
+    anaconda_mode
+    ~~~~~~~~~~~~~
+
+    This is anaconda_mode autocompletion server.
+
+    :copyright: (c) 2013-2015 by Artem Malyshev.
+    :license: GPL3, see LICENSE for more details.
+"""
+
 from __future__ import print_function
 
 import functools
