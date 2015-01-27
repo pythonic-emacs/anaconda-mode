@@ -17,7 +17,9 @@
 
 (defun load-fixture (filename source)
   "Load FILENAME fixture filled with SOURCE."
-  (setq buffer-file-name (expand-file-name filename))
+  (find-file (expand-file-name filename temporary-file-directory))
+  (erase-buffer)
+  (python-mode)
   (insert source)
   (search-backward "_|_")
   (delete-char 3))
@@ -151,6 +153,11 @@ if True:
 	sys.api_|_")
   (should (equal (anaconda-mode-complete-thing)
                  '("api_version"))))
+
+(ert-deftest test-anaconda-mode-complete-in-comments ()
+  "Completion in comments must be nil."
+  (load-fixture "simple.py" "#imp_|_")
+  (should (null (anaconda-mode-complete-thing))))
 
 ;; Documentation.
 

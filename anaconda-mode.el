@@ -223,9 +223,11 @@ Return nil if it run under proper environment."
 
 (defun anaconda-mode-complete-thing (&rest ignored)
   "Complete python thing at point.
+Do nothing in comments block.
 IGNORED parameter is the string for which completion is required."
-  (--map (plist-get it :name)
-         (anaconda-mode-complete)))
+  (unless (python-syntax-comment-or-string-p)
+    (--map (plist-get it :name)
+           (anaconda-mode-complete))))
 
 (defun anaconda-mode-complete ()
   "Request completion candidates."
