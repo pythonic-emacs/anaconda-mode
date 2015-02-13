@@ -44,6 +44,7 @@ if missing_dependencies:
     import jedi
     import jsonrpc
 
+print('Python executable:', sys.executable)
 print('Jedi version:', jedi.__version__)
 print('JSON RPC version:', jsonrpc.__version__)
 
