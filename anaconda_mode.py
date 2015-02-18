@@ -22,7 +22,9 @@ from subprocess import Popen
 
 project_path = dirname(abspath(__file__))
 
-sys.path.insert(0, project_path)
+if project_path in sys.path:
+    sys.path.remove(project_path)
+sys.path.append(project_path)
 
 missing_dependencies = []
 
