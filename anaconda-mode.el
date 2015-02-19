@@ -58,11 +58,16 @@
 (defvar anaconda-mode-connection nil
   "Json Rpc connection to anaconda_mode process.")
 
+(defvaralias 'anaconda-mode-virtualenv-variable (if (version< emacs-version "25.1")
+                                                    'python-shell-virtualenv-path
+                                                  'python-shell-virtualenv-root)
+  "Alias to `python.el' virtualenv variable.")
+
 (defun anaconda-mode-python ()
   "Detect python executable."
   (let ((python (if (eq system-type 'windows-nt) "pythonw" "python"))
         (bin-dir (if (eq system-type 'windows-nt) "Scripts" "bin")))
-    (--if-let python-shell-virtualenv-path
+    (--if-let anaconda-mode-virtualenv-variable
         (f-join it bin-dir python)
       python)))
 
