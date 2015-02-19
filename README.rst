@@ -209,8 +209,9 @@ Thanks
 * Vasilij Schneidermann **@wasamasa**
 * Fredrik Bergroth **@fbergroth**
 * Fabio Corneti **@fabiocorneti**
-* Tom Davis **tdavis**
-* Sviridov Alexander **sviridov**
+* Tom Davis **@tdavis**
+* Sviridov Alexander **@sviridov**
+* Mario Rodas **@marsam**
 
 .. _Melpa: http://melpa.milkbox.net/
 .. _pyenv-mode: https://github.com/proofit404/pyenv-mode
