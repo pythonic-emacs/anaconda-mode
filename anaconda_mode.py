@@ -22,7 +22,9 @@ from subprocess import Popen
 
 project_path = dirname(abspath(__file__))
 
-sys.path.insert(0, project_path)
+if project_path in sys.path:
+    sys.path.remove(project_path)
+sys.path.append(project_path)
 
 missing_dependencies = []
 
@@ -129,7 +131,7 @@ def process_definitions(f):
         def get_description(d):
             if d.module_path not in cache:
                 with open(d.module_path, 'r') as file:
-                    cache[d.module_path] = file.read().splitlines()
+                    cache[d.module_path] = file.read().splitlines() or ['']
 
             return cache[d.module_path][d.line - 1]
 
