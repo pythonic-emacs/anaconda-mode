@@ -182,7 +182,7 @@ def eldoc(script):
 def main():
     """Runs anaconda server."""
 
-    host = sys.argv[1] if len(sys.argv) == 2 else 'localhost'
+    host = sys.argv[1] if len(sys.argv) == 2 else '127.0.0.1'
     port = 24970
     server = None
 
