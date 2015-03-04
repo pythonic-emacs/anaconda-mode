@@ -8,15 +8,11 @@
     :license: GPL3, see LICENSE for more details.
 """
 
-from __future__ import print_function
+from __future__ import (
+    absolute_import, unicode_literals, division, print_function)
 
-import functools
-import socket
 import sys
-try:
-    from http.server import BaseHTTPRequestHandler, HTTPServer
-except:
-    from BaseHTTPServer import BaseHTTPRequestHandler, HTTPServer
+from pkg_resources import get_distribution
 from os.path import abspath, dirname
 from subprocess import Popen
 
@@ -27,67 +23,37 @@ sys.path.insert(0, project_path)
 missing_dependencies = []
 
 try:
-    import jedi
+    from jedi import Script, NotFoundError
 except ImportError:
     missing_dependencies.append('jedi')
 
 try:
-    import jsonrpc
+    from service_factory import service_factory
 except ImportError:
-    missing_dependencies.append('json-rpc')
+    missing_dependencies.append('service_factory')
 
 if missing_dependencies:
     command = ['pip', 'install', '-t', project_path] + missing_dependencies
     pip = Popen(command)
     pip.communicate()
     assert pip.returncode is 0, 'PyPi installation fails.'
-    import jedi
-    import jsonrpc
+    from jedi import Script, NotFoundError
+    from service_factory import service_factory
 
 print('Python executable:', sys.executable)
-print('Jedi version:', jedi.__version__)
-print('JSON RPC version:', jsonrpc.__version__)
-
-
-class HTTPRequestHandler(BaseHTTPRequestHandler):
-
-    protocol_version = 'HTTP/1.1'
-    error_message_format = ''
-
-    def log_request(*args):
-        """Ignore non error logging messages."""
-        pass
-
-    def do_POST(self):
-        content_len = self.headers.get('content-length')
-        if content_len is not None:
-            data = self.rfile.read(int(content_len))
-            data = data.decode('utf-8')
-            status, response = self.process_request(data)
-        else:
-            status, response = 400, 'Missing content-length header'
-
-        response = response.encode('utf-8')
-        self.send_response(status)
-        self.send_header("Content-Length", len(response))
-        self.end_headers()
-        self.wfile.write(response)
-
-    @staticmethod
-    def process_request(request):
-        response = jsonrpc.JSONRPCResponseManager.handle(
-            request, jsonrpc.dispatcher)
-        status = 500 if response.error else 200
-        return status, response.json
+for package in ['jedi', 'service_factory']:
+    version = get_distribution(package).version
+    print('{package} version: {version}'.format(
+        package=package, version=version))
 
 
 def script_method(f):
-    @jsonrpc.dispatcher.add_method
-    @functools.wraps(f)
+    """Create jedi.Script instance and apply f to it."""
+
     def wrapper(source, line, column, path):
         try:
-            return f(jedi.Script(source, line, column, path))
-        except jedi.NotFoundError:
+            return f(Script(source, line, column, path))
+        except NotFoundError:
             return []
 
     return wrapper
@@ -122,7 +88,6 @@ def doc(script):
 
 
 def process_definitions(f):
-    @functools.wraps(f)
     def wrapper(script):
         cache = {script.path: script.source.splitlines()}
 
@@ -179,23 +144,9 @@ def eldoc(script):
     return {}
 
 
-def main():
-    """Runs anaconda server."""
-
-    host = sys.argv[1] if len(sys.argv) == 2 else '127.0.0.1'
-    port = 24970
-    server = None
-
-    while server is None:
-        try:
-            server = HTTPServer((host, port), HTTPRequestHandler)
-        except (OSError, socket.error):
-            port += 1
-
-    print('anaconda_mode port', port)
-    sys.stdout.flush()
-    server.serve_forever()
+app = [complete, doc, goto_definitions, goto_assignments, usages, eldoc]
 
 
 if __name__ == '__main__':
-    main()
+    host = sys.argv[1] if len(sys.argv) == 2 else '127.0.0.1'
+    service_factory(app, host, 'auto', (), 'anaconda_mode port {port}')
