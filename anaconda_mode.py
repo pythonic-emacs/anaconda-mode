@@ -149,4 +149,4 @@ app = [complete, doc, goto_definitions, goto_assignments, usages, eldoc]
 
 if __name__ == '__main__':
     host = sys.argv[1] if len(sys.argv) == 2 else '127.0.0.1'
-    service_factory(app, host, 'auto', (), 'anaconda_mode port {port}')
+    service_factory(app, host, 'auto', 'anaconda_mode port {port}')
