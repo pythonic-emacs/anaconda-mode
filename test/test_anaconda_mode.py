@@ -1,131 +1,63 @@
-from __future__ import absolute_import
-from .test_helper import process, make_request, send
-from textwrap import dedent
+from __future__ import (
+    absolute_import, unicode_literals, division, print_function)
+from os.path import abspath
+
 import anaconda_mode
-import io
-import mock
-import os
-import socket
 
-# HTTP server.
-
-
-def status_of(method, params):
-    return process(make_request(method, params))[0]
-
-
-def status_of_req(request):
-    return process(request)[0]
-
-
-def test_correct_post_request():
-    """Need status 200 on correct post request with its body."""
-    params = dict(source='imp', line=1, column=3, path='')
-    assert status_of("complete", params) == 200
-
-
-def test_handle_jedi_exceptions():
-    """Need status 500 on jedi failure."""
-    assert status_of("unsupported_method", {}) == 500
-
-
-def test_broken_content():
-    """Need send status 500 on invalid Json body."""
-    assert status_of_req('{"aaa": 1, "bb') == 500
-
-
-def test_incomplete_content():
-    """Need send 500 on valid request without necessary keys."""
-    assert status_of_req('{"aaa": 1, "bbb": 2}') == 500
-
-
-def test_server_start(capfd):
-    with mock.patch('anaconda_mode.HTTPServer') as cls:
-        server = mock.Mock()
-        cls.side_effect = [OSError('Address already in use'),
-                           socket.error('Address already in use'),
-                           server]
-
-        anaconda_mode.main()
-        resout, reserr = capfd.readouterr()
-
-        assert server.serve_forever.called
-        assert resout == 'anaconda_mode port 24972\n'
-
-
-def test_http_handler():
-
-    class TestHandler(anaconda_mode.HTTPRequestHandler):
-        def __init__(self):
-            self.request_version = self.protocol_version
-            self.headers = {'content-length': '7'}
-            self.rfile = io.BytesIO(b'content')
-            self.wfile = io.BytesIO()
-            self.process_request = mock.Mock(return_value=(200, u'response'))
-
-        def version_string(self):
-            return 'Weight gain 4000'
-
-        def date_time_string(self):
-            return 'Ice age'
-
-    handler = TestHandler()
-    handler.do_POST()
-    response = handler.wfile.getvalue().decode('utf-8')
-
-    handler.process_request.assert_called_with(u'content')
-    assert response == '\r\n'.join(['HTTP/1.1 200 OK',
-                                    'Server: Weight gain 4000',
-                                    'Date: Ice age',
-                                    'Content-Length: 8', '', 'response'])
 
 # Completion.
 
 
 def test_completion_response():
-    path = os.path.abspath('test.py')
-    rv = send('''\
-              def test1(a, b):
-                  """First test function."""
-                  pass
+    """Check completions works."""
 
+    path = abspath('test.py')
 
-              def test2(c):
-                  """Second test function."""
-                  pass
+    completions = anaconda_mode.complete('''
+def test1(a, b):
+    """First test function."""
+    pass
 
-              test_|_
-              ''', 'complete', path)
+def test2(c):
+    """Second test function."""
+    pass
 
-    assert rv == [{
+test
+''', 10, 4, path)
+
+    assert completions == [{
         "name": "test1",
         "doc": 'test1(a, b)\n\nFirst test function.',
         'info': 'First test function.',
         'type': 'function',
         'path': path,
-        'line': 1
+        'line': 2,
     }, {
         "name": "test2",
         "doc": 'test2(c)\n\nSecond test function.',
         'info': 'Second test function.',
         'type': 'function',
         'path': path,
-        'line': 6
+        'line': 6,
     }]
+
 
 # Definitions.
 
 
 def test_goto_definitions():
-    path = os.path.abspath('test.py')
-    rv = send('''\
-              def fn(a, b):
-                  pass
-              fn_|_(1, 2)
-              ''', 'goto_definitions', path)
+    """Check goto definitions works."""
 
-    assert rv == [{
-        'line': 1,
+    path = abspath('test.py')
+
+    definitions = anaconda_mode.goto_definitions('''
+def fn(a, b):
+    pass
+fn(1, 2)
+''', 4, 2, path)
+
+    assert definitions == [{
+        'line': 2,
         'column': 0,
         'name': 'fn',
         'description': 'def fn(a, b):',
@@ -136,81 +68,81 @@ def test_goto_definitions():
 
 
 def test_unknown_definition():
-    rv = send('''\
-              raise_|_
-              ''', 'goto_definitions')
+    """Check we process not found error."""
 
-    assert rv == []
+    definitions = anaconda_mode.goto_definitions('''
+raise
+''', 2, 5, None)
+
+    assert not definitions
 
 
 def test_goto_assignments():
-    rv = send('''\
-              if a:      x = 1
-              else if b: x = 2
-              else if c: x = 3
-              else:      x = 4
-              x_|_
-              ''', 'goto_assignments')
+    """Check goto assignments works."""
 
-    assert sorted(r['line'] for r in rv) == [1, 2, 3, 4]
+    assignments = anaconda_mode.goto_assignments('''
+if a:      x = 1
+else if b: x = 2
+else if c: x = 3
+else:      x = 4
+    x
+''', 6, 5, None)
+
+    assert sorted(assign['line'] for assign in assignments) == [2, 3, 4, 5]
+
 
 # Documentation.
 
 
-def test_doc_fn_with_docstring():
-    rv = send('''
-              def f_|_(a, b=1):
-                  """Some docstring."""
-                  pass
-              ''', 'doc', 'some_module.py')
+def test_doc():
+    """Check documentation lookup works."""
 
-    assert rv == dedent('''\
-        some_module - def f
-        ========================================
-        f(a, b = 1)
+    doc = anaconda_mode.doc('''
+def f(a, b=1):
+    """Some docstring."""
+    pass
+''', 2, 4, 'some_module.py')
 
-        Some docstring.''')
+    assert doc == '''some_module - def f
+========================================
+f(a, b = 1)
 
+Some docstring.'''
 
-def test_doc_fn_without_docstring():
-    rv = send('''
-              def f_|_(a, b=1):
-                  pass
-              ''', 'doc', 'other_module.py')
-
-    assert rv == dedent('''\
-        other_module - def f
-        ========================================
-        f(a, b = 1)''')
 
 # Usages.
 
 
 def test_usages():
-    rv = send('''\
-              import json
-              json.dumps_|_
-              ''', 'usages', 'test.py')
+    """Check usages search works."""
 
-    assert set(['test', 'json']) <= set(r['module'] for r in rv)
+    usages = anaconda_mode.usages('''
+import json
+json.dumps
+''', 3, 10, 'test.py')
+
+    assert set(['test', 'json']) <= set(usage['module'] for usage in usages)
+
 
 # ElDoc.
 
 
-def test_eldoc_signature():
-    rv = send('''
-              def f(obj, fp, skipkeys=False, ensure_ascii=True,
-                    check_circular=True, allow_nan=True, cls=None,
-                    indent=None, separators=None, default=None,
-                    sort_keys=False, **kw):
-                  pass
+def test_eldoc():
+    """Check eldoc on function with signature."""
 
-              f(123, _|_
-              ''', 'eldoc')
+    eldoc = anaconda_mode.eldoc('''
+def f(obj, fp, skipkeys=False, ensure_ascii=True,
+    check_circular=True, allow_nan=True, cls=None,
+    indent=None, separators=None, default=None,
+    sort_keys=False, **kw):
+    pass
 
-    assert rv == {
+f(123
+''', 8, 5, None)
+
+    assert eldoc == {
         'name': 'f',
-        'index': 1,
+        'index': 0,
         'params': ['obj', 'fp', 'skipkeys = False', 'ensure_ascii = True',
                    'check_circular = True', 'allow_nan = True', 'cls = None',
                    'indent = None', 'separators = None', 'default = None',
@@ -218,9 +150,11 @@ def test_eldoc_signature():
     }
 
 
-def test_eldoc_unknown_fn():
-    rv = send('''
-              unknown_fn(_|_
-              ''', 'eldoc')
+def test_eldoc_unknown_function():
+    """Check eldoc ignore unknown functions."""
 
-    assert rv == {}
+    eldoc = anaconda_mode.eldoc('''
+unknown_fn(
+''', 2, 11, None)
+
+    assert not eldoc
