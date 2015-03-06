@@ -12,7 +12,7 @@ from __future__ import (
     absolute_import, unicode_literals, division, print_function)
 
 import sys
-from pkg_resources import get_distribution
+from pkg_resources import get_distribution, DistributionNotFound
 from os.path import abspath, dirname
 from subprocess import Popen
 
@@ -42,9 +42,13 @@ if missing_dependencies:
 
 print('Python executable:', sys.executable)
 for package in ['jedi', 'service_factory']:
-    version = get_distribution(package).version
-    print('{package} version: {version}'.format(
-        package=package, version=version))
+    try:
+        version = get_distribution(package).version
+    except DistributionNotFound:
+        print('Unable to find {package} version'.format(package=package))
+    else:
+        print('{package} version: {version}'.format(
+            package=package, version=version))
 
 
 def script_method(f):
