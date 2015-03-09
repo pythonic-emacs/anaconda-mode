@@ -12,8 +12,9 @@ from __future__ import (
     absolute_import, unicode_literals, division, print_function)
 
 import sys
-from pkg_resources import get_distribution, DistributionNotFound
+from functools import wraps
 from os.path import abspath, dirname
+from pkg_resources import get_distribution, DistributionNotFound
 from subprocess import Popen
 
 project_path = dirname(abspath(__file__))
@@ -54,6 +55,7 @@ for package in ['jedi', 'service_factory']:
 def script_method(f):
     """Create jedi.Script instance and apply f to it."""
 
+    @wraps(f)
     def wrapper(source, line, column, path):
         try:
             return f(Script(source, line, column, path))
