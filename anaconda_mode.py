@@ -94,6 +94,8 @@ def doc(script):
 
 
 def process_definitions(f):
+
+    @wraps(f)
     def wrapper(script):
         cache = {script.path: script.source.splitlines()}
 
