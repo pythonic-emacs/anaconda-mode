@@ -31,94 +31,69 @@ def script_method(f):
     return wrapper
 
 
-@script_method
-def complete(script):
-    """Select auto-complete candidates for source position."""
-
-    def first_line(text):
-        """Return text first line."""
-        return text.strip().split('\n', 1)[0]
-
-    return [{'name': comp.name,
-             'doc': comp.docstring() or None,
-             'info': first_line(comp.docstring(raw=True)) or None,
-             'type': comp.type,
-             'path': comp.module_path or None,
-             'line': comp.line}
-            for comp in script.completions()]
-
-
-@script_method
-def doc(script):
-    """Documentation for all definitions at point."""
-    docs = ['\n'.join([d.module_name + ' - ' + d.description,
-                       '=' * 40,
-                       d.docstring() or "- No docstring -"]).strip()
-            for d in script.goto_definitions()]
-
-    return ('\n' + '-' * 40 + '\n').join(docs)
-
-
 def process_definitions(f):
 
     @wraps(f)
     def wrapper(script):
-        cache = {script.path: script.source.splitlines()}
 
-        def get_description(d):
-            if d.module_path not in cache:
-                with open(d.module_path, 'r') as file:
-                    cache[d.module_path] = file.read().splitlines()
-
-            return cache[d.module_path][d.line - 1]
-
-        return [{'line': d.line,
-                 'column': d.column,
-                 'name': d.name,
-                 'description': get_description(d),
-                 'module': d.module_name,
-                 'type': d.type,
-                 'path': d.module_path}
-                for d in f(script) if not d.in_builtin_module()]
+        return [{'name': definition.name,
+                 'type': definition.type,
+                 'module_name': definition.module_name,
+                 'module_path': definition.module_path,
+                 'line': definition.line,
+                 'column': definition.column,
+                 'docstring': definition.docstring(),
+                 'description': definition.description,
+                 'full_name': definition.full_name}
+                for definition in f(script)]
 
     return wrapper
 
 
 @script_method
 @process_definitions
+def complete(script):
+    """Select auto-complete candidates for source position."""
+
+    return script.completions()
+
+
+@script_method
+@process_definitions
 def goto_definitions(script):
+
     return script.goto_definitions()
 
 
 @script_method
 @process_definitions
 def goto_assignments(script):
+
     return script.goto_assignments()
 
 
 @script_method
 @process_definitions
 def usages(script):
+
     return script.usages()
 
 
 @script_method
 def eldoc(script):
     """Return eldoc format documentation string or ''."""
-    signatures = script.call_signatures()
 
+    signatures = script.call_signatures()
     if len(signatures) == 1:
-        sgn = signatures[0]
+        signature = signatures[0]
         return {
-            'name': sgn.name,
-            'index': sgn.index,
-            'params': [p.description for p in sgn.params]
+            'name': signature.name,
+            'index': signature.index,
+            'params': [param.description for param in signature.params]
         }
 
-    return {}
 
-
-app = [complete, doc, goto_definitions, goto_assignments, usages, eldoc]
+app = [complete, goto_definitions, goto_assignments, usages, eldoc]
 
 
 if __name__ == '__main__':
