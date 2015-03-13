@@ -25,21 +25,8 @@ def test2(c):
 test
 ''', 10, 4, path)
 
-    assert completions == [{
-        "name": "test1",
-        "doc": 'test1(a, b)\n\nFirst test function.',
-        'info': 'First test function.',
-        'type': 'function',
-        'path': path,
-        'line': 2,
-    }, {
-        "name": "test2",
-        "doc": 'test2(c)\n\nSecond test function.',
-        'info': 'Second test function.',
-        'type': 'function',
-        'path': path,
-        'line': 6,
-    }]
+    assert 'test1' == completions[0]['name']
+    assert 'test2' == completions[1]['name']
 
 
 # Definitions.
@@ -56,15 +43,9 @@ def fn(a, b):
 fn(1, 2)
 ''', 4, 2, path)
 
-    assert definitions == [{
-        'line': 2,
-        'column': 0,
-        'name': 'fn',
-        'description': 'def fn(a, b):',
-        'module': 'test',
-        'type': 'function',
-        'path': path
-    }]
+    assert 2 == definitions[0]['line']
+    assert 0 == definitions[0]['column']
+    assert path == definitions[0]['module_path']
 
 
 def test_unknown_definition():
@@ -91,25 +72,6 @@ else:      x = 4
     assert sorted(assign['line'] for assign in assignments) == [2, 3, 4, 5]
 
 
-# Documentation.
-
-
-def test_doc():
-    """Check documentation lookup works."""
-
-    doc = anaconda_mode.doc('''
-def f(a, b=1):
-    """Some docstring."""
-    pass
-''', 2, 4, 'some_module.py')
-
-    assert doc == '''some_module - def f
-========================================
-f(a, b = 1)
-
-Some docstring.'''
-
-
 # Usages.
 
 
@@ -121,7 +83,7 @@ import json
 json.dumps
 ''', 3, 10, 'test.py')
 
-    assert set(['test', 'json']) <= set(usage['module'] for usage in usages)
+    assert set(['test', 'json']) == set(usage['module_name'] for usage in usages)
 
 
 # ElDoc.
