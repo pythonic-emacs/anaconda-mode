@@ -113,6 +113,8 @@ Return nil if it run under proper environment."
 
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
+  (unless (executable-find "pip")
+    (error "Unable to find pip executable"))
   (setq anaconda-mode-process
         (start-process
          "anaconda_mode"
