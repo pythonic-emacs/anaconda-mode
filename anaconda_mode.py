@@ -13,43 +13,9 @@ from __future__ import (
 
 import sys
 from functools import wraps
-from os.path import abspath, dirname
-from pkg_resources import get_distribution, DistributionNotFound
-from subprocess import Popen
 
-project_path = dirname(abspath(__file__))
-
-sys.path.insert(0, project_path)
-
-missing_dependencies = []
-
-try:
-    from jedi import Script, NotFoundError
-except ImportError:
-    missing_dependencies.append('jedi')
-
-try:
-    from service_factory import service_factory
-except ImportError:
-    missing_dependencies.append('service_factory')
-
-if missing_dependencies:
-    command = ['pip', 'install', '-t', project_path] + missing_dependencies
-    pip = Popen(command)
-    pip.communicate()
-    assert pip.returncode is 0, 'PyPi installation fails.'
-    from jedi import Script, NotFoundError
-    from service_factory import service_factory
-
-print('Python executable:', sys.executable)
-for package in ['jedi', 'service_factory']:
-    try:
-        version = get_distribution(package).version
-    except DistributionNotFound:
-        print('Unable to find {package} version'.format(package=package))
-    else:
-        print('{package} version: {version}'.format(
-            package=package, version=version))
+from jedi import Script, NotFoundError
+from service_factory import service_factory
 
 
 def script_method(f):
