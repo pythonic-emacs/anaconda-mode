@@ -1,4 +1,3 @@
-*.dist-info/
 *.egg-info/
 *.elc
 *.pyc
@@ -8,6 +7,3 @@
 .tox/
 [#]*[#]
 __pycache__/
-jedi/
-service_factory/
-six.py
