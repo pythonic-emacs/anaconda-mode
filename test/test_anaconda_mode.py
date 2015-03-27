@@ -45,7 +45,7 @@ fn(1, 2)
 
     assert 2 == definitions[0]['line']
     assert 0 == definitions[0]['column']
-    assert path == definitions[0]['module_path']
+    assert path == definitions[0]['module-path']
 
 
 def test_unknown_definition():
@@ -83,7 +83,8 @@ import json
 json.dumps
 ''', 3, 10, 'test.py')
 
-    assert set(['test', 'json']) == set(usage['module_name'] for usage in usages)
+    result = (usage['module-name'] for usage in usages)
+    assert set(['test', 'json']) == set(result)
 
 
 # ElDoc.

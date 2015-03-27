@@ -39,13 +39,13 @@ def process_definitions(f):
 
         return [{'name': definition.name,
                  'type': definition.type,
-                 'module_name': definition.module_name,
-                 'module_path': definition.module_path,
+                 'module-name': definition.module_name,
+                 'module-path': definition.module_path,
                  'line': definition.line,
                  'column': definition.column,
                  'docstring': definition.docstring(),
                  'description': definition.description,
-                 'full_name': definition.full_name}
+                 'full-name': definition.full_name}
                 for definition in f(script)]
 
     return wrapper
