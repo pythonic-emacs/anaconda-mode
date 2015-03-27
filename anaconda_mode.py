@@ -32,6 +32,7 @@ def script_method(f):
 
 
 def process_definitions(f):
+    """Call f and convert it result into json dumpable format."""
 
     @wraps(f)
     def wrapper(script):
@@ -61,6 +62,7 @@ def complete(script):
 @script_method
 @process_definitions
 def goto_definitions(script):
+    """Get definitions for thing under cursor."""
 
     return script.goto_definitions()
 
@@ -68,6 +70,7 @@ def goto_definitions(script):
 @script_method
 @process_definitions
 def goto_assignments(script):
+    """Get assignments for thing under cursor."""
 
     return script.goto_assignments()
 
@@ -75,6 +78,7 @@ def goto_assignments(script):
 @script_method
 @process_definitions
 def usages(script):
+    """Get usage information for thing under cursor."""
 
     return script.usages()
 
