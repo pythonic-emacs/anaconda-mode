@@ -16,8 +16,8 @@ setup(name='anaconda_mode',
       maintainer_email='proofit404@gmail.com',
       py_modules=['anaconda_mode'],
       install_requires=[
-          'jedi==0.8.1',
-          'service_factory==0.1.2'
+          'jedi>=0.8.1',
+          'service_factory>=0.1.2'
       ],
       classifiers=[
           'Development Status :: 4 - Beta',
