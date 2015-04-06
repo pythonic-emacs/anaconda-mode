@@ -193,20 +193,49 @@ Return nil if it run under proper environment."
         anaconda-mode-host "localhost"
         anaconda-mode-port nil))
 
-(defun anaconda-mode-call (command)
-  "Make remote procedure call for COMMAND."
+(defun anaconda-mode-context-at-point ()
+  "Return context at current point.
+The context at current point is:
+text: entire current buffer
+line: current line
+column: current column"
+  (list (buffer-substring-no-properties (point-min) (point-max))
+        (line-number-at-pos (point))
+        (- (point) (line-beginning-position))))
+
+(defun anaconda-mode-context-top-level (&optional object)
+  "Return context for OBJECT at buffer's top-most indentation level.
+OBJECT should be a string representing a python object.  If OBJECT is
+nil, prompt the user for an object.
+The top-level context constitutes of:
+text: entire current buffer, plus OBJECT on a new line
+line: last line
+column: last column of last line"
+  (let ((object (read-string "Object: "))
+        (buffer-string (buffer-substring-no-properties (point-min) (point-max))))
+    (with-temp-buffer
+      (insert buffer-string "\n" object)
+      (goto-char (point-max))
+      (anaconda-mode-context-at-point))))
+
+(defun anaconda-mode-call (command &optional context-maker)
+  "Make remote procedure call for COMMAND.
+CONTEXT-MAKER is a function specifying the context.  It defaults to the
+context of thing at point."
   (unless anaconda-mode-remote-p
     (anaconda-mode-start))
   (anaconda-mode-connect)
   ;; use list since not all dash functions operate on vectors
-  (let ((json-array-type 'list))
-    (json-rpc
-     anaconda-mode-connection
-     command
-     (buffer-substring-no-properties (point-min) (point-max))
-     (line-number-at-pos (point))
-     (- (point) (line-beginning-position))
-     (anaconda-mode-file-name))))
+  (let ((json-array-type 'list)
+        (context-maker (or context-maker 'anaconda-mode-context-at-point)))
+    (destructuring-bind (text line column) (funcall context-maker)
+      (json-rpc
+       anaconda-mode-connection
+       command
+       text
+       line
+       column
+       (anaconda-mode-file-name)))))
 
 (defun anaconda-mode-file-name ()
   "Return appropriate buffer file name both for local and tramp files."
@@ -243,13 +272,26 @@ IGNORED parameter is the string for which completion is required."
 
 ;;; View documentation.
 
+(defun anaconda-mode-view-doc-context (&optional context-maker)
+  "Show documentation for CONTEXT-MAKER's context.
+CONTEXT-MAKER should be a function such as
+`anaconda-mode-context-at-point' and `anaconda-mode-context-top-level'.
+CONTEXT-MAKER defaults to `anaconda-mode-context-at-point'."
+  (pop-to-buffer
+   (anaconda-mode-doc-buffer
+    (or (anaconda-mode-call "doc" context-maker)
+        (error "No documentation found")))))
+
 (defun anaconda-mode-view-doc ()
   "Show documentation for context at point."
   (interactive)
-  (pop-to-buffer
-   (anaconda-mode-doc-buffer
-    (or (anaconda-mode-call "doc")
-        (error "No documentation found")))))
+  (anaconda-mode-view-doc-context))
+
+(defun anaconda-mode-view-doc-top-level ()
+  "Show documentation for object at buffer's top-level context.
+Prompt the user for object."
+  (interactive)
+  (anaconda-mode-view-doc-context 'anaconda-mode-context-top-level))
 
 (defun anaconda-mode-doc-buffer (doc)
   "Display documentation buffer with contents DOC."
@@ -265,40 +307,92 @@ IGNORED parameter is the string for which completion is required."
 
 ;;; Usages.
 
+(defun anaconda-mode-usages-context (&optional context-maker)
+  "Show usages for CONTEXT-MAKER's context.
+CONTEXT-MAKER should be a function such as
+`anaconda-mode-context-at-point' and `anaconda-mode-context-top-level'.
+CONTEXT-MAKER defaults to `anaconda-mode-context-at-point'."
+  (anaconda-nav-navigate
+   (or (anaconda-mode-call "usages" context-maker)
+       (error "No usages found"))))
+
 (defun anaconda-mode-usages ()
   "Show usages for thing at point."
   (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "usages")
-       (error "No usages found"))))
+  (anaconda-mode-usages-context))
+
+(defun anaconda-mode-usages-top-level ()
+  "Show usages for object at buffer's top-level context.
+Prompt the user for object."
+  (interactive)
+  (anaconda-mode-usages-context 'anaconda-mode-context-top-level))
 
 
 ;;; Definitions and assignments.
 
+(defun anaconda-mode-goto-definitions-context (&optional context-maker)
+  "Goto definition for CONTEXT-MAKER's context.
+CONTEXT-MAKER should be a function such as
+`anaconda-mode-context-at-point' and `anaconda-mode-context-top-level'.
+CONTEXT-MAKER defaults to `anaconda-mode-context-at-point'."
+  (anaconda-nav-navigate
+   (or (anaconda-mode-call "goto_definitions" context-maker)
+       (error "No definition found"))
+   t))
+
+(defun anaconda-mode-goto-assignments-context (&optional context-maker)
+  "Goto assignment for CONTEXT-MAKER's context.
+CONTEXT-MAKER should be a function such as
+`anaconda-mode-context-at-point' and `anaconda-mode-context-top-level'.
+CONTEXT-MAKER defaults to `anaconda-mode-context-at-point'."
+  (anaconda-nav-navigate
+   (or (anaconda-mode-call "goto_assignments" context-maker)
+       (error "No assignment found"))
+   t))
+
+(defun anaconda-mode-goto-context (&optional context-maker)
+  "Goto definition or fallback to assignment for CONTEXT-MAKER's context.
+CONTEXT-MAKER should be a function such as
+`anaconda-mode-context-at-point' and `anaconda-mode-context-top-level'.
+CONTEXT-MAKER defaults to `anaconda-mode-context-at-point'."
+  (anaconda-nav-navigate
+   (or (anaconda-mode-call "goto_definitions" context-maker)
+       (anaconda-mode-call "goto_assignments" context-maker)
+       (error "No definition found"))
+   t))
+
 (defun anaconda-mode-goto-definitions ()
   "Goto definition for thing at point."
   (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "goto_definitions")
-       (error "No definition found"))
-   t))
+  (anaconda-mode-goto-definitions-context))
 
 (defun anaconda-mode-goto-assignments ()
   "Goto assignment for thing at point."
   (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "goto_assignments")
-       (error "No assignment found"))
-   t))
+  (anaconda-mode-goto-assignments-context))
 
 (defun anaconda-mode-goto ()
   "Goto definition or fallback to assignment for thing at point."
   (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "goto_definitions")
-       (anaconda-mode-call "goto_assignments")
-       (error "No definition found"))
-   t))
+  (anaconda-mode-goto-context))
+
+(defun anaconda-mode-goto-definitions-top-level ()
+  "Goto definition for object at buffer's top-level context.
+Prompt the user for object."
+  (interactive)
+  (anaconda-mode-goto-definitions-context 'anaconda-mode-context-top-level))
+
+(defun anaconda-mode-goto-assignments-top-level ()
+  "Goto assignment for object at buffer's top-level context.
+Prompt the user for object."
+  (interactive)
+  (anaconda-mode-goto-assignments-context 'anaconda-mode-context-top-level))
+
+(defun anaconda-mode-goto-top-level ()
+  "Goto definition or fallback to assignment for object at buffer's top-level context.
+Prompt the user for object."
+  (interactive)
+  (anaconda-mode-goto-definitions-context 'anaconda-mode-context-top-level))
 
 
 ;;; Anaconda navigator mode
