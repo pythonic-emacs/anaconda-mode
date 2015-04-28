@@ -4,6 +4,7 @@
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
+;; Package-Version: 20150313.1455
 ;; Version: 0.1.0
 ;; Package-Requires: ((emacs "24") (json-rpc "0.0.1") (cl-lib "0.5.0") (dash "2.6.0") (f "0.16.2"))
 
@@ -111,16 +112,14 @@ Return nil if it run under proper environment."
        (not (equal anaconda-mode-process-pythonpath
                    (anaconda-mode-pythonpath)))))
 
+(defun anaconda-mode-start-server-process ()
+  (start-process "anaconda_mode" "*anaconda-mode*" (anaconda-mode-python) anaconda-mode-server))
+
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
   (unless (executable-find "pip")
     (error "Unable to find pip executable"))
-  (setq anaconda-mode-process
-        (start-process
-         "anaconda_mode"
-         "*anaconda-mode*"
-         (anaconda-mode-python)
-         anaconda-mode-server))
+  (setq anaconda-mode-process (anaconda-mode-start-server-process))
   (setq anaconda-mode-process-pythonpath (anaconda-mode-pythonpath))
   (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
   (while (null anaconda-mode-port)
