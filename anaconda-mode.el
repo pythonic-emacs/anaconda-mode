@@ -63,6 +63,8 @@
                                                   'python-shell-virtualenv-root)
   "Alias to `python.el' virtualenv variable.")
 
+(defvar anaconda-mode-waiting-for-port nil)
+
 (defun anaconda-mode-python ()
   "Detect python executable."
   (let ((python (if (eq system-type 'windows-nt) "pythonw" "python"))
@@ -115,25 +117,27 @@ Return nil if it run under proper environment."
   "Run anaconda-mode-command process."
   (unless (executable-find "pip")
     (error "Unable to find pip executable"))
+  (setq anaconda-mode-waiting-for-port t)
   (setq anaconda-mode-process
         (start-process
          "anaconda_mode"
          "*anaconda-mode*"
          (anaconda-mode-python)
          anaconda-mode-server))
+  (set-process-filter anaconda-mode-process #'anaconda-mode-process-filter)
   (setq anaconda-mode-process-pythonpath (anaconda-mode-pythonpath))
-  (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
-  (while (null anaconda-mode-port)
-    (accept-process-output anaconda-mode-process)
-    (unless (anaconda-mode-running-p)
-      (error "Unable to run anaconda-mode server")))
-  (set-process-filter anaconda-mode-process nil)
   (set-process-query-on-exit-flag anaconda-mode-process nil))
 
 (defun anaconda-mode-process-filter (process output)
   "Set `anaconda-mode-port' from PROCESS OUTPUT."
-  (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
-    (setq anaconda-mode-port (string-to-number (cadr it))))
+  (when (string-match "anaconda_mode port \\([0-9]+\\)" output)
+    (let ((port (string-to-number (match-string 1 output))))
+      (message (format "anaconda server started on %s" port))
+      (setq anaconda-mode-port port
+            anaconda-mode-connection (json-rpc-connect anaconda-mode-host port)
+            anaconda-mode-waiting-for-port nil)
+      (set-process-query-on-exit-flag
+       (json-rpc-process anaconda-mode-connection) nil)))
   ;; Mimic default filter.
   (when (buffer-live-p (process-buffer process))
     (with-current-buffer (process-buffer process)
@@ -147,13 +151,11 @@ Return nil if it run under proper environment."
 
 (defun anaconda-mode-connect ()
   "Connect to anaconda_mode.py server."
-  (when (anaconda-mode-need-reconnect)
-    (anaconda-mode-disconnect))
-  (unless (anaconda-mode-connected-p)
-    (setq anaconda-mode-connection
-          (json-rpc-connect anaconda-mode-host anaconda-mode-port))
-    (set-process-query-on-exit-flag
-     (json-rpc-process anaconda-mode-connection) nil)))
+  (unless (anaconda-mode-waiting-for-port-p)
+    (when (anaconda-mode-need-reconnect)
+      (anaconda-mode-disconnect))
+    (unless (anaconda-mode-connected-p)
+      (anaconda-mode-bootstrap))))
 
 (defun anaconda-mode-disconnect ()
   "Disconnect from anaconda_mode.py server."
@@ -165,6 +167,11 @@ Return nil if it run under proper environment."
   "Check if `anaconda-mode' connected to server."
   (and anaconda-mode-connection
        (json-rpc-live-p anaconda-mode-connection)))
+
+(defun anaconda-mode-waiting-for-port-p ()
+  "Check if `anaconda-mode' is waiting for port."
+  (and (process-live-p anaconda-mode-process)
+       anaconda-mode-waiting-for-port))
 
 (defun anaconda-mode-need-reconnect ()
   "Check if current `anaconda-mode-connection' need to be reconnected."
@@ -198,15 +205,16 @@ Return nil if it run under proper environment."
   (unless anaconda-mode-remote-p
     (anaconda-mode-start))
   (anaconda-mode-connect)
-  ;; use list since not all dash functions operate on vectors
-  (let ((json-array-type 'list))
-    (json-rpc
-     anaconda-mode-connection
-     command
-     (buffer-substring-no-properties (point-min) (point-max))
-     (line-number-at-pos (point))
-     (- (point) (line-beginning-position))
-     (anaconda-mode-file-name))))
+  (when anaconda-mode-connection
+    ;; use list since not all dash functions operate on vectors
+    (let ((json-array-type 'list))
+      (json-rpc
+       anaconda-mode-connection
+       command
+       (buffer-substring-no-properties (point-min) (point-max))
+       (line-number-at-pos (point))
+       (- (point) (line-beginning-position))
+       (anaconda-mode-file-name)))))
 
 (defun anaconda-mode-file-name ()
   "Return appropriate buffer file name both for local and tramp files."
