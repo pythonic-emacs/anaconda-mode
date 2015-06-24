@@ -175,6 +175,9 @@ issue.
 Issues
 ------
 
+DistutilsOptionError
+````````````````````
+
 ::
 
     DistutilsOptionError: must supply either home or prefix/exec-prefix -- not both
@@ -189,6 +192,18 @@ issue.
   <https://github.com/proofit404/anaconda-mode/blob/master/requirements.txt>`_
   manually
 - remove ``prefix`` option from ``distutils.cfg``
+
+AttributeError and KeyError randomly happens
+````````````````````````````````````````````
+
+This kind of problems were reported with jedi 0.9 version.  You can
+try to downgrade jedi version down to 0.8.
+
+::
+
+   M-x find-library RET anaconda-mode RET
+   M-! rm -rf jedi* RET
+   M-! pip install "jedi<0.9" -t . RET
 
 Contributions
 -------------
