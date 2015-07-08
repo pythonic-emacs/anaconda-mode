@@ -1,0 +1,2 @@
+env:
+  PATH: "{{ ansible_env.HOME }}/.evm/bin:{{ ansible_env.HOME }}/.cask/bin:{{ ansible_env.PATH }}"
