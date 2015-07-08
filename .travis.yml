@@ -1,4 +1,4 @@
-language: python
+language: emacs-lisp
 
 env:
   global:
