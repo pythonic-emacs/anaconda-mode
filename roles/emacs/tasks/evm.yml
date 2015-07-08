@@ -4,6 +4,6 @@
   file: dest=/usr/local/evm state=directory mode=0777
   become: yes
 - name: install emacs
-  command: evm install --use {{ item }}
+  command: evm install --use {{ item }} creates=/usr/local/evm/{{ item }}
   with_items: "{{emacs_versions}}"
   environment: env
