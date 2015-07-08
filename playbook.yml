@@ -1,3 +1,5 @@
 - hosts: all
   roles:
     - emacs
+    - tox
+    - coveralls

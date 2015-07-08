@@ -17,8 +17,8 @@ install:
   - ansible-playbook -i inventories/travis playbook.yml
 
 script:
-  # - tox
+  - tox
   - cask exec ert-runner
 
-# after_success:
-  # - coveralls-merge emacs-coveralls.json
+after_success:
+  - coveralls-merge emacs-coveralls.json
