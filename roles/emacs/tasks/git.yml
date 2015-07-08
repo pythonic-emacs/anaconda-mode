@@ -1,0 +1,3 @@
+- name: ensure git is installed
+  apt: name=git state=present
+  become: yes

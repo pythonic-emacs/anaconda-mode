@@ -1,0 +1,4 @@
+- name: install cask
+  git: repo=https://github.com/cask/cask dest=~/.cask
+- name: install melpa dependencies
+  command: cask install

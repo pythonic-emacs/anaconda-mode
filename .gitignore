@@ -5,5 +5,6 @@
 .cask/
 .coverage
 .tox/
+.vagrant/
 [#]*[#]
 __pycache__/
