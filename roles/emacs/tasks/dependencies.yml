@@ -2,6 +2,7 @@
   apt: name={{ item }}
   with_items:
     - libncurses-dev
+    - libxpm-dev
     - autoconf
     - automake
     - texinfo
