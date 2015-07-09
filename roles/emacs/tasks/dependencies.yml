@@ -1,0 +1,8 @@
+- name: install emacs build dependencies
+  apt: name={{ item }}
+  with_items:
+    - libncurses-dev
+    - autoconf
+    - automake
+    - texinfo
+  become: yes
