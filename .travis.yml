@@ -14,7 +14,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install -y ansible
 install:
-  - travis_wait ansible-playbook -i inventories/travis playbook.yml
+  - ansible-playbook -i inventories/travis playbook.yml
 script:
   - tox
   - cask exec ert-runner
