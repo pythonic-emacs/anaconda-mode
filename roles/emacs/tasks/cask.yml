@@ -1,5 +1,5 @@
 - name: install cask
   git: repo=https://github.com/cask/cask dest=~/.cask
 - name: install melpa dependencies
-  command: cask install
-  environment: env
+  command: cask install chdir={{ project_root }}
+  environment: emacs_env

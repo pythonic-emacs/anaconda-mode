@@ -6,4 +6,4 @@
 - name: install emacs
   command: evm install --use {{ item }} creates=/usr/local/evm/{{ item }}
   with_items: "{{emacs_versions}}"
-  environment: env
+  environment: emacs_env
