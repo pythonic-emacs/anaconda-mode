@@ -1,1 +1,1 @@
-project_root: {{ ansible_env.TRAVIS_BUILD_DIR }}
+project_root: "{{ ansible_env.TRAVIS_BUILD_DIR }}"
