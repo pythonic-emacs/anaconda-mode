@@ -1,0 +1,10 @@
+- name: install pyenv
+  git: repo=https://github.com/yyuu/pyenv dest=~/.pyenv
+- name: install python
+  command: pyenv install {{ item }} creates=~/.pyenv/versions/{{ item }}
+  with_items: "{{python_versions}}"
+  environment: pyenv_env
+- name: set global python
+  command: pyenv global {{ item }}
+  with_items: "{{python_versions}}"
+  environment: pyenv_env
