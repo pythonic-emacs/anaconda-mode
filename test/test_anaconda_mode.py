@@ -44,7 +44,7 @@ fn(1, 2)
 ''', 4, 2, path)
 
     assert 2 == definitions[0]['line']
-    assert 0 == definitions[0]['column']
+    assert 4 == definitions[0]['column']
     assert path == definitions[0]['module-path']
 
 
@@ -62,14 +62,13 @@ def test_goto_assignments():
     """Check goto assignments works."""
 
     assignments = anaconda_mode.goto_assignments('''
-if a:      x = 1
-else if b: x = 2
-else if c: x = 3
-else:      x = 4
-    x
-''', 6, 5, None)
+a = True
+if a:
+    x = 1
+x
+''', 5, 1, None)
 
-    assert sorted(assign['line'] for assign in assignments) == [2, 3, 4, 5]
+    assert 4 == assignments[0]['line']
 
 
 # Usages.
@@ -106,10 +105,10 @@ f(123
     assert eldoc == {
         'name': 'f',
         'index': 0,
-        'params': ['obj', 'fp', 'skipkeys = False', 'ensure_ascii = True',
-                   'check_circular = True', 'allow_nan = True', 'cls = None',
-                   'indent = None', 'separators = None', 'default = None',
-                   'sort_keys = False', '**kw']
+        'params': ['obj', 'fp', 'skipkeys=False', 'ensure_ascii=True',
+                   'check_circular=True', 'allow_nan=True', 'cls=None',
+                   'indent=None', 'separators=None', 'default=None',
+                   'sort_keys=False', '**kw']
     }
 
 
