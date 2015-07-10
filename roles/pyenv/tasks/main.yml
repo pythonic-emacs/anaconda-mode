@@ -1,2 +1,3 @@
 - include: dependencies.yml
 - include: pyenv.yml
+- include: setuptools.yml

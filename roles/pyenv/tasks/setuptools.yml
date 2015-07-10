@@ -1,0 +1,3 @@
+- name: upgrade setuptools
+  pip: name=setuptools state=latest
+  environment: pyenv_env
