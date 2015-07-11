@@ -5,3 +5,6 @@
     - pyenv
     - tox
     - coveralls
+- hosts: vagrant
+  roles:
+    - bashrc
