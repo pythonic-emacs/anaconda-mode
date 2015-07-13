@@ -1,9 +1,9 @@
 - hosts: all
   roles:
     - git
-    - emacs
     - pyenv
     - tox
+    - emacs
 - hosts: vagrant
   roles:
     - bashrc
