@@ -5,7 +5,7 @@
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "24") (json-rpc "0.0.1") (cl-lib "0.5.0") (dash "2.6.0") (f "0.16.2") (pythonic "0.1.0"))
+;; Package-Requires: ((emacs "24") (pythonic "0.1.0") (json-rpc "0.0.1") (cl-lib "0.5.0") (dash "2.6.0") (f "0.16.2"))
 
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -27,9 +27,9 @@
 
 ;;; Code:
 
+(require 'tramp)
 (require 'pythonic)
 (require 'json-rpc)
-(require 'tramp)
 (require 'cl-lib)
 (require 'dash)
 (require 'f)
@@ -37,11 +37,6 @@
 (defgroup anaconda-mode nil
   "Code navigation, documentation lookup and completion for Python."
   :group 'programming)
-
-(defcustom anaconda-mode-requirements '("anaconda_mode")
-  "Requirements needed to run anaconda-mode server."
-  :group 'anaconda-mode
-  :type '(repeat string))
 
 (defcustom anaconda-eldoc-as-single-line nil
   "If not nil, trim eldoc string to frame width."
@@ -51,15 +46,22 @@
 
 ;;; Server.
 
-(defvar anaconda-mode-directory (f-dirname load-file-name)
+(defvar anaconda-mode-server-version "0.1.0"
+  "Server version needed to run anaconda-mode.")
+
+(defvar anaconda-mode-server-directory
+  (f-join "~/.anaconda_mode" anaconda-mode-server-version)
   "Anaconda mode installation directory.")
 
 (defvar anaconda-mode-server
-  (f-join anaconda-mode-directory "anaconda_mode.py")
+  (f-join anaconda-mode-server-directory "anaconda_mode.py")
   "Script file with anaconda-mode server.")
 
-(defvar anaconda-mode-host "localhost"
-  "Target host with anaconda-mode server.")
+(defvar anaconda-mode-process-name "anaconda-mode"
+  "Process name for anaconda-mode processes.")
+
+(defvar anaconda-mode-process-buffer "*anaconda-mode*"
+  "Buffer name for anaconda-mode processes.")
 
 (defvar anaconda-mode-port nil
   "Port for anaconda-mode connection.")
@@ -67,15 +69,19 @@
 (defvar anaconda-mode-process nil
   "Currently running anaconda-mode process.")
 
-(defvar anaconda-mode-connection nil
-  "Json Rpc connection to anaconda-mode process.")
+(defun anaconda-mode-host ()
+  "Target host with anaconda-mode server."
+  (--if-let (pythonic-connection)
+      (tramp-file-name-host
+       (tramp-dissect-file-name it))
+    "localhost"))
 
 (defun anaconda-mode-start ()
   "Start anaconda-mode server."
   (when (anaconda-mode-need-restart)
     (anaconda-mode-stop))
   (unless (anaconda-mode-running-p)
-    (anaconda-mode-bootstrap)))
+    (anaconda-mode-install 'anaconda-mode-bootstrap)))
 
 (defun anaconda-mode-stop ()
   "Stop anaconda-mode server."
@@ -95,11 +101,42 @@ Return nil if it run under proper environment."
        (not (equal (pythonic-process-command anaconda-mode-process)
                    (anaconda-mode-get-process-command)))))
 
+(defun anaconda-mode-install (callback)
+  "Check anaconda-mode installation and apply CALLBACK."
+  (anaconda-mode-ensure-directory)
+  (start-pythonic :process anaconda-mode-process-name
+                  :buffer anaconda-mode-process-buffer
+                  :cwd anaconda-mode-server-directory
+                  :sentinel 'anaconda-mode-install-sentinel
+                  :args '("-c" "
+from pkg_resources import get_distribution
+def check_deps(deps=['anaconda-mode']):
+    for each in deps:
+        distrib = get_distribution(each)
+        requirements = distrib.requires()
+        if requirements:
+            check_deps(requirements)
+check_deps()
+")))
+
+(defun anaconda-mode-ensure-directory ()
+  "Ensure if `anaconda-mode-server-directory' exists."
+  (let ((default-directory (pythonic-default-directory)))
+    (unless (f-dir? anaconda-mode-server-directory)
+      (f-mkdir anaconda-mode-server-directory))))
+
+(defun anaconda-mode-install-sentinel (process event)
+  "Sentinel applied to anaconda-mode installation verification PROCESS.
+EVENT is a string described process exit status."
+  (if (eq 0 (process-exit-status process))
+      (message "Congratulations.")
+    (pop-to-buffer anaconda-mode-process-buffer)
+    (error "Can't find anaconda-mode server installation")))
+
 (defun anaconda-mode-bootstrap ()
   "Run anaconda-mode-command process."
-  (pythonic-install anaconda-mode-requirements anaconda-mode-directory)
   (setq anaconda-mode-process
-        (pythonic-start-process
+        (start-pythonic
          :name "anaconda_mode"
          :buffer "*anaconda-mode*"
          :script anaconda-mode-server
@@ -125,6 +162,9 @@ Return nil if it run under proper environment."
 
 
 ;;; Connection.
+
+(defvar anaconda-mode-connection nil
+  "Json Rpc connection to anaconda-mode process.")
 
 (defun anaconda-mode-connect ()
   "Connect to anaconda-mode server."
@@ -338,9 +378,9 @@ IGNORED parameter is the string for which completion is required."
     (erase-buffer)
     (setq-local overlay-arrow-position nil)
     (--> result
-      (--group-by (cons (plist-get it :module)
-                        (plist-get it :path)) it)
-      (--each it (apply 'anaconda-nav--insert-module it)))
+         (--group-by (cons (plist-get it :module)
+                           (plist-get it :path)) it)
+         (--each it (apply 'anaconda-nav--insert-module it)))
     (goto-char (point-min))
     (anaconda-nav-mode)
     (current-buffer)))
