@@ -5,6 +5,8 @@ cache:
     - $HOME/.pyenv
     - $HOME/.evm
     - $HOME/.cask
+    - $TRAVIS_BUILD_DIR/.cask
+    - $TRAVIS_BUILD_DIR/.tox
     - /usr/local/evm
 env:
   global:
