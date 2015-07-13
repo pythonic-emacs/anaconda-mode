@@ -4,7 +4,9 @@
     - emacs
     - pyenv
     - tox
-    - coveralls
 - hosts: vagrant
   roles:
     - bashrc
+- hosts: travis
+  roles:
+    - coveralls
