@@ -3,7 +3,7 @@ from setuptools import setup
 readme = open('README.rst').read()
 
 setup(name='anaconda_mode',
-      version='0.1.0',
+      version='0.1.1',
       url='https://github.com/proofit404/anaconda-mode',
       description='Code navigation, documentation lookup and '
       'completion for Python.',
