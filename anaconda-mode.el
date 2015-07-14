@@ -46,14 +46,18 @@
 
 ;;; Server.
 
-(defvar anaconda-mode-server-version "0.1.0"
+(defvar anaconda-mode-server-version "0.1.1"
   "Server version needed to run anaconda-mode.")
 
 (defvar anaconda-mode-server-directory
-  (f-join "~/.anaconda-mode" anaconda-mode-server-version)
+  ;; We use `file-name-as-directory' because final slash is necessary
+  ;; in the directory name.  Process CWD doesn't respect
+  ;; `default-directory' binding if last slash was missed.
+  (file-name-as-directory
+   (f-join "~/.anaconda-mode" anaconda-mode-server-version))
   "Anaconda mode installation directory.")
 
-(defvar anaconda-mode-server "anaconda_mode.py"
+(defvar anaconda-mode-server-script "anaconda_mode.py"
   "Script file with anaconda-mode server.")
 
 (defvar anaconda-mode-process-name "anaconda-mode"
@@ -62,25 +66,15 @@
 (defvar anaconda-mode-process-buffer "*anaconda-mode*"
   "Buffer name for anaconda-mode processes.")
 
-(defvar anaconda-mode-port nil
-  "Port for anaconda-mode connection.")
-
 (defvar anaconda-mode-process nil
   "Currently running anaconda-mode process.")
-
-(defun anaconda-mode-host ()
-  "Target host with anaconda-mode server."
-  (--if-let (pythonic-connection)
-      (tramp-file-name-host
-       (tramp-dissect-file-name it))
-    "localhost"))
 
 (defun anaconda-mode-start ()
   "Start anaconda-mode server."
   (when (anaconda-mode-need-restart)
     (anaconda-mode-stop))
   (unless (anaconda-mode-running-p)
-    (anaconda-mode-install 'anaconda-mode-bootstrap)))
+    (anaconda-mode-ensure-directory)))
 
 (defun anaconda-mode-stop ()
   "Stop anaconda-mode server."
@@ -132,7 +126,7 @@ parameters."
                         :sentinel 'anaconda-mode-check-sentinel
                         :args '("-c" "
 from pkg_resources import get_distribution
-def check_deps(deps=['anaconda-mode']):
+def check_deps(deps=['anaconda_mode']):
     for each in deps:
         distrib = get_distribution(each)
         requirements = distrib.requires()
@@ -155,7 +149,9 @@ EVENT are basic sentinel parameters."
                         :buffer anaconda-mode-process-buffer
                         :cwd anaconda-mode-server-directory
                         :sentinel 'anaconda-mode-install-sentinel
-                        :args (list "-m" "pip" "install" "-t" "." (concat "anaconda-mode" "==" anaconda-mode-server-version)))))
+                        :args (list "-m" "pip" "install" "-t" "."
+                                    (concat "anaconda_mode" "=="
+                                            anaconda-mode-server-version)))))
 
 (defun anaconda-mode-install-sentinel (process event)
   "Run `anaconda-mode-bootstrap' if server installation complete successfully.
@@ -175,7 +171,7 @@ parameters."
                         :filter 'anaconda-mode-bootstrap-filter
                         :sentinel 'anaconda-mode-bootstrap-sentinel
                         :query-on-exit nil
-                        :args (list anaconda-mode-server))))
+                        :args (list anaconda-mode-server-script))))
 
 (defun anaconda-mode-bootstrap-filter (process output)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.
@@ -202,6 +198,16 @@ PROCESS and EVENT are basic sentinel parameters."
 
 ;;; Connection.
 
+(defun anaconda-mode-host ()
+  "Target host with anaconda-mode server."
+  (--if-let (pythonic-connection)
+      (tramp-file-name-host
+       (tramp-dissect-file-name it))
+    "localhost"))
+
+(defvar anaconda-mode-port nil
+  "Port for anaconda-mode connection.")
+
 (defvar anaconda-mode-connection nil
   "Json Rpc connection to anaconda-mode process.")
 
@@ -211,7 +217,9 @@ PROCESS and EVENT are basic sentinel parameters."
     (anaconda-mode-disconnect))
   (unless (anaconda-mode-connected-p)
     (setq anaconda-mode-connection
-          (json-rpc-connect anaconda-mode-host anaconda-mode-port))
+          (json-rpc-connect
+           (anaconda-mode-host)
+           anaconda-mode-port))
     (set-process-query-on-exit-flag
      (json-rpc-process anaconda-mode-connection) nil)))
 
