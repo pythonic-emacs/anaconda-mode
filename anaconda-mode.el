@@ -90,9 +90,12 @@
 (defun anaconda-mode-need-restart ()
   "Check if current `anaconda-mode-process' need restart with new args.
 Return nil if it run under proper environment."
-  (and (anaconda-mode-running-p)
-       (not (equal (pythonic-process-command anaconda-mode-process)
-                   (anaconda-mode-get-process-command)))))
+  (when (anaconda-mode-running-p)
+    (or (not (equal (pythonic-executable)
+                    (car (process-command anaconda-mode-process))))
+        ;; TODO: check default directory, PYTHONPATH, PATH and
+        ;; additional variables.
+        )))
 
 (defun anaconda-mode-ensure-directory ()
   "Ensure if `anaconda-mode-server-directory' exists."
@@ -200,10 +203,11 @@ PROCESS and EVENT are basic sentinel parameters."
 
 (defun anaconda-mode-host ()
   "Target host with anaconda-mode server."
-  (--if-let (pythonic-connection)
+  (if (pythonic-remote-p)
       (tramp-file-name-host
-       (tramp-dissect-file-name it))
-    "localhost"))
+       (tramp-dissect-file-name
+        (pythonic-tramp-connection)))
+    "127.0.0.1"))
 
 (defvar anaconda-mode-port nil
   "Port for anaconda-mode connection.")
@@ -248,7 +252,6 @@ PROCESS and EVENT are basic sentinel parameters."
 (defun anaconda-mode-call (command)
   "Make remote procedure call for COMMAND."
   (anaconda-mode-start)
-  (anaconda-mode-connect)
   ;; use list since not all dash functions operate on vectors
   (let ((json-array-type 'list))
     (json-rpc
