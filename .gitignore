@@ -8,3 +8,5 @@
 .vagrant/
 [#]*[#]
 __pycache__/
+build/
+dist/
