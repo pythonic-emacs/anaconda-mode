@@ -1,3 +1,7 @@
-- name: upgrade setuptools
-  pip: name=setuptools state=latest
+- name: upgrade pip and setuptools
+  pip: name={{ item }} state=latest
+  with_items:
+    - setuptools
+    - pip
+    - wheel
   environment: pyenv_env
