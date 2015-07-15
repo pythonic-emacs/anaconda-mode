@@ -91,11 +91,22 @@
   "Check if current `anaconda-mode-process' need restart with new args.
 Return nil if it run under proper environment."
   (when (anaconda-mode-running-p)
-    (or (not (equal (pythonic-executable)
-                    (car (process-command anaconda-mode-process))))
-        ;; TODO: check default directory, PYTHONPATH, PATH and
-        ;; additional variables.
-        )))
+    (not (and
+          (equal
+           (pythonic-executable)
+           (car (process-command anaconda-mode-process)))
+          (equal
+           (pythonic-default-directory anaconda-mode-server-directory)
+           (process-get anaconda-mode-process 'default-directory))
+          (equal
+           python-shell-extra-pythonpaths ;; TODO: what if we set PYTHONPATH directly.
+           (process-get anaconda-mode-process 'pythonpath))
+          (equal
+           python-shell-exec-path       ;; TODO: what if we modify exec-path directly.
+           (process-get anaconda-mode-process 'path))
+          (equal
+           python-shell-process-environment ;; TODO: the same.
+           (process-get anaconda-mode-process 'environment))))))
 
 (defun anaconda-mode-ensure-directory ()
   "Ensure if `anaconda-mode-server-directory' exists."
