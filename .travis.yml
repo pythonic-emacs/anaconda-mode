@@ -16,9 +16,9 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install -y ansible
 install:
-  - ansible-playbook -i inventories/travis playbook.yml
+  - ./travis.sh
 script:
   - tox
-  - cask exec ert-runner
+  - ./ert.sh
 after_success:
   - coveralls-merge emacs-coveralls.json
