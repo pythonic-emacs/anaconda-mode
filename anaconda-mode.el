@@ -1,4 +1,4 @@
-;;; anaconda-mode.el --- Code navigation, documentation lookup and completion for Python
+;;; anaconda-mode.el --- Code navigation, documentation lookup and completion for Python  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2015 by Artem Malyshev
 
@@ -200,7 +200,8 @@ Connect to the `anaconda-mode' server."
   (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
     (setq anaconda-mode-port (string-to-number (cadr it)))
     (set-process-filter process nil)
-    (anaconda-mode-connect)))
+    (anaconda-mode-connect)
+    (anaconda-mode-json-rpc)))
 
 (defun anaconda-mode-bootstrap-sentinel (process event)
   "Raise error if `anaconda-mode' server exit abnormally.
@@ -253,25 +254,47 @@ PROCESS and EVENT are basic sentinel parameters."
   "Check if current `anaconda-mode-connection' need to be reconnected."
   (and (anaconda-mode-connected-p)
        (or (not (equal (json-rpc-host anaconda-mode-connection)
-                       anaconda-mode-host))
+                       (anaconda-mode-host)))
            (not (equal (json-rpc-port anaconda-mode-connection)
                        anaconda-mode-port)))))
+
+(defun anaconda-mode-json-rpc ()
+  "Perform JSON-RPC call.
+RPC connection must be available.  `anaconda-mode-current-command'
+must be bound according to its documentation."
+  (when (anaconda-mode-connected-p)
+    (let ((json-array-type 'list)
+          (command (or (car anaconda-mode-current-command)
+                       (error "You should bind `anaconda-mode-current-command' before use `anaconda-mode-json-rpc'")))
+          (callback (cdr anaconda-mode-current-command)))
+      (apply
+       callback
+       (json-rpc
+        anaconda-mode-connection
+        command
+        (buffer-substring-no-properties (point-min) (point-max))
+        (line-number-at-pos (point))
+        (- (point) (line-beginning-position))
+        (anaconda-mode-file-name))
+       ;; We expect callback will have single arity.  So we need to
+       ;; stub last `apply' argument to avoid json-rpc response to be
+       ;; treated as list or args rather single arg.
+       nil))))
 
 
 ;;; Interaction.
 
-(defun anaconda-mode-call (command)
-  "Make remote procedure call for COMMAND."
-  (anaconda-mode-start)
-  ;; use list since not all dash functions operate on vectors
-  (let ((json-array-type 'list))
-    (json-rpc
-     anaconda-mode-connection
-     command
-     (buffer-substring-no-properties (point-min) (point-max))
-     (line-number-at-pos (point))
-     (- (point) (line-beginning-position))
-     (anaconda-mode-file-name))))
+(defvar anaconda-mode-current-command nil
+  "Current JSON-RPC command.
+Cons of rpc function name and callback applied to its result.
+Use in lexical bindings only.")
+
+(defun anaconda-mode-call (command callback)
+  "Make remote procedure call for COMMAND.
+Apply CALLBACK to it result."
+  (let ((anaconda-mode-current-command (cons command callback)))
+    (anaconda-mode-start)
+    (anaconda-mode-json-rpc)))
 
 (defun anaconda-mode-file-name ()
   "Return appropriate buffer file name both for local and tramp files."
