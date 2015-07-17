@@ -50,11 +50,7 @@
   "Server version needed to run anaconda-mode.")
 
 (defvar anaconda-mode-server-directory
-  ;; We use `file-name-as-directory' because final slash is necessary
-  ;; in the directory name.  Process CWD doesn't respect
-  ;; `default-directory' binding if last slash was missed.
-  (file-name-as-directory
-   (f-join "~" ".emacs.d" "anaconda-mode" anaconda-mode-server-version))
+  (f-join "~" ".emacs.d" "anaconda-mode" anaconda-mode-server-version)
   "Anaconda mode installation directory.")
 
 (defvar anaconda-mode-server-script "anaconda_mode.py"
