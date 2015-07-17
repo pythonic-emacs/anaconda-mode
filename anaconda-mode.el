@@ -99,13 +99,13 @@ Return nil if it run under proper environment."
            (pythonic-default-directory anaconda-mode-server-directory)
            (process-get anaconda-mode-process 'default-directory))
           (equal
-           python-shell-extra-pythonpaths ;; TODO: what if we set PYTHONPATH directly.
+           (pythonic-get-pythonpath-variable)
            (process-get anaconda-mode-process 'pythonpath))
           (equal
-           python-shell-exec-path       ;; TODO: what if we modify exec-path directly.
+           (pythonic-get-path-variable)
            (process-get anaconda-mode-process 'path))
           (equal
-           python-shell-process-environment ;; TODO: the same.
+           python-shell-process-environment
            (process-get anaconda-mode-process 'environment))))))
 
 (defun anaconda-mode-ensure-directory ()
