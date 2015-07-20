@@ -258,24 +258,23 @@ PROCESS and EVENT are basic sentinel parameters."
   "Perform JSON-RPC call.
 RPC connection must be available.  `anaconda-mode-current-command'
 must be bound according to its documentation."
-  (when (anaconda-mode-connected-p)
-    (let ((json-array-type 'list)
-          (command (or (car anaconda-mode-current-command)
-                       (error "You should bind `anaconda-mode-current-command' before use `anaconda-mode-json-rpc'")))
-          (callback (cdr anaconda-mode-current-command)))
-      (apply
-       callback
-       (json-rpc
-        anaconda-mode-connection
-        command
-        (buffer-substring-no-properties (point-min) (point-max))
-        (line-number-at-pos (point))
-        (- (point) (line-beginning-position))
-        (anaconda-mode-file-name))
-       ;; We expect callback will have single arity.  So we need to
-       ;; stub last `apply' argument to avoid json-rpc response to be
-       ;; treated as list or args rather single arg.
-       nil))))
+  (let ((json-array-type 'list)
+        (command (or (car anaconda-mode-current-command)
+                     (error "You should set `anaconda-mode-current-command' before use `anaconda-mode-json-rpc'")))
+        (callback (cdr anaconda-mode-current-command)))
+    (apply
+     callback
+     (json-rpc
+      anaconda-mode-connection
+      command
+      (buffer-substring-no-properties (point-min) (point-max))
+      (line-number-at-pos (point))
+      (- (point) (line-beginning-position))
+      (anaconda-mode-file-name))
+     ;; We expect callback will have single arity.  So we need to
+     ;; stub last `apply' argument to avoid json-rpc response to be
+     ;; treated as list or args rather single arg.
+     nil)))
 
 
 ;;; Interaction.
@@ -288,8 +287,9 @@ Use in lexical bindings only.")
 (defun anaconda-mode-call (command callback)
   "Make remote procedure call for COMMAND.
 Apply CALLBACK to it result."
-  (let ((anaconda-mode-current-command (cons command callback)))
-    (anaconda-mode-start)
+  (setq anaconda-mode-current-command (cons command callback))
+  (anaconda-mode-start)
+  (when (anaconda-mode-connected-p)
     (anaconda-mode-json-rpc)))
 
 (defun anaconda-mode-file-name ()
