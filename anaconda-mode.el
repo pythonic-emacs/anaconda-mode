@@ -95,10 +95,10 @@ Return nil if it run under proper environment."
            (pythonic-default-directory anaconda-mode-server-directory)
            (process-get anaconda-mode-process 'default-directory))
           (equal
-           (pythonic-get-pythonpath-variable)
+           (pythonic-get-pythonpath)
            (process-get anaconda-mode-process 'pythonpath))
           (equal
-           (pythonic-get-path-variable)
+           (pythonic-get-path)
            (process-get anaconda-mode-process 'path))
           (equal
            python-shell-process-environment
