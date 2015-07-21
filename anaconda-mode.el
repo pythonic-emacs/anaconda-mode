@@ -5,7 +5,7 @@
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "24") (pythonic "0.1.0") (json-rpc "0.0.1") (cl-lib "0.5.0") (dash "2.6.0") (f "0.16.2"))
+;; Package-Requires: ((emacs "24") (cl-lib "0.5.0") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
 
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -27,11 +27,13 @@
 
 ;;; Code:
 
-(require 'tramp)
-(require 'pythonic)
-(require 'json-rpc)
 (require 'cl-lib)
+(require 'tramp)
+(require 'url)
+(require 'json)
+(require 'pythonic)
 (require 'dash)
+(require 's)
 (require 'f)
 
 (defgroup anaconda-mode nil
@@ -220,85 +222,30 @@ PROCESS and EVENT are basic sentinel parameters."
 (defvar anaconda-mode-port nil
   "Port for anaconda-mode connection.")
 
-(defvar anaconda-mode-connection nil
-  "Json Rpc connection to anaconda-mode process.")
-
-(defun anaconda-mode-connect ()
-  "Connect to anaconda-mode server."
-  (when (anaconda-mode-need-reconnect)
-    (anaconda-mode-disconnect))
-  (unless (anaconda-mode-connected-p)
-    (setq anaconda-mode-connection
-          (json-rpc-connect
-           (anaconda-mode-host)
-           anaconda-mode-port))
-    (set-process-query-on-exit-flag
-     (json-rpc-process anaconda-mode-connection) nil)))
-
-(defun anaconda-mode-disconnect ()
-  "Disconnect from anaconda-mode server."
-  (when (anaconda-mode-connected-p)
-    (json-rpc-close anaconda-mode-connection)
-    (setq anaconda-mode-connection nil)))
-
-(defun anaconda-mode-connected-p ()
-  "Check if `anaconda-mode' connected to server."
-  (and anaconda-mode-connection
-       (json-rpc-live-p anaconda-mode-connection)))
-
-(defun anaconda-mode-need-reconnect ()
-  "Check if current `anaconda-mode-connection' need to be reconnected."
-  (and (anaconda-mode-connected-p)
-       (or (not (equal (json-rpc-host anaconda-mode-connection)
-                       (anaconda-mode-host)))
-           (not (equal (json-rpc-port anaconda-mode-connection)
-                       anaconda-mode-port)))))
-
 (defun anaconda-mode-json-rpc ()
-  "Perform JSON-RPC call.
-RPC connection must be available.  `anaconda-mode-current-command'
-must be bound according to its documentation."
-  (let ((json-array-type 'list)
-        (command (or (car anaconda-mode-current-command)
-                     (error "You should set `anaconda-mode-current-command' before use `anaconda-mode-json-rpc'")))
-        (callback (cdr anaconda-mode-current-command)))
-    (apply
-     callback
-     (json-rpc
-      anaconda-mode-connection
-      command
-      (buffer-substring-no-properties (point-min) (point-max))
-      (line-number-at-pos (point))
-      (- (point) (line-beginning-position))
-      (anaconda-mode-file-name))
-     ;; We expect callback will have single arity.  So we need to
-     ;; stub last `apply' argument to avoid json-rpc response to be
-     ;; treated as list or args rather single arg.
-     nil)))
+  "Perform JSON-RPC call."
+  (let ((url-request-method "POST")
+        (url-request-data
+         (json-encode
+          (vector
+           command
+           (buffer-substring-no-properties (point-min) (point-max))
+           (line-number-at-pos (point))
+           (- (point) (line-beginning-position))
+           (anaconda-mode-file-name)))))
+    (url-retrieve
+     (format "http://%s:%s" (anaconda-mode-host) anaconda-mode-port)
+     callback)))
 
 
 ;;; Interaction.
 
-(defvar anaconda-mode-current-command nil
-  "Current JSON-RPC command.
-Cons of rpc function name and callback applied to its result.
-Use in lexical bindings only.")
-
 (defun anaconda-mode-call (command callback)
   "Make remote procedure call for COMMAND.
 Apply CALLBACK to it result."
-  (setq anaconda-mode-current-command (cons command callback))
   (anaconda-mode-start)
   (when (anaconda-mode-connected-p)
     (anaconda-mode-json-rpc)))
-
-(defun anaconda-mode-file-name ()
-  "Return appropriate buffer file name both for local and tramp files."
-  (if (tramp-tramp-file-p (buffer-file-name))
-      (tramp-file-name-localname
-       (tramp-dissect-file-name
-        (buffer-file-name)))
-    (buffer-file-name)))
 
 
 ;;; Code completion.
