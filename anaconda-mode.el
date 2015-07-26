@@ -77,11 +77,14 @@
 (defun anaconda-mode-stop ()
   "Stop anaconda-mode server."
   (when (anaconda-mode-running-p)
+    (set-process-filter anaconda-mode-process nil)
+    (set-process-sentinel anaconda-mode-process nil)
     (kill-process anaconda-mode-process)
-    (setq anaconda-mode-process nil)))
+    (setq anaconda-mode-process nil
+          anaconda-mode-port nil)))
 
 (defun anaconda-mode-running-p ()
-  "Check for running anaconda-mode server."
+  "Is `anaconda-mode' server running."
   (and anaconda-mode-process
        (process-live-p anaconda-mode-process)))
 
@@ -198,8 +201,8 @@ Connect to the `anaconda-mode' server."
   (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
     (setq anaconda-mode-port (string-to-number (cadr it)))
     (set-process-filter process nil)
-    (anaconda-mode-connect)
-    (anaconda-mode-json-rpc)))
+    ;; (anaconda-mode-json-rpc)
+    ))
 
 (defun anaconda-mode-bootstrap-sentinel (process event)
   "Raise error if `anaconda-mode' server exit abnormally.
@@ -222,6 +225,10 @@ PROCESS and EVENT are basic sentinel parameters."
 (defvar anaconda-mode-port nil
   "Port for anaconda-mode connection.")
 
+(defun anaconda-mode-bound-p ()
+  "Is `anaconda-mode' port bound."
+  (numberp anaconda-mode-port))
+
 (defun anaconda-mode-json-rpc ()
   "Perform JSON-RPC call."
   (let ((url-request-method "POST")
@@ -232,7 +239,7 @@ PROCESS and EVENT are basic sentinel parameters."
            (buffer-substring-no-properties (point-min) (point-max))
            (line-number-at-pos (point))
            (- (point) (line-beginning-position))
-           (anaconda-mode-file-name)))))
+           (pythonic-file-name (buffer-file-name))))))
     (url-retrieve
      (format "http://%s:%s" (anaconda-mode-host) anaconda-mode-port)
      callback)))
