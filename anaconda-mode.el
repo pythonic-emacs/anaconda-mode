@@ -89,25 +89,7 @@
        (process-live-p anaconda-mode-process)))
 
 (defun anaconda-mode-need-restart ()
-  "Check if current `anaconda-mode-process' need restart with new args.
-Return nil if it run under proper environment."
-  (when (anaconda-mode-running-p)
-    (not (and
-          (equal
-           (pythonic-executable)
-           (car (process-command anaconda-mode-process)))
-          (equal
-           (pythonic-default-directory anaconda-mode-server-directory)
-           (process-get anaconda-mode-process 'default-directory))
-          (equal
-           (pythonic-get-pythonpath)
-           (process-get anaconda-mode-process 'pythonpath))
-          (equal
-           (pythonic-get-path)
-           (process-get anaconda-mode-process 'path))
-          (equal
-           python-shell-process-environment
-           (process-get anaconda-mode-process 'environment))))))
+  nil)
 
 (defun anaconda-mode-ensure-directory ()
   "Ensure if `anaconda-mode-server-directory' exists."
