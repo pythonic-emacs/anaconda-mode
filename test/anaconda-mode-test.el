@@ -63,35 +63,35 @@
   (run anaconda-mode-install-server-command)
   (should (zerop (run anaconda-mode-check-installation-command))))
 
-(ert-deftest test-anaconda-mode-restart-virtualenv ()
-  "Test if anaconda-mode local server react on VIRTUAL_ENV change."
-  (anaconda-mode-start)
-  (should-not (s-equals? envpython (car (process-command anaconda-mode-process))))
-  (let ((python-shell-virtualenv-path envdir))
-    (anaconda-mode-start))
-  (should (s-equals? envpython (car (process-command anaconda-mode-process)))))
+(ert-deftest test-anaconda-mode-restart-on-environment-change ()
+  "`anaconda-mode' server will be restarted if any variable of
+the pythonic environment (for example `python-shell-interpreter')
+was changed."
+  (unwind-protect
+      (let (id1 id2)
+        (anaconda-mode-start)
+        (wait)
+        (setq id1 (process-id anaconda-mode-process))
+        (let ((python-shell-interpreter "python3"))
+          (anaconda-mode-start)
+          (wait)
+          (setq id2 (process-id anaconda-mode-process)))
+        (should-not (equal id1 id2)))
+    (anaconda-mode-stop)))
 
-(ert-deftest test-anaconda-mode-restart-python-path ()
-  "Check if anaconda-mode server react on PYTHONPATH change."
-  (anaconda-mode-start)
-  (let ((process-environment '("PYTHONPATH=/usr/lib/python3.4")))
-    (should (anaconda-mode-need-restart))))
-
-(ert-deftest test-anaconda-mode-process-filter ()
-  "Anaconda mode process filter should detect process port."
-  (let* ((process (start-process "*python*" "*python*" "python" "-V"))
-         (output "anaconda_mode port 24970\n")
-         (anaconda-mode-port nil))
-    (anaconda-mode-process-filter process output)
-    (should (numberp anaconda-mode-port))))
-
-(ert-deftest test-anaconda-mode-process-filter-error ()
-  "Anaconda mode process filter should ignore any trash output."
-  (let* ((process (start-process "*python*" "*python*" "python" "-V"))
-         (output "Process anaconda_mode finished")
-         (anaconda-mode-port nil))
-    (anaconda-mode-process-filter process output)
-    (should-not anaconda-mode-port)))
+(ert-deftest test-anaconda-mode-not-restart-in-the-same-envinment ()
+  "`anaconda-mode' server will not be restarted if pythonic
+environment keeps the same."
+  (unwind-protect
+      (let (id1 id2)
+        (anaconda-mode-start)
+        (wait)
+        (setq id1 (process-id anaconda-mode-process))
+        (anaconda-mode-start)
+        (wait)
+        (setq id2 (process-id anaconda-mode-process))
+        (should (equal id1 id2)))
+    (anaconda-mode-stop)))
 
 ;;; Completion.
 

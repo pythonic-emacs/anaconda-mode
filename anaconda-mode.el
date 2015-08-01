@@ -118,7 +118,9 @@ check_deps()
        (process-live-p anaconda-mode-process)))
 
 (defun anaconda-mode-need-restart ()
-  nil)
+  "Check if we need to restart `anaconda-mode-server'."
+  (when (anaconda-mode-running-p)
+    (not (pythonic-proper-environment-p anaconda-mode-process))))
 
 (defun anaconda-mode-ensure-directory ()
   "Ensure if `anaconda-mode-server-directory' exists."
