@@ -9,7 +9,7 @@
 
 ;;; Helpers.
 
-(defun anaconda-mode-wait ()
+(defun wait ()
   "Wait for `anaconda-mode' server start."
   (while (not (anaconda-mode-bound-p))
     (sleep-for 0.5)))
@@ -21,7 +21,7 @@
   (unwind-protect
       (progn
         (anaconda-mode-start)
-        (anaconda-mode-wait)
+        (wait)
         (should (anaconda-mode-running-p)))
     (anaconda-mode-stop)))
 
@@ -30,21 +30,21 @@
   (unwind-protect
       (progn
         (anaconda-mode-start)
-        (anaconda-mode-wait)
+        (wait)
         (should (anaconda-mode-bound-p)))
     (anaconda-mode-stop)))
 
 (ert-deftest test-anaconda-mode-stop ()
   "`anaconda-mode' server stops successfully."
   (anaconda-mode-start)
-  (anaconda-mode-wait)
+  (wait)
   (anaconda-mode-stop)
   (should-not (anaconda-mode-running-p)))
 
 (ert-deftest test-anaconda-mode-stop-release-port ()
   "`anaconda-mode' server release port successfully on teardown."
   (anaconda-mode-start)
-  (anaconda-mode-wait)
+  (wait)
   (anaconda-mode-stop)
   (should-not (anaconda-mode-bound-p)))
 
