@@ -67,14 +67,34 @@
 (defvar anaconda-mode-process nil
   "Currently running anaconda-mode process.")
 
-(defvar anaconda-mode-ensure-directory-code "
+(defvar anaconda-mode-ensure-directory-command
+  (list
+   "-c" "
 import os
 import sys
 directory = sys.argv[1]
 if not os.path.exists(directory):
     os.makedirs(directory)
-"
-  "Python code to create directory passed next to it.")
+" anaconda-mode-server-directory)
+  "Create `anaconda-mode-server-directory' if necessary.")
+
+(defvar anaconda-mode-check-installation-command
+  (list "-c" "
+from pkg_resources import get_distribution
+def check_deps(deps=['anaconda_mode']):
+    for each in deps:
+        distrib = get_distribution(each)
+        requirements = distrib.requires()
+        check_deps(requirements)
+check_deps()
+")
+  "Check if `anaconda-mode' server is installed or not.")
+
+(defvar anaconda-mode-install-server-command
+  (list "-m" "pip" "install" "-t" "."
+        (concat "anaconda_mode" "=="
+                anaconda-mode-server-version))
+  "Install `anaconda_mode' server.")
 
 (defun anaconda-mode-start ()
   "Start anaconda-mode server."
@@ -106,9 +126,7 @@ if not os.path.exists(directory):
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
                         :sentinel 'anaconda-mode-ensure-directory-sentinel
-                        :args (list "-c"
-                                    anaconda-mode-ensure-directory-code
-                                    anaconda-mode-server-directory))))
+                        :args anaconda-mode-ensure-directory-command)))
 
 (defun anaconda-mode-ensure-directory-sentinel (process event)
   "Run `anaconda-mode-check' if `anaconda-mode-server-directory' exists.
@@ -126,15 +144,7 @@ parameters."
                         :buffer anaconda-mode-process-buffer
                         :cwd anaconda-mode-server-directory
                         :sentinel 'anaconda-mode-check-sentinel
-                        :args '("-c" "
-from pkg_resources import get_distribution
-def check_deps(deps=['anaconda_mode']):
-    for each in deps:
-        distrib = get_distribution(each)
-        requirements = distrib.requires()
-        check_deps(requirements)
-check_deps()
-"))))
+                        :args anaconda-mode-check-installation-command)))
 
 (defun anaconda-mode-check-sentinel (process event)
   "Run `anaconda-mode-bootstrap' if server installation check passed.
@@ -151,9 +161,7 @@ EVENT are basic sentinel parameters."
                         :buffer anaconda-mode-process-buffer
                         :cwd anaconda-mode-server-directory
                         :sentinel 'anaconda-mode-install-sentinel
-                        :args (list "-m" "pip" "install" "-t" "."
-                                    (concat "anaconda_mode" "=="
-                                            anaconda-mode-server-version)))))
+                        :args anaconda-mode-install-server-command)))
 
 (defun anaconda-mode-install-sentinel (process event)
   "Run `anaconda-mode-bootstrap' if server installation complete successfully.
