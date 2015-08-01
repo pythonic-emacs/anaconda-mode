@@ -67,6 +67,15 @@
 (defvar anaconda-mode-process nil
   "Currently running anaconda-mode process.")
 
+(defvar anaconda-mode-ensure-directory-code "
+import os
+import sys
+directory = sys.argv[1]
+if not os.path.exists(directory):
+    os.makedirs(directory)
+"
+  "Python code to create directory passed next to it.")
+
 (defun anaconda-mode-start ()
   "Start anaconda-mode server."
   (when (anaconda-mode-need-restart)
@@ -97,13 +106,9 @@
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
                         :sentinel 'anaconda-mode-ensure-directory-sentinel
-                        :args (list "-c" "
-import os
-import sys
-directory = sys.argv[1]
-if not os.path.exists(directory):
-    os.makedirs(directory)
-" anaconda-mode-server-directory))))
+                        :args (list "-c"
+                                    anaconda-mode-ensure-directory-code
+                                    anaconda-mode-server-directory))))
 
 (defun anaconda-mode-ensure-directory-sentinel (process event)
   "Run `anaconda-mode-check' if `anaconda-mode-server-directory' exists.

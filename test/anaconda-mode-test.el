@@ -14,6 +14,10 @@
   (while (not (anaconda-mode-bound-p))
     (sleep-for 0.5)))
 
+(defun run (&rest args)
+  "Run python interpreter synchronously with command ARGS."
+  (call-pythonic :args (cons "-c" args)))
+
 ;;; Server.
 
 (ert-deftest test-anaconda-mode-start ()
@@ -47,6 +51,13 @@
   (wait)
   (anaconda-mode-stop)
   (should-not (anaconda-mode-bound-p)))
+
+(ert-deftest test-anaconda-mode-create-server-directory ()
+  "`anaconda-mode-ensure-directory-code' must create
+`anaconda-mode-server-directory'."
+  (run anaconda-mode-ensure-directory-code
+       anaconda-mode-server-directory)
+  (should (f-dir? anaconda-mode-server-directory)))
 
 (ert-deftest test-anaconda-mode-restart-virtualenv ()
   "Test if anaconda-mode local server react on VIRTUAL_ENV change."
