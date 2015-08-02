@@ -67,6 +67,9 @@
 (defvar anaconda-mode-process nil
   "Currently running anaconda-mode process.")
 
+(defvar anaconda-mode-port nil
+  "Port for anaconda-mode connection.")
+
 (defvar anaconda-mode-ensure-directory-command
   (list
    "-c" "
@@ -96,6 +99,14 @@ check_deps()
                 anaconda-mode-server-version))
   "Install `anaconda_mode' server.")
 
+(defun anaconda-mode-host ()
+  "Target host with anaconda-mode server."
+  (if (pythonic-remote-p)
+      (tramp-file-name-host
+       (tramp-dissect-file-name
+        (pythonic-tramp-connection)))
+    "127.0.0.1"))
+
 (defun anaconda-mode-start (&optional callback)
   "Start anaconda-mode server.
 CALLBACK function will be called when `anaconda-mode-port' will
@@ -120,6 +131,10 @@ be bound."
   "Is `anaconda-mode' server running."
   (and anaconda-mode-process
        (process-live-p anaconda-mode-process)))
+
+(defun anaconda-mode-bound-p ()
+  "Is `anaconda-mode' port bound."
+  (numberp anaconda-mode-port))
 
 (defun anaconda-mode-need-restart ()
   "Check if we need to restart `anaconda-mode-server'."
@@ -225,39 +240,6 @@ PROCESS and EVENT are basic sentinel parameters."
     (error "Can't start `anaconda-mode' server")))
 
 
-;;; Connection.
-
-(defun anaconda-mode-host ()
-  "Target host with anaconda-mode server."
-  (if (pythonic-remote-p)
-      (tramp-file-name-host
-       (tramp-dissect-file-name
-        (pythonic-tramp-connection)))
-    "127.0.0.1"))
-
-(defvar anaconda-mode-port nil
-  "Port for anaconda-mode connection.")
-
-(defun anaconda-mode-bound-p ()
-  "Is `anaconda-mode' port bound."
-  (numberp anaconda-mode-port))
-
-(defun anaconda-mode-json-rpc ()
-  "Perform JSON-RPC call."
-  (let ((url-request-method "POST")
-        (url-request-data
-         (json-encode
-          (vector
-           command
-           (buffer-substring-no-properties (point-min) (point-max))
-           (line-number-at-pos (point))
-           (- (point) (line-beginning-position))
-           (pythonic-file-name (buffer-file-name))))))
-    (url-retrieve
-     (format "http://%s:%s" (anaconda-mode-host) anaconda-mode-port)
-     callback)))
-
-
 ;;; Interaction.
 
 (defun anaconda-mode-call (command callback)
@@ -266,6 +248,31 @@ Apply CALLBACK to it result."
   (anaconda-mode-start)
   (when (anaconda-mode-connected-p)
     (anaconda-mode-json-rpc)))
+
+(defun anaconda-mode-jsonrpc (command callback)
+  "Perform JSONRPC call for COMMAND.
+Apply CALLBACK to the call result when retrieve it.  Remote
+COMMAND must expect four arguments: python buffer content, line
+number position, column number position and file path."
+  (let ((url-request-method "POST")
+        (url-request-data (anaconda-mode-jsonrpc-request command)))
+    (url-retrieve
+     (format "http://%s:%s" (anaconda-mode-host) anaconda-mode-port)
+     callback)))
+
+(defun anaconda-mode-jsonrpc-request (command)
+  ""
+  (json-encode (anaconda-mode-jsonrpc-request-data command)))
+
+(defun anaconda-mode-jsonrpc-request-data (command)
+  ""
+  `((jsonrpc . "2.0")
+    (id . 1)
+    (method . ,command)
+    (params . ((source . ,(buffer-substring-no-properties (point-min) (point-max)))
+               (line . ,(line-number-at-pos (point)))
+               (column . ,(- (point) (line-beginning-position)))
+               (path . ,(pythonic-file-name (buffer-file-name)))))))
 
 
 ;;; Code completion.

@@ -2,9 +2,16 @@
 
 ;;; Commentary:
 
+;;; Todo:
+
+;; * test `anaconda-mode-host' function
+;; * test server start chain behavior
+;; * test server start doesn't reinstall server
+
 ;;; Code:
 
 (require 'ert)
+(require 'f)
 (require 'anaconda-mode)
 
 ;;; Helpers.
@@ -17,6 +24,18 @@
 (defun run (args)
   "Run python interpreter synchronously with ARGS passed directly to it."
   (call-pythonic :args args))
+
+(defun fixture (source line column path)
+  "Open SOURCE fixture.
+Put point on LINE at COLUMN position.  Set PATH as current file
+name."
+  (with-current-buffer (generate-new-buffer "*fixture*")
+    (insert source)
+    (goto-char 0)
+    (forward-line (1- line))
+    (forward-char column)
+    (set-visited-file-name path)
+    (current-buffer)))
 
 ;;; Server.
 
@@ -111,6 +130,23 @@ environment keeps the same."
         (anaconda-mode-start (lambda () (setq var t)))
         (should var))
     (anaconda-mode-stop)))
+
+;;; JSONRPC implementation.
+
+(ert-deftest test-anaconda-mode-jsonrpc ()
+  "Perform remote procedure call.")
+
+(ert-deftest test-anaconda-mode-jsonrpc-request-data ()
+  "Prepare data for remote procedure call."
+  (with-current-buffer (fixture "import datetime" 1 15 "simple.py")
+    (should (equal (anaconda-mode-jsonrpc-request-data "echo")
+                   `((jsonrpc . "2.0")
+                     (id . 1)
+                     (method . "echo")
+                     (params . ((source . "import datetime")
+                                (line . 1)
+                                (column . 15)
+                                (path . ,(f-full "simple.py")))))))))
 
 ;;; Completion.
 
