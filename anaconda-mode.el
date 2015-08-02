@@ -96,12 +96,16 @@ check_deps()
                 anaconda-mode-server-version))
   "Install `anaconda_mode' server.")
 
-(defun anaconda-mode-start ()
-  "Start anaconda-mode server."
+(defun anaconda-mode-start (&optional callback)
+  "Start anaconda-mode server.
+CALLBACK function will be called when `anaconda-mode-port' will
+be bound."
   (when (anaconda-mode-need-restart)
     (anaconda-mode-stop))
-  (unless (anaconda-mode-running-p)
-    (anaconda-mode-ensure-directory)))
+  (if (anaconda-mode-running-p)
+      (when callback
+        (funcall callback))
+    (anaconda-mode-ensure-directory callback)))
 
 (defun anaconda-mode-stop ()
   "Stop anaconda-mode server."
@@ -122,72 +126,84 @@ check_deps()
   (when (anaconda-mode-running-p)
     (not (pythonic-proper-environment-p anaconda-mode-process))))
 
-(defun anaconda-mode-ensure-directory ()
-  "Ensure if `anaconda-mode-server-directory' exists."
+(defun anaconda-mode-ensure-directory (&optional callback)
+  "Ensure if `anaconda-mode-server-directory' exists.
+CALLBACK function will be called when `anaconda-mode-port' will
+be bound."
   (setq anaconda-mode-process
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
-                        :sentinel 'anaconda-mode-ensure-directory-sentinel
+                        :sentinel (lambda (process event) (anaconda-mode-ensure-directory-sentinel process event callback))
                         :args anaconda-mode-ensure-directory-command)))
 
-(defun anaconda-mode-ensure-directory-sentinel (process event)
+(defun anaconda-mode-ensure-directory-sentinel (process event &optional callback)
   "Run `anaconda-mode-check' if `anaconda-mode-server-directory' exists.
 Raise error otherwise.  PROCESS and EVENT are basic sentinel
-parameters."
+parameters.  CALLBACK function will be called when
+`anaconda-mode-port' will be bound."
   (if (eq 0 (process-exit-status process))
-      (anaconda-mode-check)
+      (anaconda-mode-check callback)
     (pop-to-buffer anaconda-mode-process-buffer)
     (error "Can't create %s directory" anaconda-mode-server-directory)))
 
-(defun anaconda-mode-check ()
-  "Check `anaconda-mode' server installation."
+(defun anaconda-mode-check (&optional callback)
+  "Check `anaconda-mode' server installation.
+CALLBACK function will be called when `anaconda-mode-port' will
+be bound."
   (setq anaconda-mode-process
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
                         :cwd anaconda-mode-server-directory
-                        :sentinel 'anaconda-mode-check-sentinel
+                        :sentinel (lambda (process event) (anaconda-mode-check-sentinel process event callback))
                         :args anaconda-mode-check-installation-command)))
 
-(defun anaconda-mode-check-sentinel (process event)
+(defun anaconda-mode-check-sentinel (process event &optional callback)
   "Run `anaconda-mode-bootstrap' if server installation check passed.
 Try to install `anaconda-mode' server otherwise.  PROCESS and
-EVENT are basic sentinel parameters."
+EVENT are basic sentinel parameters.  CALLBACK function will be
+called when `anaconda-mode-port' will be bound."
   (if (eq 0 (process-exit-status process))
-      (anaconda-mode-bootstrap)
-    (anaconda-mode-install)))
+      (anaconda-mode-bootstrap callback)
+    (anaconda-mode-install callback)))
 
-(defun anaconda-mode-install ()
-  "Try to install `anaconda-mode' server."
+(defun anaconda-mode-install (&optional callback)
+  "Try to install `anaconda-mode' server.
+CALLBACK function will be called when `anaconda-mode-port' will
+be bound."
   (setq anaconda-mode-process
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
                         :cwd anaconda-mode-server-directory
-                        :sentinel 'anaconda-mode-install-sentinel
+                        :sentinel (lambda (process event) (anaconda-mode-install-sentinel process event callback))
                         :args anaconda-mode-install-server-command)))
 
-(defun anaconda-mode-install-sentinel (process event)
+(defun anaconda-mode-install-sentinel (process event &optional callback)
   "Run `anaconda-mode-bootstrap' if server installation complete successfully.
 Raise error otherwise.  PROCESS and EVENT are basic sentinel
-parameters."
+parameters.  CALLBACK function will be called when
+`anaconda-mode-port' will be bound."
   (if (eq 0 (process-exit-status process))
-      (anaconda-mode-bootstrap)
+      (anaconda-mode-bootstrap callback)
     (pop-to-buffer anaconda-mode-process-buffer)
     (error "Can't install `anaconda-mode' server")))
 
-(defun anaconda-mode-bootstrap ()
-  "Run `anaconda-mode' server."
+(defun anaconda-mode-bootstrap (&optional callback)
+  "Run `anaconda-mode' server.
+CALLBACK function will be called when `anaconda-mode-port' will
+be bound."
   (setq anaconda-mode-process
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
                         :cwd anaconda-mode-server-directory
-                        :filter 'anaconda-mode-bootstrap-filter
+                        :filter (lambda (process output) (anaconda-mode-bootstrap-filter process output callback))
                         :sentinel 'anaconda-mode-bootstrap-sentinel
                         :query-on-exit nil
                         :args (list anaconda-mode-server-script))))
 
-(defun anaconda-mode-bootstrap-filter (process output)
+(defun anaconda-mode-bootstrap-filter (process output &optional callback)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.
-Connect to the `anaconda-mode' server."
+Connect to the `anaconda-mode' server.  CALLBACK function will be
+called when `anaconda-mode-port' will be bound."
   ;; Mimic default filter.
   (when (buffer-live-p (process-buffer process))
     (with-current-buffer (process-buffer process)
@@ -198,8 +214,8 @@ Connect to the `anaconda-mode' server."
   (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
     (setq anaconda-mode-port (string-to-number (cadr it)))
     (set-process-filter process nil)
-    ;; (anaconda-mode-json-rpc)
-    ))
+    (when callback
+      (funcall callback))))
 
 (defun anaconda-mode-bootstrap-sentinel (process event)
   "Raise error if `anaconda-mode' server exit abnormally.

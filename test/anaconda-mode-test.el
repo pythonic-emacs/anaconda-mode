@@ -93,6 +93,25 @@ environment keeps the same."
         (should (equal id1 id2)))
     (anaconda-mode-stop)))
 
+(ert-deftest test-anaconda-mode-on-start-callback ()
+  "Run callback passed on server start."
+  (unwind-protect
+      (let (var)
+        (anaconda-mode-start (lambda () (setq var t)))
+        (wait)
+        (should var))
+    (anaconda-mode-stop)))
+
+(ert-deftest test-anaconda-mode-after-start-callback ()
+  "Run callback passed after server start."
+  (unwind-protect
+      (let (var)
+        (anaconda-mode-start)
+        (wait)
+        (anaconda-mode-start (lambda () (setq var t)))
+        (should var))
+    (anaconda-mode-stop)))
+
 ;;; Completion.
 
 (ert-deftest test-anaconda-mode-complete ()
