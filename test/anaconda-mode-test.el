@@ -134,7 +134,17 @@ environment keeps the same."
 ;;; JSONRPC implementation.
 
 (ert-deftest test-anaconda-mode-jsonrpc ()
-  "Perform remote procedure call.")
+  "Perform remote procedure call."
+  (let (response)
+    (with-current-buffer (fixture "import sys" 1 10)
+      (unwind-protect
+          (progn
+            (anaconda-mode-start)
+            (wait)
+            (anaconda-mode-jsonrpc "complete" (lambda (resp) (setq response resp)))
+            (sleep-for 1)
+            (should (assoc 'id response)))
+        (anaconda-mode-stop)))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-request ()
   "Prepare JSON encoded data for procedure call."

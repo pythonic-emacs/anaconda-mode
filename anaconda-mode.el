@@ -258,7 +258,11 @@ number position, column number position and file path."
         (url-request-data (anaconda-mode-jsonrpc-request command)))
     (url-retrieve
      (format "http://%s:%s" (anaconda-mode-host) anaconda-mode-port)
-     callback)))
+     (lambda (status)
+       (goto-char url-http-end-of-headers)
+       ;; Terminate `apply' call with empty list so response will be
+       ;; treated as single argument.
+       (apply callback (json-read) nil)))))
 
 (defun anaconda-mode-jsonrpc-request (command)
   "Prepare JSON encoded buffer data for COMMAND call."
