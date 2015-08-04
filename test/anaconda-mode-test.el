@@ -34,7 +34,7 @@ name."
     (goto-char 0)
     (forward-line (1- line))
     (forward-char column)
-    (set-visited-file-name path)
+    (setq buffer-file-name (f-full path))
     (current-buffer)))
 
 ;;; Server.
@@ -148,6 +148,23 @@ environment keeps the same."
                                 (column . 15)
                                 (path . ,(f-full "simple.py")))))))))
 
+(ert-deftest test-anaconda-mode-jsonrpc-request-data-with-tabulation ()
+  "Prepare data for remote procedure call from buffer contained
+tabulation characters."
+  (with-current-buffer (fixture "
+if True:
+	sys.api" 3 8 "simple.py")
+    (should (equal (anaconda-mode-jsonrpc-request-data "echo")
+                   `((jsonrpc . "2.0")
+                     (id . 1)
+                     (method . "echo")
+                     (params . ((source . "
+if True:
+	sys.api")
+                                (line . 3)
+                                (column . 8)
+                                (path . ,(f-full "simple.py")))))))))
+
 ;;; Completion.
 
 (ert-deftest test-anaconda-mode-complete ()
@@ -163,15 +180,6 @@ def test2(c):
 test_|_")
   (should (equal (anaconda-mode-complete-thing)
                  '("test1" "test2"))))
-
-(ert-deftest test-anaconda-mode-complete-with-tabulation ()
-  "Test completion at point with tab indentation."
-  (load-fixture "simple.py" "\
-import sys
-if True:
-	sys.api_|_")
-  (should (equal (anaconda-mode-complete-thing)
-                 '("api_version"))))
 
 (ert-deftest test-anaconda-mode-complete-in-comments ()
   "Completion in comments must be nil."
