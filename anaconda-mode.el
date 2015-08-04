@@ -261,11 +261,11 @@ number position, column number position and file path."
      callback)))
 
 (defun anaconda-mode-jsonrpc-request (command)
-  ""
+  "Prepare JSON encoded buffer data for COMMAND call."
   (json-encode (anaconda-mode-jsonrpc-request-data command)))
 
 (defun anaconda-mode-jsonrpc-request-data (command)
-  ""
+  "Prepare buffer data for COMMAND call."
   `((jsonrpc . "2.0")
     (id . 1)
     (method . ,command)
