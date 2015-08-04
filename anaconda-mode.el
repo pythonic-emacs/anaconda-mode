@@ -272,7 +272,8 @@ number position, column number position and file path."
     (params . ((source . ,(buffer-substring-no-properties (point-min) (point-max)))
                (line . ,(line-number-at-pos (point)))
                (column . ,(- (point) (line-beginning-position)))
-               (path . ,(pythonic-file-name (buffer-file-name)))))))
+               (path . ,(when (buffer-file-name)
+                          (pythonic-file-name (buffer-file-name))))))))
 
 
 ;;; Code completion.

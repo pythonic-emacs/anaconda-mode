@@ -25,7 +25,7 @@
   "Run python interpreter synchronously with ARGS passed directly to it."
   (call-pythonic :args args))
 
-(defun fixture (source line column path)
+(defun fixture (source line column &optional path)
   "Open SOURCE fixture.
 Put point on LINE at COLUMN position.  Set PATH as current file
 name."
@@ -34,7 +34,7 @@ name."
     (goto-char 0)
     (forward-line (1- line))
     (forward-char column)
-    (setq buffer-file-name (f-full path))
+    (setq buffer-file-name (and path (f-full path)))
     (current-buffer)))
 
 ;;; Server.
@@ -135,6 +135,12 @@ environment keeps the same."
 
 (ert-deftest test-anaconda-mode-jsonrpc ()
   "Perform remote procedure call.")
+
+(ert-deftest test-anaconda-mode-jsonrpc-request ()
+  "Prepare JSON encoded data for procedure call."
+  (with-current-buffer (fixture "import sys" 1 10)
+    (equal (anaconda-mode-jsonrpc-request "echo")
+           "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"echo\",\"params\":{\"source\":\"import sys\",\"line\":1,\"column\":10,\"path\":null}}")))
 
 (ert-deftest test-anaconda-mode-jsonrpc-request-data ()
   "Prepare data for remote procedure call."
