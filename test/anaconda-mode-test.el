@@ -158,6 +158,20 @@ environment keeps the same."
             (should (assoc 'id response)))
         (anaconda-mode-stop)))))
 
+(ert-deftest test-anaconda-mode-jsonrpc-remove-http-buffer ()
+  "Remove *http* buffer leaved after `url-retrieve' function call."
+  (with-current-buffer (fixture "import sys" 1 10)
+    (unwind-protect
+        (progn
+          (anaconda-mode-start)
+          (wait)
+          (anaconda-mode-jsonrpc "complete" (lambda (resp)))
+          (sleep-for 1)
+          (should-not
+           (--filter (s-starts-with? " *http" (buffer-name it))
+                     (buffer-list))))
+      (anaconda-mode-stop))))
+
 (ert-deftest test-anaconda-mode-jsonrpc-request ()
   "Prepare JSON encoded data for procedure call."
   (with-current-buffer (fixture "import sys" 1 10)
