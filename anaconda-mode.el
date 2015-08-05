@@ -257,7 +257,7 @@ number position, column number position and file path."
         (url-request-data (anaconda-mode-jsonrpc-request command)))
     (url-retrieve
      (format "http://%s:%s" (anaconda-mode-host) anaconda-mode-port)
-     (anaconda-mode-create-response-handler callback))))
+     (anaconda-mode-create-response-handler command callback))))
 
 (defun anaconda-mode-jsonrpc-request (command)
   "Prepare JSON encoded buffer data for COMMAND call."
@@ -274,15 +274,24 @@ number position, column number position and file path."
                (path . ,(when (buffer-file-name)
                           (pythonic-file-name (buffer-file-name))))))))
 
-(defun anaconda-mode-create-response-handler (callback)
-  "Create `anaconda-mode' server response handler based on CALLBACK function."
-  (lambda (status)
-    (goto-char url-http-end-of-headers)
-    ;; Terminate `apply' call with empty list so response will be
-    ;; treated as single argument.
-    (prog1
-        (apply callback (json-read) nil)
-      (kill-buffer (current-buffer)))))
+(defun anaconda-mode-create-response-handler (command callback)
+  "Create server response handler based on COMMAND and CALLBACK function.
+COMMAND argument will be used for response skip message.
+Response can be skipped if point was moved sense request was
+submitted."
+  (let ((anaconda-mode-request-point (point))
+        (anaconda-mode-request-buffer (current-buffer)))
+    (lambda (status)
+      (prog1
+          (if (not (equal anaconda-mode-request-point
+                          (with-current-buffer anaconda-mode-request-buffer
+                            (point))))
+              (message "Skip anaconda-mode %s response" command)
+            (goto-char url-http-end-of-headers)
+            ;; Terminate `apply' call with empty list so response will be
+            ;; treated as single argument.
+            (apply callback (json-read) nil))
+        (kill-buffer (current-buffer))))))
 
 
 ;;; Code completion.

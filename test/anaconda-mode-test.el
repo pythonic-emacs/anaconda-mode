@@ -172,6 +172,20 @@ environment keeps the same."
                      (buffer-list))))
       (anaconda-mode-stop))))
 
+(ert-deftest test-anaconda-mode-jsonrpc-skip-response-on-point-movement ()
+  "Don't run response callback if point position was changed."
+  (let (response)
+    (with-current-buffer (fixture "import s " 1 8)
+      (unwind-protect
+          (progn
+            (anaconda-mode-start)
+            (wait)
+            (anaconda-mode-jsonrpc "complete" (lambda (resp) (setq response resp)))
+            (forward-char)
+            (sleep-for 1)
+            (should-not response))
+        (anaconda-mode-stop)))))
+
 (ert-deftest test-anaconda-mode-jsonrpc-request ()
   "Prepare JSON encoded data for procedure call."
   (with-current-buffer (fixture "import sys" 1 10)
