@@ -133,6 +133,18 @@ environment keeps the same."
 
 ;;; JSONRPC implementation.
 
+(ert-deftest test-anaconda-mode-call ()
+  "Perform remote procedure call without already started server."
+  (let (response)
+    (with-current-buffer (fixture "import sys" 1 10)
+      (unwind-protect
+          (progn
+            (anaconda-mode-call "complete" (lambda (resp) (setq response resp)))
+            (wait)
+            (sleep-for 1)
+            (should (assoc 'id response)))
+        (anaconda-mode-stop)))))
+
 (ert-deftest test-anaconda-mode-jsonrpc ()
   "Perform remote procedure call."
   (let (response)

@@ -245,9 +245,8 @@ PROCESS and EVENT are basic sentinel parameters."
 (defun anaconda-mode-call (command callback)
   "Make remote procedure call for COMMAND.
 Apply CALLBACK to it result."
-  (anaconda-mode-start)
-  (when (anaconda-mode-connected-p)
-    (anaconda-mode-json-rpc)))
+  (anaconda-mode-start
+   (lambda () (anaconda-mode-jsonrpc command callback))))
 
 (defun anaconda-mode-jsonrpc (command callback)
   "Perform JSONRPC call for COMMAND.
