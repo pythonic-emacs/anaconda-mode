@@ -283,9 +283,8 @@ submitted."
         (anaconda-mode-request-buffer (current-buffer)))
     (lambda (status)
       (prog1
-          (if (not (equal anaconda-mode-request-point
-                          (with-current-buffer anaconda-mode-request-buffer
-                            (point))))
+          (if (with-current-buffer (window-buffer (selected-window))
+                (not (equal anaconda-mode-request-point (point))))
               (message "Skip anaconda-mode %s response" command)
             (goto-char url-http-end-of-headers)
             ;; Terminate `apply' call with empty list so response will be

@@ -35,6 +35,7 @@ name."
     (forward-line (1- line))
     (forward-char column)
     (setq buffer-file-name (and path (f-full path)))
+    (switch-to-buffer (current-buffer))
     (current-buffer)))
 
 ;;; Server.
