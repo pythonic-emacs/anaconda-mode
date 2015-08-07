@@ -281,13 +281,15 @@ Response can be skipped if point was moved sense request was
 submitted."
   (let ((anaconda-mode-request-point (point))
         (anaconda-mode-request-buffer (current-buffer))
-        (anaconda-mode-request-window (selected-window)))
+        (anaconda-mode-request-window (selected-window))
+        (anaconda-mode-request-tick (buffer-chars-modified-tick)))
     (lambda (status)
       (prog1
           (if (or (not (equal anaconda-mode-request-window (selected-window)))
                   (with-current-buffer (window-buffer anaconda-mode-request-window)
                     (or (not (equal anaconda-mode-request-buffer (current-buffer)))
-                        (not (equal anaconda-mode-request-point (point))))))
+                        (not (equal anaconda-mode-request-point (point)))
+                        (not (equal anaconda-mode-request-tick (buffer-chars-modified-tick))))))
               (message "Skip anaconda-mode %s response" command)
             (goto-char url-http-end-of-headers)
             ;; Terminate `apply' call with empty list so response will be
