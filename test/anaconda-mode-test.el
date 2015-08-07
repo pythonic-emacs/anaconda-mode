@@ -205,6 +205,20 @@ environment keeps the same."
             (should-not response))
         (anaconda-mode-stop)))))
 
+(ert-deftest test-anaconda-mode-jsonrpc-skip-response-on-window-switch ()
+  "Don't run response callback if user switch the window."
+  (let (response)
+    (with-current-buffer (fixture "import s" 1 8)
+      (unwind-protect
+          (progn
+            (anaconda-mode-start)
+            (wait)
+            (anaconda-mode-jsonrpc "complete" (lambda (resp) (setq response resp)))
+            (switch-to-buffer-other-window (current-buffer))
+            (sleep-for 1)
+            (should-not response))
+        (anaconda-mode-stop)))))
+
 (ert-deftest test-anaconda-mode-jsonrpc-request ()
   "Prepare JSON encoded data for procedure call."
   (with-current-buffer (fixture "import sys" 1 10)
