@@ -147,6 +147,19 @@ environment keeps the same."
             (should (assoc 'id response)))
         (anaconda-mode-stop)))))
 
+(ert-deftest test-anaconda-mode-call-callback-current-buffer ()
+  "Run response callback in the request buffer."
+  (with-current-buffer (fixture "import sys" 1 10)
+    (let ((request-buffer (current-buffer))
+          response-buffer)
+      (unwind-protect
+          (progn
+            (anaconda-mode-call "complete" (lambda (resp) (setq response-buffer (current-buffer))))
+            (wait)
+            (sleep-for 1)
+            (should (equal request-buffer response-buffer)))
+        (anaconda-mode-stop)))))
+
 (ert-deftest test-anaconda-mode-jsonrpc ()
   "Perform remote procedure call."
   (let (response)
