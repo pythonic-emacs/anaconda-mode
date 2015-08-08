@@ -302,7 +302,7 @@ submitted."
 
 (defun anaconda-mode-complete ()
   "Request completion candidates."
-  ;; TODO: (interactive)
+  (interactive)
   (unless (python-syntax-comment-or-string-p)
     (anaconda-mode-call "complete" 'anaconda-mode-complete-callback)))
 
@@ -413,6 +413,7 @@ submitted."
 
 (defvar anaconda-mode-map
   (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-M-i") 'anaconda-mode-complete)
     (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
     (define-key map (kbd "M-r") 'anaconda-mode-usages)
     (define-key map [remap find-tag] 'anaconda-mode-goto)
@@ -433,15 +434,11 @@ submitted."
 
 (defun turn-on-anaconda-mode ()
   "Turn on `anaconda-mode'."
-  (add-hook 'completion-at-point-functions
-            'anaconda-mode-complete-at-point nil t)
   (make-local-variable 'eldoc-documentation-function)
   (setq-local eldoc-documentation-function 'anaconda-eldoc-function))
 
 (defun turn-off-anaconda-mode ()
   "Turn off `anaconda-mode'."
-  (remove-hook 'completion-at-point-functions
-               'anaconda-mode-complete-at-point t)
   (kill-local-variable 'eldoc-documentation-function))
 
 (provide 'anaconda-mode)

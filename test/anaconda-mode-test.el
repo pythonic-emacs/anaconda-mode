@@ -404,16 +404,12 @@ fn(_|_")
 (ert-deftest test-anaconda-mode-enable ()
   (with-temp-buffer
     (anaconda-mode 1)
-    (should (eq (car completion-at-point-functions)
-                'anaconda-mode-complete-at-point))
     (should (eq eldoc-documentation-function 'anaconda-eldoc-function))))
 
 (ert-deftest test-anaconda-mode-disable ()
   (with-temp-buffer
     (anaconda-mode 1)
     (anaconda-mode -1)
-    (should-not (eq (car completion-at-point-functions)
-                    'anaconda-mode-complete-at-point))
     (should-not (eq eldoc-documentation-function 'anaconda-eldoc-function))))
 
 (provide 'anaconda-mode-test)
