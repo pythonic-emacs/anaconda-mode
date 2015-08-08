@@ -284,7 +284,7 @@ submitted."
         (anaconda-mode-request-window (selected-window))
         (anaconda-mode-request-tick (buffer-chars-modified-tick)))
     (lambda (status)
-      (prog1
+      (unwind-protect
           (if (or (not (equal anaconda-mode-request-window (selected-window)))
                   (with-current-buffer (window-buffer anaconda-mode-request-window)
                     (or (not (equal anaconda-mode-request-buffer (current-buffer)))

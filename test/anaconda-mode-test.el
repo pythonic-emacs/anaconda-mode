@@ -173,6 +173,21 @@ environment keeps the same."
                      (buffer-list))))
       (anaconda-mode-stop))))
 
+(ert-deftest test-anaconda-mode-jsonrpc-remove-http-buffer-on-callback-error ()
+  "Remove *http* buffer leaved after `url-retrieve' function call
+even if an error occurs in response callback."
+  (with-current-buffer (fixture "import sys" 1 10)
+    (unwind-protect
+        (progn
+          (anaconda-mode-start)
+          (wait)
+          (anaconda-mode-jsonrpc "complete" (lambda (resp) (error "Shit happens")))
+          (ignore-errors (sleep-for 1))
+          (should-not
+           (--filter (s-starts-with? " *http" (buffer-name it))
+                     (buffer-list))))
+      (anaconda-mode-stop))))
+
 (ert-deftest test-anaconda-mode-jsonrpc-skip-response-on-point-movement ()
   "Don't run response callback if point position was changed."
   (let (response)
