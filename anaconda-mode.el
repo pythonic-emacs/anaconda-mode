@@ -319,9 +319,12 @@ IGNORED parameter is the string for which completion is required."
 
 (defun anaconda-mode-complete ()
   "Request completion candidates."
+  ;; TODO: (interactive)
   (anaconda-mode-call "complete"))
 
-;; EXAMPLE: (anaconda-mode-call "complete" (lambda (resp) (message "%s" (mapcar (lambda (def) (cdr (assoc 'name def))) (cdr (assoc 'result resp))))))
+(defun anaconda-mode-complete-extract-names (response)
+  "Extract completion names from anaconda-mode RESPONSE."
+  (--map (cdr (assoc 'name it)) (cdr (assoc 'result response))))
 
 
 ;;; View documentation.
