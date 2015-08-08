@@ -300,23 +300,6 @@ submitted."
 
 ;;; Code completion.
 
-(defun anaconda-mode-complete-at-point ()
-  "Complete at point with anaconda-mode."
-  (let* ((bounds (bounds-of-thing-at-point 'symbol))
-         (start (or (car bounds) (point)))
-         (stop (or (cdr bounds) (point))))
-    (list start stop
-          (completion-table-dynamic
-           'anaconda-mode-complete-thing))))
-
-(defun anaconda-mode-complete-thing (&rest ignored)
-  "Complete python thing at point.
-Do nothing in comments block.
-IGNORED parameter is the string for which completion is required."
-  (unless (python-syntax-comment-or-string-p)
-    (--map (plist-get it :name)
-           (anaconda-mode-complete))))
-
 (defun anaconda-mode-complete ()
   "Request completion candidates."
   ;; TODO: (interactive)
