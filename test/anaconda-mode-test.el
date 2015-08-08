@@ -313,7 +313,7 @@ if True:
                    (anaconda-mode-complete-extract-names response)))))
 
 (ert-deftest test-anaconda-mode-complete-callback ()
-  "Completion behavior on results with common base."
+  "Completion function must insert common candidates base."
   (let ((response '((result . [((module-path . "/vagrant/simple.py")
                                 (docstring . "test1(a, b)")
                                 (line . 1)
@@ -337,6 +337,38 @@ if True:
     (with-current-buffer (fixture "t" 1 1)
       (anaconda-mode-complete-callback response)
       (should (looking-back "test")))))
+
+(ert-deftest test-anaconda-mode-complete-callback-completions-buffer ()
+  "Completion must show *Completions* buffer if candidates doesn't have same base."
+  (unwind-protect
+      (let ((response '((id . 1)
+                        (result . [((full-name . "bool")
+                                    (line)
+                                    (module-name . "builtins")
+                                    (description . "instance: builtins.bool")
+                                    (module-path)
+                                    (name . "True")
+                                    (docstring . "bool(x) -> bool
+
+Returns True when the argument x is true, False otherwise.
+The builtins True and False are the only two instances of the class bool.
+The class bool is a subclass of the class int, and cannot be subclassed.")
+                                    (column)
+                                    (type . "instance"))
+                                   ((full-name . "try")
+                                    (line)
+                                    (module-name . "builtins")
+                                    (description . "keyword: builtins.try")
+                                    (module-path)
+                                    (name . "Try")
+                                    (docstring . "")
+                                    (column)
+                                    (type . "keyword"))])
+                        (jsonrpc . "2.0"))))
+        (with-current-buffer (fixture "Tr" 1 2)
+          (anaconda-mode-complete-callback response)
+          (should (get-buffer "*Completions*"))))
+    (kill-buffer "*Completions*")))
 
 (ert-deftest test-anaconda-mode-complete ()
   "Test completion at point."
