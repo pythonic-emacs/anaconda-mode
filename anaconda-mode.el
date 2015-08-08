@@ -304,7 +304,7 @@ submitted."
   "Request completion candidates."
   ;; TODO: (interactive)
   (unless (python-syntax-comment-or-string-p)
-    (anaconda-mode-call "complete")))
+    (anaconda-mode-call "complete" 'anaconda-mode-complete-callback)))
 
 (defun anaconda-mode-complete-callback (response)
   "Start interactive completion on RESPONSE receiving."

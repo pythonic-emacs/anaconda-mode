@@ -340,17 +340,14 @@ if True:
 
 (ert-deftest test-anaconda-mode-complete ()
   "Test completion at point."
-  (load-fixture "simple.py" "\
-def test1(a, b):
-    '''First test function.'''
-    pass
-
-def test2(c):
-    '''Second test function.'''
-    pass
-test_|_")
-  (should (equal (anaconda-mode-complete-thing)
-                 '("test1" "test2"))))
+  (unwind-protect
+      (with-current-buffer (fixture "t" 1 1)
+        (anaconda-mode-complete)
+        (wait)
+        (sleep-for 1)
+        (should (get-buffer "*Completions*")))
+    (anaconda-mode-stop)
+    (kill-buffer "*Completions*")))
 
 (ert-deftest test-anaconda-mode-does-not-complete-in-comments ()
   "Don't run interactive completion inside comment block."
