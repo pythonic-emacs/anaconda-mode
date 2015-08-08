@@ -321,6 +321,8 @@ IGNORED parameter is the string for which completion is required."
   "Request completion candidates."
   (anaconda-mode-call "complete"))
 
+;; EXAMPLE: (anaconda-mode-call "complete" (lambda (resp) (message "%s" (mapcar (lambda (def) (cdr (assoc 'name def))) (cdr (assoc 'result resp))))))
+
 
 ;;; View documentation.
 
