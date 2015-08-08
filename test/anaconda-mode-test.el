@@ -394,6 +394,18 @@ The class bool is a subclass of the class int, and cannot be subclassed.")
     (anaconda-mode-stop)
     (kill-buffer "*Completions*")))
 
+(ert-deftest test-anaconda-mode-complete-insert-candidates-base ()
+  "Completion must insert common candidates base."
+  (unwind-protect
+      (with-current-buffer (fixture "
+def teardown(): pass
+tear" 3 4)
+        (anaconda-mode-complete)
+        (wait)
+        (sleep-for 1)
+        (should (looking-back "teardown")))
+    (anaconda-mode-stop)))
+
 (ert-deftest test-anaconda-mode-does-not-complete-in-comments ()
   "Don't run interactive completion inside comment block."
   (with-current-buffer (fixture "#im" 1 3)
