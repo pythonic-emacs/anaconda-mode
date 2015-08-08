@@ -322,6 +322,14 @@ IGNORED parameter is the string for which completion is required."
   ;; TODO: (interactive)
   (anaconda-mode-call "complete"))
 
+(defun anaconda-mode-complete-callback (response)
+  "Start interactive completion on RESPONSE receiving."
+  (let* ((bounds (bounds-of-thing-at-point 'symbol))
+         (start (or (car bounds) (point)))
+         (stop (or (cdr bounds) (point)))
+         (collection (anaconda-mode-complete-extract-names response)))
+    (completion-in-region start stop collection)))
+
 (defun anaconda-mode-complete-extract-names (response)
   "Extract completion names from anaconda-mode RESPONSE."
   (--map (cdr (assoc 'name it)) (cdr (assoc 'result response))))

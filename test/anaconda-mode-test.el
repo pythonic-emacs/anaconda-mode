@@ -271,7 +271,7 @@ if True:
 
 ;;; Completion.
 
-(ert-deftest test-anaconda-mode-extract-names ()
+(ert-deftest test-anaconda-mode-complete-extract-names ()
   "Extract names from complete response."
   (let ((response '((result . [((module-path . "/vagrant/simple.py")
                                 (docstring . "test1(a, b)")
@@ -295,6 +295,32 @@ if True:
                     (id . 1))))
     (should (equal '("test1" "test2")
                    (anaconda-mode-complete-extract-names response)))))
+
+(ert-deftest test-anaconda-mode-complete-callback ()
+  "Completion behavior on results with common base."
+  (let ((response '((result . [((module-path . "/vagrant/simple.py")
+                                (docstring . "test1(a, b)")
+                                (line . 1)
+                                (module-name . "simple")
+                                (column . 4)
+                                (type . "function")
+                                (name . "test1")
+                                (full-name . "simple.test1")
+                                (description . "function: simple.test1"))
+                               ((module-path . "/vagrant/simple.py")
+                                (docstring . "test2(c)")
+                                (line . 5)
+                                (module-name . "simple")
+                                (column . 4)
+                                (type . "function")
+                                (name . "test2")
+                                (full-name . "simple.test2")
+                                (description . "function: simple.test2"))])
+                    (jsonrpc . "2.0")
+                    (id . 1))))
+    (with-current-buffer (fixture "t" 1 1)
+      (anaconda-mode-complete-callback response)
+      (should (looking-back "test")))))
 
 (ert-deftest test-anaconda-mode-complete ()
   "Test completion at point."
