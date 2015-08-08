@@ -30,6 +30,7 @@
 Put point on LINE at COLUMN position.  Set PATH as current file
 name."
   (with-current-buffer (generate-new-buffer "*fixture*")
+    (python-mode)
     (insert source)
     (goto-char 0)
     (forward-line (1- line))
@@ -351,10 +352,11 @@ test_|_")
   (should (equal (anaconda-mode-complete-thing)
                  '("test1" "test2"))))
 
-(ert-deftest test-anaconda-mode-complete-in-comments ()
-  "Completion in comments must be nil."
-  (load-fixture "simple.py" "#imp_|_")
-  (should (null (anaconda-mode-complete-thing))))
+(ert-deftest test-anaconda-mode-does-not-complete-in-comments ()
+  "Don't run interactive completion inside comment block."
+  (with-current-buffer (fixture "#im" 1 3)
+    (anaconda-mode-complete)
+    (should-not (anaconda-mode-running-p))))
 
 ;;; Documentation.
 

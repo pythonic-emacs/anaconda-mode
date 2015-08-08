@@ -320,7 +320,8 @@ IGNORED parameter is the string for which completion is required."
 (defun anaconda-mode-complete ()
   "Request completion candidates."
   ;; TODO: (interactive)
-  (anaconda-mode-call "complete"))
+  (unless (python-syntax-comment-or-string-p)
+    (anaconda-mode-call "complete")))
 
 (defun anaconda-mode-complete-callback (response)
   "Start interactive completion on RESPONSE receiving."
