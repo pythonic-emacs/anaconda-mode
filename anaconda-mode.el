@@ -419,9 +419,9 @@ submitted."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-M-i") 'anaconda-mode-complete)
     (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
-    (define-key map (kbd "M-r") 'anaconda-mode-usages)
-    (define-key map [remap find-tag] 'anaconda-mode-goto)
-    (define-key map [remap pop-tag-mark] 'anaconda-nav-pop-marker)
+    (define-key map (kbd "M-r") 'anaconda-mode-find-usages)
+    (define-key map (kbd "M-.") 'anaconda-mode-find-definition)
+    (define-key map (kbd "M-*") 'anaconda-mode-pop-mark)
     map)
   "Keymap for `anaconda-mode'.")
 
