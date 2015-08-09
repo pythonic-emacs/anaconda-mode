@@ -40,7 +40,7 @@
   "Code navigation, documentation lookup and completion for Python."
   :group 'programming)
 
-(defcustom anaconda-eldoc-as-single-line nil
+(defcustom anaconda-mode-eldoc-as-single-line nil
   "If not nil, trim eldoc string to frame width."
   :group 'anaconda-mode
   :type 'boolean)
@@ -397,7 +397,34 @@ submitted."
 
 ;;; Eldoc.
 
-(defun anaconda-eldoc-format-params (args index)
+(defun anaconda-mode-eldoc-function ()
+  "Show eldoc for context at point."
+  (anaconda-mode-call "eldoc" 'anaconda-mode-eldoc-callback))
+
+(defun anaconda-mode-eldoc-callback (response)
+  "Display eldoc from server RESPONSE."
+  (eldoc-message (anaconda-mode-eldoc-format response)))
+
+(defun anaconda-mode-eldoc-format (response)
+  "Format eldoc string from RESPONSE."
+  (let* ((result (cdr (assoc 'result response)))
+         (name (cdr (assoc 'name result)))
+         (index (cdr (assoc 'index result)))
+         (params (cdr (assoc 'params result)))
+         (doc (anaconda-mode-eldoc-format-definition name index params)))
+    (if anaconda-mode-eldoc-as-single-line
+        (substring doc 0 (min (frame-width) (length doc)))
+      doc)))
+
+(defun anaconda-mode-eldoc-format-definition (name index params)
+  "Format function definition from NAME, INDEX and PARAMS."
+  (concat
+   (propertize name 'face 'font-lock-function-name-face)
+   "("
+   (anaconda-mode-eldoc-format-params params index)
+   ")"))
+
+(defun anaconda-mode-eldoc-format-params (args index)
   "Build colorized ARGS string with current arg pointed to INDEX."
   (apply
    'concat
@@ -407,22 +434,6 @@ submitted."
              (propertize it 'face 'eldoc-highlight-function-argument)
            it))
         (-interpose ", "))))
-
-(cl-defun anaconda-eldoc-format (&key name index params)
-  (concat
-   (propertize name 'face 'font-lock-function-name-face)
-   "("
-   (anaconda-eldoc-format-params params index)
-   ")"))
-
-(defun anaconda-eldoc-function ()
-  "Show eldoc for context at point."
-  (ignore-errors
-    (-when-let* ((res (anaconda-mode-call "eldoc"))
-                 (doc (apply 'anaconda-eldoc-format res)))
-      (if anaconda-eldoc-as-single-line
-          (substring doc 0 (min (frame-width) (length doc)))
-        doc))))
 
 
 ;;; Anaconda minor mode.
@@ -451,7 +462,7 @@ submitted."
 (defun turn-on-anaconda-mode ()
   "Turn on `anaconda-mode'."
   (make-local-variable 'eldoc-documentation-function)
-  (setq-local eldoc-documentation-function 'anaconda-eldoc-function))
+  (setq-local eldoc-documentation-function 'anaconda-mode-eldoc-function))
 
 (defun turn-off-anaconda-mode ()
   "Turn off `anaconda-mode'."

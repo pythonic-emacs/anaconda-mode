@@ -11,6 +11,7 @@
 ;;; Code:
 
 (require 'ert)
+(require 'eldoc)
 (require 'f)
 (require 'anaconda-mode)
 
@@ -452,35 +453,53 @@ I'm documentation string.
 
 ;;; ElDoc.
 
-(ert-deftest test-anaconda-eldoc-existing ()
-  (load-fixture "simple.py" "\
-def fn(a, b):
-    pass
-fn(_|_")
-  (should (equal (anaconda-eldoc-function)
-                 "fn(a, b)")))
+(ert-deftest test-anaconda-mode-eldoc ()
+  "`anaconda-mode-eldoc-function' will run `anaconda-mode' server."
+  (unwind-protect
+      (with-current-buffer (fixture "
+def test(one, other):
+    '''Test if one is other'''
+    return one is other
 
-(ert-deftest test-anaconda-eldoc-invalid ()
-  (load-fixture "simple.py" "invalid(_|_")
-  (should-not (anaconda-eldoc-function)))
+test(" 6 5 "simple.py")
+        (anaconda-mode-eldoc-function)
+        (wait)
+        (sleep-for 1)
+        (should (equal "test(one, other)" eldoc-last-message)))
+    (anaconda-mode-stop)))
 
-(ert-deftest test-anaconda-eldoc-ignore-errors ()
-  (let ((anaconda-mode-directory (f-root))
-        (anaconda-mode-port nil))
-    (should-not (anaconda-eldoc-function))))
+(ert-deftest test-anaconda-mode-eldoc-callback ()
+  "Format eldoc string from response."
+  (let ((response '((id . 1)
+                    (result (params . ["one" "other"])
+                            (name . "test")
+                            (index . 0))
+                    (jsonrpc . "2.0"))))
+    (should (equal "test(one, other)"
+                   (anaconda-mode-eldoc-callback response)))))
+
+(ert-deftest test-anaconda-mode-eldoc-callback-empty-response ()
+  "Format eldoc string from response with empty result."
+  (should nil))
+
+(ert-deftest test-anaconda-mode-eldoc-format-as-single-line ()
+  "Format eldoc string as single line."
+  (should nil))
 
 ;;; Minor mode.
 
 (ert-deftest test-anaconda-mode-enable ()
+  "Enable `anaconda-mode'."
   (with-temp-buffer
     (anaconda-mode 1)
-    (should (eq eldoc-documentation-function 'anaconda-eldoc-function))))
+    (should (eq eldoc-documentation-function 'anaconda-mode-eldoc-function))))
 
 (ert-deftest test-anaconda-mode-disable ()
+  "Disable `anaconda-mode'."
   (with-temp-buffer
     (anaconda-mode 1)
     (anaconda-mode -1)
-    (should-not (eq eldoc-documentation-function 'anaconda-eldoc-function))))
+    (should-not (eq eldoc-documentation-function 'anaconda-mode-eldoc-function))))
 
 (provide 'anaconda-mode-test)
 
