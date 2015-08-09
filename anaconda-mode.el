@@ -328,12 +328,15 @@ submitted."
 (defun anaconda-mode-view-doc ()
   "Show documentation for context at point."
   (interactive)
-  (pop-to-buffer
-   (anaconda-mode-doc-buffer
-    (or (anaconda-mode-call "doc")
-        (error "No documentation found")))))
+  (anaconda-mode-call "goto_definitions" 'anaconda-mode-view-doc-callback))
 
-(defun anaconda-mode-doc-buffer (doc)
+(defun anaconda-mode-view-doc-callback (response)
+  "Process view doc RESPONSE."
+  (pop-to-buffer
+   (anaconda-mode-create-view-doc-buffer
+    (anaconda-mode-format-view-doc-content response))))
+
+(defun anaconda-mode-create-view-doc-buffer (doc)
   "Display documentation buffer with contents DOC."
   (let ((buf (get-buffer-create "*anaconda-doc*")))
     (with-current-buffer buf
@@ -343,6 +346,15 @@ submitted."
       (goto-char (point-min))
       (view-mode 1)
       buf)))
+
+(defun anaconda-mode-format-view-doc-content (response)
+  "Create content for documentation buffer from RESPONSE fields."
+  (->>
+   (cdr (assoc 'result response))
+   (--mapcat (list (s-trim (cdr (assoc 'full-name it)))
+                   (s-trim (cdr (assoc 'docstring it)))))
+   (s-join "\n")
+   (s-append "\n")))
 
 
 ;;; Usages.

@@ -414,28 +414,41 @@ tear" 3 4)
 
 ;;; Documentation.
 
-(ert-deftest test-anaconda-mode-doc ()
-  "Test documentation string search."
-  (load-fixture "simple.py" "\
-def f_|_(a, b=1):
+(ert-deftest test-anaconda-mode-view-doc ()
+  "Show documentation buffer on documentation lookup."
+  (unwind-protect
+      (with-current-buffer (fixture "
+def f(a, b=1):
     '''Docstring for f.'''
-    pass")
-  (anaconda-mode-view-doc)
-  (should (equal (with-current-buffer (get-buffer "*anaconda-doc*")
-                   (buffer-string))
-                 "\
-simple - def f
-========================================
-f(a, b = 1)
+    pass" 2 5 "simple.py")
+        (anaconda-mode-view-doc)
+        (wait)
+        (sleep-for 1)
+        (should (equal "*anaconda-doc*"
+                       (buffer-name (window-buffer (selected-window))))))
+    (anaconda-mode-stop)))
 
-Docstring for f.")))
+(ert-deftest test-anaconda-mode-view-doc-callback ()
+  "Fill documentation buffer content from response."
+  (let ((response '((result . [((type . "function")
+                                (docstring . "f(a, b)
 
-(ert-deftest test-anaconda-mode-doc-window-focus ()
-  "Test documentation window focus."
-  (load-fixture "simple.py" "from os import path_|_")
-  (anaconda-mode-view-doc)
-  (should (equal "*anaconda-doc*"
-                 (buffer-name))))
+I'm documentation string.")
+                                (name . "f")
+                                (module-name . "simple")
+                                (column . 4)
+                                (module-path . "/vagrant/simple.py")
+                                (full-name . "simple.f")
+                                (description . "def f")
+                                (line . 1))])
+                    (jsonrpc . "2.0")
+                    (id . 1))))
+    (anaconda-mode-view-doc-callback response)
+    (should (equal "simple.f
+f(a, b)
+
+I'm documentation string.
+" (buffer-string)))))
 
 ;;; ElDoc.
 
