@@ -484,7 +484,14 @@ test(" 6 5 "simple.py")
 
 (ert-deftest test-anaconda-mode-eldoc-format-as-single-line ()
   "Format eldoc string as single line."
-  (should nil))
+  (let ((anaconda-mode-eldoc-as-single-line t)
+        (response `((id . 1)
+                    (result (params ,@(--iterate it "a" 1000))
+                            (name . "test")
+                            (index . 0))
+                    (jsonrpc . "2.0"))))
+    (should (equal (frame-width)
+                   (length (anaconda-mode-eldoc-format response))))))
 
 ;;; Minor mode.
 
