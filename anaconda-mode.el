@@ -408,11 +408,11 @@ submitted."
 
 (defun anaconda-mode-eldoc-format (response)
   "Format eldoc string from RESPONSE."
-  (let* ((result (cdr (assoc 'result response)))
-         (name (cdr (assoc 'name result)))
-         (index (cdr (assoc 'index result)))
-         (params (cdr (assoc 'params result)))
-         (doc (anaconda-mode-eldoc-format-definition name index params)))
+  (-when-let* ((result (cdr (assoc 'result response)))
+               (name (cdr (assoc 'name result)))
+               (index (cdr (assoc 'index result)))
+               (params (cdr (assoc 'params result)))
+               (doc (anaconda-mode-eldoc-format-definition name index params)))
     (if anaconda-mode-eldoc-as-single-line
         (substring doc 0 (min (frame-width) (length doc)))
       doc)))

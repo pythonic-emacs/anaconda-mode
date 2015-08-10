@@ -455,18 +455,19 @@ I'm documentation string.
 
 (ert-deftest test-anaconda-mode-eldoc ()
   "`anaconda-mode-eldoc-function' will run `anaconda-mode' server."
-  (unwind-protect
-      (with-current-buffer (fixture "
+  (let (eldoc-last-message)
+    (unwind-protect
+        (with-current-buffer (fixture "
 def test(one, other):
     '''Test if one is other'''
     return one is other
 
 test(" 6 5 "simple.py")
-        (anaconda-mode-eldoc-function)
-        (wait)
-        (sleep-for 1)
-        (should (equal "test(one, other)" eldoc-last-message)))
-    (anaconda-mode-stop)))
+          (anaconda-mode-eldoc-function)
+          (wait)
+          (sleep-for 1)
+          (should (equal "test(one, other)" eldoc-last-message)))
+      (anaconda-mode-stop))))
 
 (ert-deftest test-anaconda-mode-eldoc-callback ()
   "Format eldoc string from response."
@@ -479,8 +480,15 @@ test(" 6 5 "simple.py")
                    (anaconda-mode-eldoc-callback response)))))
 
 (ert-deftest test-anaconda-mode-eldoc-callback-empty-response ()
-  "Format eldoc string from response with empty result."
-  (should nil))
+  "Don't try to show eldoc on response with empty result."
+  (let (eldoc-last-message)
+    (unwind-protect
+        (with-current-buffer (fixture "invalid(" 1 8 "simple.py")
+          (anaconda-mode-eldoc-function)
+          (wait)
+          (sleep-for 1)
+          (should-not eldoc-last-message))
+      (anaconda-mode-stop))))
 
 (ert-deftest test-anaconda-mode-eldoc-format-as-single-line ()
   "Format eldoc string as single line."
