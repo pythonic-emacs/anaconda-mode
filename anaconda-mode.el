@@ -294,7 +294,8 @@ submitted."
                         (not (equal anaconda-mode-request-tick (buffer-chars-modified-tick))))))
               (message "Skip anaconda-mode %s response" command)
             (goto-char url-http-end-of-headers)
-            (let ((result (json-read)))
+            (let* ((json-array-type 'list)
+                   (result (json-read)))
               (with-current-buffer anaconda-mode-request-buffer
                 ;; Terminate `apply' call with empty list so response
                 ;; will be treated as single argument.
