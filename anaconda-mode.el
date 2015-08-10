@@ -408,14 +408,14 @@ submitted."
 
 (defun anaconda-mode-eldoc-format (response)
   "Format eldoc string from RESPONSE."
-  (-when-let* ((result (cdr (assoc 'result response)))
-               (name (cdr (assoc 'name result)))
-               (index (cdr (assoc 'index result)))
-               (params (cdr (assoc 'params result)))
-               (doc (anaconda-mode-eldoc-format-definition name index params)))
-    (if anaconda-mode-eldoc-as-single-line
-        (substring doc 0 (min (frame-width) (length doc)))
-      doc)))
+  (-when-let (result (cdr (assoc 'result response)))
+    (let* ((name (cdr (assoc 'name result)))
+           (index (cdr (assoc 'index result)))
+           (params (cdr (assoc 'params result)))
+           (doc (anaconda-mode-eldoc-format-definition name index params)))
+      (if anaconda-mode-eldoc-as-single-line
+          (substring doc 0 (min (frame-width) (length doc)))
+        doc))))
 
 (defun anaconda-mode-eldoc-format-definition (name index params)
   "Format function definition from NAME, INDEX and PARAMS."
@@ -427,14 +427,14 @@ submitted."
 
 (defun anaconda-mode-eldoc-format-params (args index)
   "Build colorized ARGS string with current arg pointed to INDEX."
-  (apply
-   'concat
-   (->> args
-        (--map-indexed
-         (if (= index it-index)
-             (propertize it 'face 'eldoc-highlight-function-argument)
-           it))
-        (-interpose ", "))))
+  (->>
+   args
+   (--map-indexed
+    (if (= index it-index)
+        (propertize it 'face 'eldoc-highlight-function-argument)
+      it))
+   (-interpose ", ")
+   (apply 'concat)))
 
 
 ;;; Anaconda minor mode.

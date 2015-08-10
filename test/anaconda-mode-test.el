@@ -479,7 +479,7 @@ test(" 6 5 "simple.py")
     (should (equal "test(one, other)"
                    (anaconda-mode-eldoc-callback response)))))
 
-(ert-deftest test-anaconda-mode-eldoc-callback-empty-response ()
+(ert-deftest test-anaconda-mode-eldoc-empty-response ()
   "Don't try to show eldoc on response with empty result."
   (let (eldoc-last-message)
     (unwind-protect
@@ -488,6 +488,19 @@ test(" 6 5 "simple.py")
           (wait)
           (sleep-for 1)
           (should-not eldoc-last-message))
+      (anaconda-mode-stop))))
+
+(ert-deftest test-anaconda-mode-eldoc-no-params ()
+  "Show eldoc message for function without arguments."
+  (let (eldoc-last-message)
+    (unwind-protect
+        (with-current-buffer (fixture "
+def test(): pass
+test(" 3 5 "simple.py")
+          (anaconda-mode-eldoc-function)
+          (wait)
+          (sleep-for 1)
+          (should (equal "test()" eldoc-last-message)))
       (anaconda-mode-stop))))
 
 (ert-deftest test-anaconda-mode-eldoc-format-as-single-line ()
