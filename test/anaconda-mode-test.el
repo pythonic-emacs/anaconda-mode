@@ -445,7 +445,7 @@ I'm documentation string.")
                     (jsonrpc . "2.0")
                     (id . 1))))
     (anaconda-mode-view-doc-callback response)
-    (should (equal "simple.f
+    (should (equal "simple
 f(a, b)
 
 I'm documentation string.
@@ -480,10 +480,10 @@ ends with a separator.")
                              (name . "join")
                              (module-name . "posixpath")))
                     (jsonrpc . "2.0"))))
-    (should (equal "ntpath.join
+    (should (equal "ntpath
 join(path, *paths)
 
-posixpath.join
+posixpath
 join(a, *p)
 
 Join two or more pathname components, inserting '/' as needed.

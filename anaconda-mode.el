@@ -352,11 +352,7 @@ submitted."
   "Create content for documentation buffer from RESPONSE fields."
   (->>
    (cdr (assoc 'result response))
-   (--map (list (cdr (assoc 'module-name it))
-                "."
-                (cdr (assoc 'name it))
-                "\n"
-                (cdr (assoc 'docstring it))))
+   (--map (anaconda-mode-view-doc-extract-definition it))
    (--map (apply 's-concat it))
    (-map 's-trim)
    (s-join "\n\n")
@@ -364,7 +360,9 @@ submitted."
 
 (defun anaconda-mode-view-doc-extract-definition (definition)
   "Extract module DEFINITION from the response structure."
-  (list (propertize (cdr (assoc 'module-name definition)) 'face 'bold)))
+  (list (propertize (cdr (assoc 'module-name definition)) 'face 'bold)
+        "\n"
+        (cdr (assoc 'docstring definition))))
 
 
 ;;; Usages.
