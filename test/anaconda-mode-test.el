@@ -493,6 +493,23 @@ ends with a separator.
 "
                    (anaconda-mode-format-view-doc-content response)))))
 
+(ert-deftest test-anaconda-mode-view-doc-extract-definition-bold-module-name ()
+  "Extract module definition will use bold font for module name."
+  (let* ((definition '((description . "def join")
+                       (full-name . "os.path.join")
+                       (type . "function")
+                       (docstring . "join(path, *paths)
+
+")
+                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
+                       (column . 4)
+                       (line . 104)
+                       (name . "join")
+                       (module-name . "ntpath")))
+         (module (anaconda-mode-view-doc-extract-definition definition))
+         (module-name (car module)))
+    (should (equal 'bold (get-text-property 0 'face module-name)))))
+
 ;;; ElDoc.
 
 (ert-deftest test-anaconda-mode-eldoc ()

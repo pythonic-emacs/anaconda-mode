@@ -362,6 +362,10 @@ submitted."
    (s-join "\n\n")
    (s-append "\n")))
 
+(defun anaconda-mode-view-doc-extract-definition (definition)
+  "Extract module DEFINITION from the response structure."
+  (list (propertize (cdr (assoc 'module-name definition)) 'face 'bold)))
+
 
 ;;; Usages.
 
