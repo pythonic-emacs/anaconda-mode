@@ -352,9 +352,14 @@ submitted."
   "Create content for documentation buffer from RESPONSE fields."
   (->>
    (cdr (assoc 'result response))
-   (--mapcat (list (s-trim (cdr (assoc 'full-name it)))
-                   (s-trim (cdr (assoc 'docstring it)))))
-   (s-join "\n")
+   (--map (list (cdr (assoc 'module-name it))
+                "."
+                (cdr (assoc 'name it))
+                "\n"
+                (cdr (assoc 'docstring it))))
+   (--map (apply 's-concat it))
+   (-map 's-trim)
+   (s-join "\n\n")
    (s-append "\n")))
 
 

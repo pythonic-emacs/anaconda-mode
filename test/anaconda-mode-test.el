@@ -451,6 +451,48 @@ f(a, b)
 I'm documentation string.
 " (buffer-string)))))
 
+(ert-deftest test-anaconda-mode-view-doc-format-multiple-modules ()
+  "Format doc buffer for multiple modules."
+  (let ((response '((id . 1)
+                    (result ((description . "def join")
+                             (full-name . "os.path.join")
+                             (type . "function")
+                             (docstring . "join(path, *paths)
+
+")
+                             (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
+                             (column . 4)
+                             (line . 104)
+                             (name . "join")
+                             (module-name . "ntpath"))
+                            ((description . "def join")
+                             (full-name . "os.path.join")
+                             (type . "function")
+                             (docstring . "join(a, *p)
+
+Join two or more pathname components, inserting '/' as needed.
+If any component is an absolute path, all previous path components
+will be discarded.  An empty last part will result in a path that
+ends with a separator.")
+                             (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/posixpath.py")
+                             (column . 4)
+                             (line . 70)
+                             (name . "join")
+                             (module-name . "posixpath")))
+                    (jsonrpc . "2.0"))))
+    (should (equal "ntpath.join
+join(path, *paths)
+
+posixpath.join
+join(a, *p)
+
+Join two or more pathname components, inserting '/' as needed.
+If any component is an absolute path, all previous path components
+will be discarded.  An empty last part will result in a path that
+ends with a separator.
+"
+                   (anaconda-mode-format-view-doc-content response)))))
+
 ;;; ElDoc.
 
 (ert-deftest test-anaconda-mode-eldoc ()
