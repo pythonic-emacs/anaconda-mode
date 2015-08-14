@@ -360,9 +360,25 @@ submitted."
 
 (defun anaconda-mode-view-doc-extract-definition (definition)
   "Extract module DEFINITION from the response structure."
-  (list (propertize (cdr (assoc 'module-name definition)) 'face 'bold)
-        "\n"
-        (cdr (assoc 'docstring definition))))
+  (let ((map (make-sparse-keymap))
+        (handler (anaconda-mode-view-doc-make-click-handler definition)))
+    (define-key map (kbd "RET") handler)
+    (define-key map (kbd "<mouse-2>") handler)
+    (list (propertize
+           (cdr (assoc 'module-name definition))
+           'face 'bold
+           'keymap map)
+          "\n"
+          (cdr (assoc 'docstring definition)))))
+
+(defun anaconda-mode-view-doc-make-click-handler (definition)
+  "Create interactive event handler to open DEFINITION module path."
+  (lambda (event)
+    (interactive "e")
+    (find-file (cdr (assoc 'module-path definition)))
+    (goto-char 0)
+    (forward-line (1- (cdr (assoc 'line definition))))
+    (forward-char (cdr (assoc 'column definition)))))
 
 
 ;;; Usages.

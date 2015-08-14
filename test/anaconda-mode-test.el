@@ -518,6 +518,45 @@ ends with a separator.
          (module-name (car module)))
     (should (equal 'bold (get-text-property 0 'face module-name)))))
 
+(ert-deftest test-anaconda-mode-view-doc-extract-definition-module-name-link ()
+  "Extract module definition will make clickable link from module name."
+  (let* ((definition '((description . "def join")
+                       (full-name . "os.path.join")
+                       (type . "function")
+                       (docstring . "join(path, *paths)
+
+")
+                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
+                       (column . 4)
+                       (line . 104)
+                       (name . "join")
+                       (module-name . "ntpath")))
+         (module (anaconda-mode-view-doc-extract-definition definition))
+         (module-name (car module)))
+    (should (keymapp (get-text-property 0 'keymap module-name)))
+    (should (lookup-key (get-text-property 0 'keymap module-name) (kbd "RET")))
+    (should (lookup-key (get-text-property 0 'keymap module-name) (kbd "<mouse-2>")))))
+
+(ert-deftest test-anaconda-mode-view-doc-make-click-handler ()
+  "Create click handler for definition"
+  (let* ((ntpath (run-to-string '("-c" "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')")))
+         (definition `((description . "def join")
+                       (full-name . "os.path.join")
+                       (type . "function")
+                       (docstring . "join(path, *paths)
+
+")
+                       (module-path . ,ntpath)
+                       (column . 4)
+                       (line . 104)
+                       (name . "join")
+                       (module-name . "ntpath")))
+         (handler (anaconda-mode-view-doc-make-click-handler definition)))
+    (funcall handler nil)
+    (should (equal ntpath (buffer-file-name)))
+    (should (equal 104 (line-number-at-pos (point))))
+    (should (equal 4 (- (point) (line-beginning-position))))))
+
 ;;; ElDoc.
 
 (ert-deftest test-anaconda-mode-eldoc ()
