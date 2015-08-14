@@ -26,6 +26,14 @@
   "Run python interpreter synchronously with ARGS passed directly to it."
   (call-pythonic :args args))
 
+(defun run-to-string (args)
+  "Run python interpreter synchronously with ARGS.
+Return process output."
+  (let ((buffer (generate-new-buffer-name "*out*")))
+    (call-pythonic :buffer buffer :args args)
+    (with-current-buffer buffer
+      (buffer-string))))
+
 (defun fixture (source line column &optional path)
   "Open SOURCE fixture.
 Put point on LINE at COLUMN position.  Set PATH as current file
