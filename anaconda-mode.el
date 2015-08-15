@@ -373,8 +373,8 @@ submitted."
 
 (defun anaconda-mode-view-doc-make-click-handler (definition)
   "Create interactive event handler to open DEFINITION module path."
-  (lambda (event)
-    (interactive "e")
+  (lambda ()
+    (interactive)
     (find-file (cdr (assoc 'module-path definition)))
     (goto-char 0)
     (forward-line (1- (cdr (assoc 'line definition))))

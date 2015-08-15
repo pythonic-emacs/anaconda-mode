@@ -552,7 +552,7 @@ ends with a separator.
                        (name . "join")
                        (module-name . "ntpath")))
          (handler (anaconda-mode-view-doc-make-click-handler definition)))
-    (funcall handler nil)
+    (funcall handler)
     (should (equal ntpath (buffer-file-name)))
     (should (equal 104 (line-number-at-pos (point))))
     (should (equal 4 (- (point) (line-beginning-position))))))
