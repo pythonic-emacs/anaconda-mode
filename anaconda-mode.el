@@ -366,6 +366,7 @@ submitted."
            (cdr (assoc 'module-name definition))
            'face 'bold
            'mouse-face 'highlight
+           'help-echo "mouse-2: visit this module"
            'keymap map)
           "\n"
           (cdr (assoc 'docstring definition)))))

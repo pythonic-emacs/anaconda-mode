@@ -575,6 +575,24 @@ ends with a separator.
          (module-name (car module)))
     (should (equal 'highlight (get-text-property 0 'mouse-face module-name)))))
 
+(ert-deftest test-anaconda-mode-view-doc-extract-definition-help-text ()
+  "Extract module definition will show help text."
+  (let* ((definition '((description . "def join")
+                       (full-name . "os.path.join")
+                       (type . "function")
+                       (docstring . "join(path, *paths)
+
+")
+                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
+                       (column . 4)
+                       (line . 104)
+                       (name . "join")
+                       (module-name . "ntpath")))
+         (module (anaconda-mode-view-doc-extract-definition definition))
+         (module-name (car module)))
+    (should (equal "mouse-2: visit this module"
+                   (get-text-property 0 'help-echo module-name)))))
+
 ;;; ElDoc.
 
 (ert-deftest test-anaconda-mode-eldoc ()
