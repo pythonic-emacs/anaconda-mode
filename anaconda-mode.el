@@ -365,6 +365,7 @@ submitted."
     (list (propertize
            (cdr (assoc 'module-name definition))
            'face 'bold
+           'mouse-face 'highlight
            'keymap map)
           "\n"
           (cdr (assoc 'docstring definition)))))

@@ -7,6 +7,7 @@
 ;; * test `anaconda-mode-host' function
 ;; * test server start chain behavior
 ;; * test server start doesn't reinstall server
+;; * M-* must go backward after doc view jump
 
 ;;; Code:
 
@@ -556,6 +557,23 @@ ends with a separator.
     (should (equal ntpath (buffer-file-name)))
     (should (equal 104 (line-number-at-pos (point))))
     (should (equal 4 (- (point) (line-beginning-position))))))
+
+(ert-deftest test-anaconda-mode-view-doc-extract-definition-mouse-face ()
+  "Extract module definition will highlight module definition under mouse cursor."
+  (let* ((definition '((description . "def join")
+                       (full-name . "os.path.join")
+                       (type . "function")
+                       (docstring . "join(path, *paths)
+
+")
+                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
+                       (column . 4)
+                       (line . 104)
+                       (name . "join")
+                       (module-name . "ntpath")))
+         (module (anaconda-mode-view-doc-extract-definition definition))
+         (module-name (car module)))
+    (should (equal 'highlight (get-text-property 0 'mouse-face module-name)))))
 
 ;;; ElDoc.
 
