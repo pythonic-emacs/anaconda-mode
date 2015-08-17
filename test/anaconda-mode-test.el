@@ -424,6 +424,44 @@ The class bool is a subclass of the class int, and cannot be subclassed.")
           (should (get-buffer "*Completions*"))))
     (kill-buffer "*Completions*")))
 
+(ert-deftest test-anaconda-mode-complete-callback-completions-annotations ()
+  "Completion must show candidate description as annotations in the *Completions* buffer."
+  (unwind-protect
+      (let ((response '((id . 1)
+                        (result ((full-name . "bool")
+                                 (line)
+                                 (module-name . "builtins")
+                                 (description . "instance: builtins.bool")
+                                 (module-path)
+                                 (name . "True")
+                                 (docstring . "bool(x) -> bool
+
+Returns True when the argument x is true, False otherwise.
+The builtins True and False are the only two instances of the class bool.
+The class bool is a subclass of the class int, and cannot be subclassed.")
+                                 (column)
+                                 (type . "instance"))
+                                ((full-name . "try")
+                                 (line)
+                                 (module-name . "builtins")
+                                 (description . "keyword: builtins.try")
+                                 (module-path)
+                                 (name . "Try")
+                                 (docstring . "")
+                                 (column)
+                                 (type . "keyword")))
+                        (jsonrpc . "2.0"))))
+        (with-current-buffer (fixture "Tr" 1 2)
+          (anaconda-mode-complete-callback response)
+          (should (equal "In this buffer, type RET to select the completion near point.
+
+Possible completions are:
+True <instance: builtins.bool>
+Try <keyword: builtins.try>"
+                         (with-current-buffer "*Completions*"
+                           (buffer-string))))))
+    (kill-buffer "*Completions*")))
+
 (ert-deftest test-anaconda-mode-complete ()
   "Test completion at point."
   (unwind-protect

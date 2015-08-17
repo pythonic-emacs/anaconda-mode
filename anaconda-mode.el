@@ -314,7 +314,8 @@ submitted."
   (let* ((bounds (bounds-of-thing-at-point 'symbol))
          (start (or (car bounds) (point)))
          (stop (or (cdr bounds) (point)))
-         (collection (anaconda-mode-complete-extract-names response)))
+         (collection (anaconda-mode-complete-extract-names response))
+         (completion-extra-properties '(:annotation-function anaconda-mode-complete-annotation)))
     (completion-in-region start stop collection)))
 
 (defun anaconda-mode-complete-extract-names (response)
@@ -324,6 +325,11 @@ submitted."
            (put-text-property 0 1 'description description name)
            name)
          (cdr (assoc 'result response))))
+
+(defun anaconda-mode-complete-annotation (candidate)
+  "Get annotation for CANDIDATE."
+  (--when-let (get-text-property 0 'description candidate)
+    (concat " <" it ">")))
 
 
 ;;; View documentation.
