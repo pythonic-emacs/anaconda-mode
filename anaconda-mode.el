@@ -321,7 +321,7 @@ submitted."
 (defun anaconda-mode-complete-extract-names (response)
   "Extract completion names from anaconda-mode RESPONSE."
   (--map (let ((name (cdr (assoc 'name it)))
-               (description (cdr (assoc 'description it))))
+               (description (s-replace "\n" "" (cdr (assoc 'description it)))))
            (put-text-property 0 1 'description description name)
            name)
          (cdr (assoc 'result response))))

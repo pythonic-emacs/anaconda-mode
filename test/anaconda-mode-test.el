@@ -366,6 +366,24 @@ if True:
                     0 'description
                     (car (anaconda-mode-complete-extract-names response)))))))
 
+(ert-deftest test-anaconda-mode-complete-extract-description-trim-new-line ()
+  "Remove new line characters from completions description."
+  (let ((response '((result ((description . "statement: \napilevel = \"2.0\"")
+                             (type . "statement")
+                             (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/sqlite3/dbapi2.py")
+                             (docstring . "")
+                             (column . 0)
+                             (module-name . "dbapi2")
+                             (line . 33)
+                             (name . "apilevel")
+                             (full-name . "dbapi2")))
+                    (jsonrpc . "2.0")
+                    (id . 1))))
+    (should (equal "statement: apilevel = \"2.0\""
+                   (get-text-property
+                    0 'description
+                    (car (anaconda-mode-complete-extract-names response)))))))
+
 (ert-deftest test-anaconda-mode-complete-callback ()
   "Completion function must insert common candidates base."
   (let ((response '((result ((module-path . "/vagrant/simple.py")
