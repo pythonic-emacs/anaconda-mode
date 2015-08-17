@@ -16,6 +16,7 @@
 (require 'f)
 (require 'anaconda-mode)
 
+
 ;;; Helpers.
 
 (defun wait ()
@@ -49,6 +50,7 @@ name."
     (switch-to-buffer (current-buffer))
     (current-buffer)))
 
+
 ;;; Server.
 
 (ert-deftest test-anaconda-mode-start ()
@@ -143,6 +145,7 @@ environment keeps the same."
         (should var))
     (anaconda-mode-stop)))
 
+
 ;;; JSONRPC implementation.
 
 (ert-deftest test-anaconda-mode-call ()
@@ -308,6 +311,7 @@ if True:
                                 (column . 8)
                                 (path . ,(f-full "simple.py")))))))))
 
+
 ;;; Completion.
 
 (ert-deftest test-anaconda-mode-complete-extract-names ()
@@ -422,6 +426,7 @@ tear" 3 4)
     (anaconda-mode-complete)
     (should-not (anaconda-mode-running-p))))
 
+
 ;;; Documentation.
 
 (ert-deftest test-anaconda-mode-view-doc ()
@@ -593,6 +598,7 @@ ends with a separator.
     (should (equal "mouse-2: visit this module"
                    (get-text-property 0 'help-echo module-name)))))
 
+
 ;;; ElDoc.
 
 (ert-deftest test-anaconda-mode-eldoc ()
@@ -656,6 +662,7 @@ test(" 3 5 "simple.py")
     (should (equal (frame-width)
                    (length (anaconda-mode-eldoc-format response))))))
 
+
 ;;; Minor mode.
 
 (ert-deftest test-anaconda-mode-enable ()
