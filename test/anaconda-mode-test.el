@@ -149,15 +149,16 @@ environment keeps the same."
 ;;; JSONRPC implementation.
 
 (ert-deftest test-anaconda-mode-call ()
-  "Perform remote procedure call without already started server."
-  (let (response)
+  "Perform remote procedure call without already started server.
+We make request knowingly so response shouldn't be null."
+  (let (result)
     (with-current-buffer (fixture "import sys" 1 10)
       (unwind-protect
           (progn
-            (anaconda-mode-call "complete" (lambda (resp) (setq response resp)))
+            (anaconda-mode-call "complete" (lambda (res) (setq result res)))
             (wait)
             (sleep-for 1)
-            (should (assoc 'id response)))
+            (should (< 0 (length result))))
         (anaconda-mode-stop)))))
 
 (ert-deftest test-anaconda-mode-call-callback-current-buffer ()
@@ -167,23 +168,24 @@ environment keeps the same."
           response-buffer)
       (unwind-protect
           (progn
-            (anaconda-mode-call "complete" (lambda (resp) (setq response-buffer (current-buffer))))
+            (anaconda-mode-call "complete" (lambda (res) (setq response-buffer (current-buffer))))
             (wait)
             (sleep-for 1)
             (should (equal request-buffer response-buffer)))
         (anaconda-mode-stop)))))
 
 (ert-deftest test-anaconda-mode-jsonrpc ()
-  "Perform remote procedure call."
-  (let (response)
+  "Perform remote procedure call.
+We make request knowingly so response shouldn't be null."
+  (let (result)
     (with-current-buffer (fixture "import sys" 1 10)
       (unwind-protect
           (progn
             (anaconda-mode-start)
             (wait)
-            (anaconda-mode-jsonrpc "complete" (lambda (resp) (setq response resp)))
+            (anaconda-mode-jsonrpc "complete" (lambda (res) (setq result res)))
             (sleep-for 1)
-            (should (assoc 'id response)))
+            (should (< 0 (length result))))
         (anaconda-mode-stop)))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-error-response ()
@@ -193,7 +195,7 @@ environment keeps the same."
         (progn
           (anaconda-mode-start)
           (wait)
-          (anaconda-mode-jsonrpc "wrong_method" (lambda (resp)))
+          (anaconda-mode-jsonrpc "wrong_method" (lambda (res)))
           (should-error (sleep-for 1)))
       (anaconda-mode-stop))))
 
@@ -204,7 +206,7 @@ environment keeps the same."
         (progn
           (anaconda-mode-start)
           (wait)
-          (anaconda-mode-jsonrpc "complete" (lambda (resp)))
+          (anaconda-mode-jsonrpc "complete" (lambda (res)))
           (sleep-for 1)
           (should-not
            (--filter (s-starts-with? " *http" (buffer-name it))
@@ -219,7 +221,7 @@ even if an error occurs in response callback."
         (progn
           (anaconda-mode-start)
           (wait)
-          (anaconda-mode-jsonrpc "complete" (lambda (resp) (error "Shit happens")))
+          (anaconda-mode-jsonrpc "complete" (lambda (res) (error "Shit happens")))
           (ignore-errors (sleep-for 1))
           (should-not
            (--filter (s-starts-with? " *http" (buffer-name it))
@@ -228,63 +230,63 @@ even if an error occurs in response callback."
 
 (ert-deftest test-anaconda-mode-jsonrpc-skip-response-on-point-movement ()
   "Don't run response callback if point position was changed."
-  (let (response)
+  (let (result)
     (with-current-buffer (fixture "import s " 1 8)
       (unwind-protect
           (progn
             (anaconda-mode-start)
             (wait)
-            (anaconda-mode-jsonrpc "complete" (lambda (resp) (setq response resp)))
+            (anaconda-mode-jsonrpc "complete" (lambda (res) (setq result res)))
             (forward-char)
             (sleep-for 1)
-            (should-not response))
+            (should-not result))
         (anaconda-mode-stop)))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-skip-response-on-buffer-switch ()
   "Don't run response callback if user switch the buffer."
-  (let (response)
+  (let (result)
     (with-current-buffer (fixture "import s" 1 8)
       (unwind-protect
           (progn
             (anaconda-mode-start)
             (wait)
-            (anaconda-mode-jsonrpc "complete" (lambda (resp) (setq response resp)))
+            (anaconda-mode-jsonrpc "complete" (lambda (res) (setq result res)))
             (switch-to-buffer "*scratch*")
             ;; Avoid false positive test pass in the case point were
             ;; set to different places in different buffers.
             (erase-buffer)
             (insert "import s")
             (sleep-for 1)
-            (should-not response))
+            (should-not result))
         (anaconda-mode-stop)))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-skip-response-on-window-switch ()
   "Don't run response callback if user switch the window."
-  (let (response)
+  (let (result)
     (with-current-buffer (fixture "import s" 1 8)
       (unwind-protect
           (progn
             (anaconda-mode-start)
             (wait)
-            (anaconda-mode-jsonrpc "complete" (lambda (resp) (setq response resp)))
+            (anaconda-mode-jsonrpc "complete" (lambda (res) (setq result res)))
             (switch-to-buffer-other-window (current-buffer))
             (sleep-for 1)
-            (should-not response))
+            (should-not result))
         (anaconda-mode-stop)))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-skip-response-on-modified-tick-change ()
   "Don't run response callback if the `buffer-chars-modified-tick' was changed."
-  (let (response)
+  (let (result)
     (with-current-buffer (fixture "import s" 1 8)
       (unwind-protect
           (progn
             (anaconda-mode-start)
             (wait)
-            (anaconda-mode-jsonrpc "complete" (lambda (resp) (setq response resp)))
+            (anaconda-mode-jsonrpc "complete" (lambda (res) (setq result res)))
             (just-one-space)
             (backward-delete-char 1)
             (sleep-for 1)
-            (should-not response))
+            (should-not result))
         (anaconda-mode-stop)))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-request ()
@@ -327,161 +329,149 @@ if True:
 
 (ert-deftest test-anaconda-mode-complete-extract-names ()
   "Extract names from complete response."
-  (let ((response '((result ((module-path . "/vagrant/simple.py")
-                             (docstring . "test1(a, b)")
-                             (line . 1)
-                             (module-name . "simple")
-                             (column . 4)
-                             (type . "function")
-                             (name . "test1")
-                             (full-name . "simple.test1")
-                             (description . "function: simple.test1"))
-                            ((module-path . "/vagrant/simple.py")
-                             (docstring . "test2(c)")
-                             (line . 5)
-                             (module-name . "simple")
-                             (column . 4)
-                             (type . "function")
-                             (name . "test2")
-                             (full-name . "simple.test2")
-                             (description . "function: simple.test2")))
-                    (jsonrpc . "2.0")
-                    (id . 1))))
+  (let ((result '(((module-path . "/vagrant/simple.py")
+                   (docstring . "test1(a, b)")
+                   (line . 1)
+                   (module-name . "simple")
+                   (column . 4)
+                   (type . "function")
+                   (name . "test1")
+                   (full-name . "simple.test1")
+                   (description . "function: simple.test1"))
+                  ((module-path . "/vagrant/simple.py")
+                   (docstring . "test2(c)")
+                   (line . 5)
+                   (module-name . "simple")
+                   (column . 4)
+                   (type . "function")
+                   (name . "test2")
+                   (full-name . "simple.test2")
+                   (description . "function: simple.test2")))))
     (should (equal '("test1" "test2")
-                   (anaconda-mode-complete-extract-names response)))))
+                   (anaconda-mode-complete-extract-names result)))))
 
 (ert-deftest test-anaconda-mode-complete-extract-description ()
   "Set description property on each completion candidate name."
-  (let ((response '((result ((module-path . "/vagrant/simple.py")
-                             (docstring . "test1(a, b)")
-                             (line . 1)
-                             (module-name . "simple")
-                             (column . 4)
-                             (type . "function")
-                             (name . "test1")
-                             (full-name . "simple.test1")
-                             (description . "function: simple.test1"))
-                            ((module-path . "/vagrant/simple.py")
-                             (docstring . "test2(c)")
-                             (line . 5)
-                             (module-name . "simple")
-                             (column . 4)
-                             (type . "function")
-                             (name . "test2")
-                             (full-name . "simple.test2")
-                             (description . "function: simple.test2")))
-                    (jsonrpc . "2.0")
-                    (id . 1))))
+  (let ((result '(((module-path . "/vagrant/simple.py")
+                   (docstring . "test1(a, b)")
+                   (line . 1)
+                   (module-name . "simple")
+                   (column . 4)
+                   (type . "function")
+                   (name . "test1")
+                   (full-name . "simple.test1")
+                   (description . "function: simple.test1"))
+                  ((module-path . "/vagrant/simple.py")
+                   (docstring . "test2(c)")
+                   (line . 5)
+                   (module-name . "simple")
+                   (column . 4)
+                   (type . "function")
+                   (name . "test2")
+                   (full-name . "simple.test2")
+                   (description . "function: simple.test2")))))
     (should (equal "function: simple.test1"
                    (get-text-property
                     0 'description
-                    (car (anaconda-mode-complete-extract-names response)))))))
+                    (car (anaconda-mode-complete-extract-names result)))))))
 
 (ert-deftest test-anaconda-mode-complete-extract-description-trim-new-line ()
   "Remove new line characters from completions description."
-  (let ((response '((result ((description . "statement: \napilevel = \"2.0\"")
-                             (type . "statement")
-                             (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/sqlite3/dbapi2.py")
-                             (docstring . "")
-                             (column . 0)
-                             (module-name . "dbapi2")
-                             (line . 33)
-                             (name . "apilevel")
-                             (full-name . "dbapi2")))
-                    (jsonrpc . "2.0")
-                    (id . 1))))
+  (let ((result '(((description . "statement: \napilevel = \"2.0\"")
+                   (type . "statement")
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/sqlite3/dbapi2.py")
+                   (docstring . "")
+                   (column . 0)
+                   (module-name . "dbapi2")
+                   (line . 33)
+                   (name . "apilevel")
+                   (full-name . "dbapi2")))))
     (should (equal "statement: apilevel = \"2.0\""
                    (get-text-property
                     0 'description
-                    (car (anaconda-mode-complete-extract-names response)))))))
+                    (car (anaconda-mode-complete-extract-names result)))))))
 
 (ert-deftest test-anaconda-mode-complete-callback ()
   "Completion function must insert common candidates base."
-  (let ((response '((result ((module-path . "/vagrant/simple.py")
-                             (docstring . "test1(a, b)")
-                             (line . 1)
-                             (module-name . "simple")
-                             (column . 4)
-                             (type . "function")
-                             (name . "test1")
-                             (full-name . "simple.test1")
-                             (description . "function: simple.test1"))
-                            ((module-path . "/vagrant/simple.py")
-                             (docstring . "test2(c)")
-                             (line . 5)
-                             (module-name . "simple")
-                             (column . 4)
-                             (type . "function")
-                             (name . "test2")
-                             (full-name . "simple.test2")
-                             (description . "function: simple.test2")))
-                    (jsonrpc . "2.0")
-                    (id . 1))))
+  (let ((result '(((module-path . "/vagrant/simple.py")
+                   (docstring . "test1(a, b)")
+                   (line . 1)
+                   (module-name . "simple")
+                   (column . 4)
+                   (type . "function")
+                   (name . "test1")
+                   (full-name . "simple.test1")
+                   (description . "function: simple.test1"))
+                  ((module-path . "/vagrant/simple.py")
+                   (docstring . "test2(c)")
+                   (line . 5)
+                   (module-name . "simple")
+                   (column . 4)
+                   (type . "function")
+                   (name . "test2")
+                   (full-name . "simple.test2")
+                   (description . "function: simple.test2")))))
     (with-current-buffer (fixture "t" 1 1)
-      (anaconda-mode-complete-callback response)
+      (anaconda-mode-complete-callback result)
       (should (looking-back "test")))))
 
 (ert-deftest test-anaconda-mode-complete-callback-completions-buffer ()
   "Completion must show *Completions* buffer if candidates doesn't have same base."
   (unwind-protect
-      (let ((response '((id . 1)
-                        (result ((full-name . "bool")
-                                 (line)
-                                 (module-name . "builtins")
-                                 (description . "instance: builtins.bool")
-                                 (module-path)
-                                 (name . "True")
-                                 (docstring . "bool(x) -> bool
+      (let ((result '(((full-name . "bool")
+                       (line)
+                       (module-name . "builtins")
+                       (description . "instance: builtins.bool")
+                       (module-path)
+                       (name . "True")
+                       (docstring . "bool(x) -> bool
 
 Returns True when the argument x is true, False otherwise.
 The builtins True and False are the only two instances of the class bool.
 The class bool is a subclass of the class int, and cannot be subclassed.")
-                                 (column)
-                                 (type . "instance"))
-                                ((full-name . "try")
-                                 (line)
-                                 (module-name . "builtins")
-                                 (description . "keyword: builtins.try")
-                                 (module-path)
-                                 (name . "Try")
-                                 (docstring . "")
-                                 (column)
-                                 (type . "keyword")))
-                        (jsonrpc . "2.0"))))
+                       (column)
+                       (type . "instance"))
+                      ((full-name . "try")
+                       (line)
+                       (module-name . "builtins")
+                       (description . "keyword: builtins.try")
+                       (module-path)
+                       (name . "Try")
+                       (docstring . "")
+                       (column)
+                       (type . "keyword")))))
         (with-current-buffer (fixture "Tr" 1 2)
-          (anaconda-mode-complete-callback response)
+          (anaconda-mode-complete-callback result)
           (should (get-buffer "*Completions*"))))
     (kill-buffer "*Completions*")))
 
 (ert-deftest test-anaconda-mode-complete-callback-completions-annotations ()
   "Completion must show candidate description as annotations in the *Completions* buffer."
   (unwind-protect
-      (let ((response '((id . 1)
-                        (result ((full-name . "bool")
-                                 (line)
-                                 (module-name . "builtins")
-                                 (description . "instance: builtins.bool")
-                                 (module-path)
-                                 (name . "True")
-                                 (docstring . "bool(x) -> bool
+      (let ((result '(((full-name . "bool")
+                       (line)
+                       (module-name . "builtins")
+                       (description . "instance: builtins.bool")
+                       (module-path)
+                       (name . "True")
+                       (docstring . "bool(x) -> bool
 
 Returns True when the argument x is true, False otherwise.
 The builtins True and False are the only two instances of the class bool.
 The class bool is a subclass of the class int, and cannot be subclassed.")
-                                 (column)
-                                 (type . "instance"))
-                                ((full-name . "try")
-                                 (line)
-                                 (module-name . "builtins")
-                                 (description . "keyword: builtins.try")
-                                 (module-path)
-                                 (name . "Try")
-                                 (docstring . "")
-                                 (column)
-                                 (type . "keyword")))
-                        (jsonrpc . "2.0"))))
+                       (column)
+                       (type . "instance"))
+                      ((full-name . "try")
+                       (line)
+                       (module-name . "builtins")
+                       (description . "keyword: builtins.try")
+                       (module-path)
+                       (name . "Try")
+                       (docstring . "")
+                       (column)
+                       (type . "keyword")))))
         (with-current-buffer (fixture "Tr" 1 2)
-          (anaconda-mode-complete-callback response)
+          (anaconda-mode-complete-callback result)
           (should (equal "In this buffer, type RET to select the completion near point.
 
 Possible completions are:
@@ -713,13 +703,11 @@ test(" 6 5 "simple.py")
 
 (ert-deftest test-anaconda-mode-eldoc-callback ()
   "Format eldoc string from response."
-  (let ((response '((id . 1)
-                    (result (params "one" "other")
-                            (name . "test")
-                            (index . 0))
-                    (jsonrpc . "2.0"))))
+  (let ((result '((params "one" "other")
+                  (name . "test")
+                  (index . 0))))
     (should (equal "test(one, other)"
-                   (anaconda-mode-eldoc-callback response)))))
+                   (anaconda-mode-eldoc-callback result)))))
 
 (ert-deftest test-anaconda-mode-eldoc-empty-response ()
   "Don't try to show eldoc on response with empty result."
@@ -748,13 +736,11 @@ test(" 3 5 "simple.py")
 (ert-deftest test-anaconda-mode-eldoc-format-as-single-line ()
   "Format eldoc string as single line."
   (let ((anaconda-mode-eldoc-as-single-line t)
-        (response `((id . 1)
-                    (result (params ,@(--iterate it "a" 1000))
-                            (name . "test")
-                            (index . 0))
-                    (jsonrpc . "2.0"))))
+        (result `((params ,@(--iterate it "a" 1000))
+                  (name . "test")
+                  (index . 0))))
     (should (equal (frame-width)
-                   (length (anaconda-mode-eldoc-format response))))))
+                   (length (anaconda-mode-eldoc-format result))))))
 
 
 ;;; Minor mode.

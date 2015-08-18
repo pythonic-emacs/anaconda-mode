@@ -299,7 +299,7 @@ submitted."
                 (with-current-buffer anaconda-mode-request-buffer
                   ;; Terminate `apply' call with empty list so response
                   ;; will be treated as single argument.
-                  (apply callback response nil)))))
+                  (apply callback (cdr (assoc 'result response)) nil)))))
         (kill-buffer (current-buffer))))))
 
 
@@ -311,22 +311,22 @@ submitted."
   (unless (python-syntax-comment-or-string-p)
     (anaconda-mode-call "complete" 'anaconda-mode-complete-callback)))
 
-(defun anaconda-mode-complete-callback (response)
-  "Start interactive completion on RESPONSE receiving."
+(defun anaconda-mode-complete-callback (result)
+  "Start interactive completion on RESULT receiving."
   (let* ((bounds (bounds-of-thing-at-point 'symbol))
          (start (or (car bounds) (point)))
          (stop (or (cdr bounds) (point)))
-         (collection (anaconda-mode-complete-extract-names response))
+         (collection (anaconda-mode-complete-extract-names result))
          (completion-extra-properties '(:annotation-function anaconda-mode-complete-annotation)))
     (completion-in-region start stop collection)))
 
-(defun anaconda-mode-complete-extract-names (response)
-  "Extract completion names from anaconda-mode RESPONSE."
+(defun anaconda-mode-complete-extract-names (result)
+  "Extract completion names from anaconda-mode RESULT."
   (--map (let ((name (cdr (assoc 'name it)))
                (description (s-replace "\n" "" (cdr (assoc 'description it)))))
            (put-text-property 0 1 'description description name)
            name)
-         (cdr (assoc 'result response))))
+         result))
 
 (defun anaconda-mode-complete-annotation (candidate)
   "Get annotation for CANDIDATE."
@@ -437,13 +437,13 @@ submitted."
   "Show eldoc for context at point."
   (anaconda-mode-call "eldoc" 'anaconda-mode-eldoc-callback))
 
-(defun anaconda-mode-eldoc-callback (response)
-  "Display eldoc from server RESPONSE."
-  (eldoc-message (anaconda-mode-eldoc-format response)))
+(defun anaconda-mode-eldoc-callback (result)
+  "Display eldoc from server RESULT."
+  (eldoc-message (anaconda-mode-eldoc-format result)))
 
-(defun anaconda-mode-eldoc-format (response)
-  "Format eldoc string from RESPONSE."
-  (-when-let (result (cdr (assoc 'result response)))
+(defun anaconda-mode-eldoc-format (result)
+  "Format eldoc string from RESULT."
+  (when result
     (let* ((name (cdr (assoc 'name result)))
            (index (cdr (assoc 'index result)))
            (params (cdr (assoc 'params result)))
