@@ -186,6 +186,17 @@ environment keeps the same."
             (should (assoc 'id response)))
         (anaconda-mode-stop)))))
 
+(ert-deftest test-anaconda-mode-jsonrpc-error-response ()
+  "Raise error if rpc call return error response."
+  (with-current-buffer (fixture "import sys" 1 10)
+    (unwind-protect
+        (progn
+          (anaconda-mode-start)
+          (wait)
+          (anaconda-mode-jsonrpc "wrong_method" (lambda (resp)))
+          (should-error (sleep-for 1)))
+      (anaconda-mode-stop))))
+
 (ert-deftest test-anaconda-mode-jsonrpc-remove-http-buffer ()
   "Remove *http* buffer leaved after `url-retrieve' function call."
   (with-current-buffer (fixture "import sys" 1 10)

@@ -293,11 +293,13 @@ submitted."
               (message "Skip anaconda-mode %s response" command)
             (goto-char url-http-end-of-headers)
             (let* ((json-array-type 'list)
-                   (result (json-read)))
-              (with-current-buffer anaconda-mode-request-buffer
-                ;; Terminate `apply' call with empty list so response
-                ;; will be treated as single argument.
-                (apply callback result nil))))
+                   (response (json-read)))
+              (if (assoc 'error response)
+                  (error (cdr (assoc 'error response)))
+                (with-current-buffer anaconda-mode-request-buffer
+                  ;; Terminate `apply' call with empty list so response
+                  ;; will be treated as single argument.
+                  (apply callback response nil)))))
         (kill-buffer (current-buffer))))))
 
 
