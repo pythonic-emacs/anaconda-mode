@@ -341,11 +341,11 @@ submitted."
   (interactive)
   (anaconda-mode-call "goto_definitions" 'anaconda-mode-view-doc-callback))
 
-(defun anaconda-mode-view-doc-callback (response)
-  "Process view doc RESPONSE."
+(defun anaconda-mode-view-doc-callback (result)
+  "Process view doc RESULT."
   (pop-to-buffer
    (anaconda-mode-create-view-doc-buffer
-    (anaconda-mode-format-view-doc-content response))))
+    (anaconda-mode-format-view-doc-content result))))
 
 (defun anaconda-mode-create-view-doc-buffer (doc)
   "Display documentation buffer with contents DOC."
@@ -358,10 +358,10 @@ submitted."
       (view-mode 1)
       buf)))
 
-(defun anaconda-mode-format-view-doc-content (response)
-  "Create content for documentation buffer from RESPONSE fields."
+(defun anaconda-mode-format-view-doc-content (result)
+  "Create content for documentation buffer from RESULT fields."
   (->>
-   (cdr (assoc 'result response))
+   result
    (--map (anaconda-mode-view-doc-extract-definition it))
    (--map (apply 's-concat it))
    (-map 's-trim)

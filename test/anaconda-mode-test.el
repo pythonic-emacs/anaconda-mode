@@ -527,22 +527,39 @@ def f(a, b=1):
                        (buffer-name (window-buffer (selected-window))))))
     (anaconda-mode-stop)))
 
+(ert-deftest test-anaconda-mode-view-doc-content ()
+  "Format documentation buffer from rpc response."
+  (unwind-protect
+      (with-current-buffer (fixture "
+def f(a, b=1):
+    '''Docstring for f.'''
+    pass" 2 5 "simple.py")
+        (anaconda-mode-view-doc)
+        (wait)
+        (sleep-for 1)
+        (should (equal "simple
+f(a, b=1)
+
+Docstring for f.
+"
+                       (with-current-buffer (window-buffer (selected-window))
+                         (buffer-string)))))
+    (anaconda-mode-stop)))
+
 (ert-deftest test-anaconda-mode-view-doc-callback ()
   "Fill documentation buffer content from response."
-  (let ((response '((result ((type . "function")
-                             (docstring . "f(a, b)
+  (let ((result '(((type . "function")
+                   (docstring . "f(a, b)
 
 I'm documentation string.")
-                             (name . "f")
-                             (module-name . "simple")
-                             (column . 4)
-                             (module-path . "/vagrant/simple.py")
-                             (full-name . "simple.f")
-                             (description . "def f")
-                             (line . 1)))
-                    (jsonrpc . "2.0")
-                    (id . 1))))
-    (anaconda-mode-view-doc-callback response)
+                   (name . "f")
+                   (module-name . "simple")
+                   (column . 4)
+                   (module-path . "/vagrant/simple.py")
+                   (full-name . "simple.f")
+                   (description . "def f")
+                   (line . 1)))))
+    (anaconda-mode-view-doc-callback result)
     (should (equal "simple
 f(a, b)
 
@@ -551,33 +568,31 @@ I'm documentation string.
 
 (ert-deftest test-anaconda-mode-view-doc-format-multiple-modules ()
   "Format doc buffer for multiple modules."
-  (let ((response '((id . 1)
-                    (result ((description . "def join")
-                             (full-name . "os.path.join")
-                             (type . "function")
-                             (docstring . "join(path, *paths)
+  (let ((result '(((description . "def join")
+                   (full-name . "os.path.join")
+                   (type . "function")
+                   (docstring . "join(path, *paths)
 
 ")
-                             (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
-                             (column . 4)
-                             (line . 104)
-                             (name . "join")
-                             (module-name . "ntpath"))
-                            ((description . "def join")
-                             (full-name . "os.path.join")
-                             (type . "function")
-                             (docstring . "join(a, *p)
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
+                   (column . 4)
+                   (line . 104)
+                   (name . "join")
+                   (module-name . "ntpath"))
+                  ((description . "def join")
+                   (full-name . "os.path.join")
+                   (type . "function")
+                   (docstring . "join(a, *p)
 
 Join two or more pathname components, inserting '/' as needed.
 If any component is an absolute path, all previous path components
 will be discarded.  An empty last part will result in a path that
 ends with a separator.")
-                             (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/posixpath.py")
-                             (column . 4)
-                             (line . 70)
-                             (name . "join")
-                             (module-name . "posixpath")))
-                    (jsonrpc . "2.0"))))
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/posixpath.py")
+                   (column . 4)
+                   (line . 70)
+                   (name . "join")
+                   (module-name . "posixpath")))))
     (should (equal "ntpath
 join(path, *paths)
 
@@ -589,7 +604,7 @@ If any component is an absolute path, all previous path components
 will be discarded.  An empty last part will result in a path that
 ends with a separator.
 "
-                   (anaconda-mode-format-view-doc-content response)))))
+                   (anaconda-mode-format-view-doc-content result)))))
 
 (ert-deftest test-anaconda-mode-view-doc-extract-definition-bold-module-name ()
   "Extract module definition will use bold font for module name."
