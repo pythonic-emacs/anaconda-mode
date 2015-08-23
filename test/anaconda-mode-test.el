@@ -758,6 +758,55 @@ test(" 3 5 "simple.py")
                    (length (anaconda-mode-eldoc-format result))))))
 
 
+;;; Definitions handling.
+
+(ert-deftest test-anaconda-mode-format-definitions-view ()
+  "Format definitions buffer from rpc call result."
+  (let ((result '(((column . 19)
+                   (type . "import")
+                   (docstring . "")
+                   (full-name . "views.views")
+                   (name . "views")
+                   (module-name . "app")
+                   (module-path . "/vagrant/app/__init__.py")
+                   (description . "from .views import views")
+                   (line . 2))
+                  ((column . 0)
+                   (type . "statement")
+                   (docstring . "")
+                   (full-name . "views")
+                   (name . "views")
+                   (module-name . "views")
+                   (module-path . "/vagrant/app/views.py")
+                   (description . "views = Blueprint('views', __name__)")
+                   (line . 4))
+                  ((column . 1)
+                   (type . "decorator")
+                   (docstring . "")
+                   (full-name . "views")
+                   (name . "views")
+                   (module-name . "views")
+                   (module-path . "/vagrant/app/views.py")
+                   (description . "@views.route('/')")
+                   (line . 7)))))
+    (should (equal "app
+19: from .views import views
+views
+4: views = Blueprint('views', __name__)
+7: @views.route('/')
+" (anaconda-mode-format-definitions-view result)))))
+
+(ert-deftest test-anaconda-mode-format-definition-module ()
+  "Format definition of single module."
+  (should (equal "module.foo
+ 4: definition
+15: definition
+" (anaconda-mode-format-definition-module
+   '("module.foo"
+     ((line . 4) (description . "definition"))
+     ((line . 5) (description . "definition")))))))
+
+
 ;;; Minor mode.
 
 (ert-deftest test-anaconda-mode-enable ()

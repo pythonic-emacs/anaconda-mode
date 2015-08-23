@@ -393,42 +393,23 @@ submitted."
     (forward-char (cdr (assoc 'column definition)))))
 
 
-;;; Usages.
+;;; Definitions processing.
 
-(defun anaconda-mode-usages ()
-  "Show usages for thing at point."
-  (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "usages")
-       (error "No usages found"))))
+(defun anaconda-mode-format-definitions-view (result)
+  "Create definitions buffer content from rpc RESULT."
+  (->>
+   (--group-by (cdr (assoc 'module-name it)) result)
+   (--map (anaconda-mode-format-definition-module it))))
 
-
-;;; Definitions and assignments.
-
-(defun anaconda-mode-goto-definitions ()
-  "Goto definition for thing at point."
-  (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "goto_definitions")
-       (error "No definition found"))
-   t))
-
-(defun anaconda-mode-goto-assignments ()
-  "Goto assignment for thing at point."
-  (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "goto_assignments")
-       (error "No assignment found"))
-   t))
-
-(defun anaconda-mode-goto ()
-  "Goto definition or fallback to assignment for thing at point."
-  (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "goto_definitions")
-       (anaconda-mode-call "goto_assignments")
-       (error "No definition found"))
-   t))
+(defun anaconda-mode-format-definition-module (module)
+  "Format MODULE definition view."
+  (let* ((module-name (car module))
+         (definitions (cdr module))
+         (definitions-lines (--mapcat (list (number-to-string (cdr (assoc 'line it)))
+                                            ": "
+                                            (cdr (assoc 'description it)))
+                                      definitions)))
+    (s-join "\n" (cons module-name definitions-lines))))
 
 
 ;;; Eldoc.
