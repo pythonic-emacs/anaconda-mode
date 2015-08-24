@@ -790,21 +790,21 @@ test(" 3 5 "simple.py")
                    (description . "@views.route('/')")
                    (line . 7)))))
     (should (equal "app
-19: from .views import views
+    from .views import views
 views
-4: views = Blueprint('views', __name__)
-7: @views.route('/')
+    views = Blueprint('views', __name__)
+    @views.route('/')
 " (anaconda-mode-format-definitions-view result)))))
 
 (ert-deftest test-anaconda-mode-format-definition-module ()
   "Format definition of single module."
   (should (equal "module.foo
- 4: definition
-15: definition
+    definition
+    definition
 " (anaconda-mode-format-definition-module
    '("module.foo"
-     ((line . 4) (description . "definition"))
-     ((line . 5) (description . "definition")))))))
+     ((description . "definition"))
+     ((description . "definition")))))))
 
 
 ;;; Minor mode.

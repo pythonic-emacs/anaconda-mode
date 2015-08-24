@@ -399,17 +399,18 @@ submitted."
   "Create definitions buffer content from rpc RESULT."
   (->>
    (--group-by (cdr (assoc 'module-name it)) result)
-   (--map (anaconda-mode-format-definition-module it))))
+   (--map (anaconda-mode-format-definition-module it))
+   (apply 's-concat)))
 
 (defun anaconda-mode-format-definition-module (module)
   "Format MODULE definition view."
-  (let* ((module-name (car module))
-         (definitions (cdr module))
-         (definitions-lines (--mapcat (list (number-to-string (cdr (assoc 'line it)))
-                                            ": "
-                                            (cdr (assoc 'description it)))
-                                      definitions)))
-    (s-join "\n" (cons module-name definitions-lines))))
+  (let ((module-name (car module))
+        (definitions (--map (concat "    " (cdr (assoc 'description it)))
+                            (cdr module))))
+    (->> definitions
+         (cons module-name)
+         (s-join "\n")
+         (s-append "\n"))))
 
 
 ;;; Eldoc.
