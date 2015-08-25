@@ -14,7 +14,6 @@ from __future__ import (
 import sys
 from functools import wraps
 from os.path import abspath, dirname
-from pkg_resources import get_distribution, DistributionNotFound
 from subprocess import Popen
 
 project_path = dirname(abspath(__file__))
@@ -22,6 +21,11 @@ project_path = dirname(abspath(__file__))
 sys.path.insert(0, project_path)
 
 missing_dependencies = []
+
+try:
+    from pkg_resources import get_distribution, DistributionNotFound
+except ImportError:
+    missing_dependencies.append('setuptools')
 
 try:
     from jedi import Script, NotFoundError
@@ -38,6 +42,7 @@ if missing_dependencies:
     pip = Popen(command)
     pip.communicate()
     assert pip.returncode is 0, 'PyPi installation fails.'
+    from pkg_resources import get_distribution, DistributionNotFound
     from jedi import Script, NotFoundError
     from service_factory import service_factory
 
