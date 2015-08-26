@@ -12,6 +12,8 @@
 
 (undercover "anaconda-mode.el" (:report-file "emacs-coveralls.json") (:send-report nil))
 
+(setq python-indent-guess-indent-offset nil)
+
 (provide 'test-helper)
 
 ;;; test-helper.el ends here
