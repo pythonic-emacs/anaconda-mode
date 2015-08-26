@@ -350,7 +350,7 @@ submitted."
 
 (defun anaconda-mode-create-view-doc-buffer (doc)
   "Display documentation buffer with contents DOC."
-  (let ((buf (get-buffer-create "*anaconda-doc*")))
+  (let ((buf (get-buffer-create "*Anaconda*")))
     (with-current-buffer buf
       (view-mode -1)
       (erase-buffer)

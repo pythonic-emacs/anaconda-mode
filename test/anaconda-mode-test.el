@@ -523,7 +523,7 @@ def f(a, b=1):
         (anaconda-mode-view-doc)
         (wait)
         (sleep-for 1)
-        (should (equal "*anaconda-doc*"
+        (should (equal "*Anaconda*"
                        (buffer-name (window-buffer (selected-window))))))
     (anaconda-mode-stop)))
 
