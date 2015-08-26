@@ -343,9 +343,10 @@ submitted."
 
 (defun anaconda-mode-view-doc-callback (result)
   "Process view doc RESULT."
-  (pop-to-buffer
-   (anaconda-mode-create-view-doc-buffer
-    (anaconda-mode-format-view-doc-content result))))
+  (when result
+    (pop-to-buffer
+     (anaconda-mode-create-view-doc-buffer
+      (anaconda-mode-format-view-doc-content result)))))
 
 (defun anaconda-mode-create-view-doc-buffer (doc)
   "Display documentation buffer with contents DOC."

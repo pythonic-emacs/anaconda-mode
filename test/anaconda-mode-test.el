@@ -527,6 +527,17 @@ def f(a, b=1):
                        (buffer-name (window-buffer (selected-window))))))
     (anaconda-mode-stop)))
 
+(ert-deftest test-anaconda-mode-view-doc-not-found ()
+  "Don't show documentation buffer in the case of missing docs."
+  (unwind-protect
+      (with-current-buffer (fixture "" 1 0 "simple.py")
+        (anaconda-mode-view-doc)
+        (wait)
+        (sleep-for 1)
+        (should (equal "simple.py"
+                       (f-filename (buffer-file-name (window-buffer (selected-window)))))))
+    (anaconda-mode-stop)))
+
 (ert-deftest test-anaconda-mode-view-doc-content ()
   "Format documentation buffer from rpc response."
   (unwind-protect
