@@ -818,6 +818,111 @@ views
      ((description . "definition")))))))
 
 
+;;; Definitions.
+
+(ert-deftest test-anaconda-mode-find-definitions ()
+  "Show definitions buffer on documentation lookup."
+  (unwind-protect
+      (with-current-buffer (fixture "
+import sys
+if sys.version[0] < 2:
+    def test():
+        pass
+else:
+    def test(a):
+        return a
+
+test" 10 3 "simple.py")
+        (anaconda-mode-find-definitions)
+        (wait)
+        (sleep-for 1)
+        (should (equal "*Anaconda*"
+                       (buffer-name (window-buffer (selected-window))))))
+    (anaconda-mode-stop)
+    (kill-buffer "*Anaconda*")))
+
+(ert-deftest test-anaconda-mode-find-definitions-not-found ()
+  "Don't show definitions buffer in the case of missing definitions."
+  (unwind-protect
+      (with-current-buffer (fixture "" 1 0 "simple.py")
+        (anaconda-mode-find-definitions)
+        (wait)
+        (sleep-for 1)
+        (should (equal "simple.py"
+                       (f-filename (buffer-file-name (window-buffer (selected-window)))))))
+    (anaconda-mode-stop)))
+
+
+;;; Assignments.
+
+(ert-deftest test-anaconda-mode-find-assignments ()
+  "Show assignments buffer on documentation lookup."
+  (unwind-protect
+      (with-current-buffer (fixture "
+import sys
+if sys.version[0] < 2:
+    def test():
+        pass
+else:
+    def test(a):
+        return a
+
+test" 10 3 "simple.py")
+        (anaconda-mode-find-assignments)
+        (wait)
+        (sleep-for 1)
+        (should (equal "*Anaconda*"
+                       (buffer-name (window-buffer (selected-window))))))
+    (anaconda-mode-stop)
+    (kill-buffer "*Anaconda*")))
+
+(ert-deftest test-anaconda-mode-find-assignments-not-found ()
+  "Don't show assignments buffer in the case of missing assignments."
+  (unwind-protect
+      (with-current-buffer (fixture "" 1 0 "simple.py")
+        (anaconda-mode-find-assignments)
+        (wait)
+        (sleep-for 1)
+        (should (equal "simple.py"
+                       (f-filename (buffer-file-name (window-buffer (selected-window)))))))
+    (anaconda-mode-stop)))
+
+
+;;; References.
+
+(ert-deftest test-anaconda-mode-find-references ()
+  "Show references buffer on documentation lookup."
+  (unwind-protect
+      (with-current-buffer (fixture "
+def test():
+    pass
+
+if one:
+    test()
+elif two:
+    test()
+else:
+    test()" 2 6 "simple.py")
+        (anaconda-mode-find-references)
+        (wait)
+        (sleep-for 1)
+        (should (equal "*Anaconda*"
+                       (buffer-name (window-buffer (selected-window))))))
+    (anaconda-mode-stop)
+    (kill-buffer "*Anaconda*")))
+
+(ert-deftest test-anaconda-mode-find-references-not-found ()
+  "Don't show references buffer in the case of missing references."
+  (unwind-protect
+      (with-current-buffer (fixture "" 1 0 "simple.py")
+        (anaconda-mode-find-references)
+        (wait)
+        (sleep-for 1)
+        (should (equal "simple.py"
+                       (f-filename (buffer-file-name (window-buffer (selected-window)))))))
+    (anaconda-mode-stop)))
+
+
 ;;; Minor mode.
 
 (ert-deftest test-anaconda-mode-enable ()

@@ -414,6 +414,51 @@ submitted."
          (s-append "\n"))))
 
 
+;;; Find definitions.
+
+(defun anaconda-mode-find-definitions ()
+  "Find definitions for thing at point."
+  (interactive)
+  (anaconda-mode-call "goto_definitions" 'anaconda-mode-find-definitions-callback))
+
+(defun anaconda-mode-find-definitions-callback (result)
+  "Process find definitions RESULT."
+  (when result
+    (pop-to-buffer
+     (anaconda-mode-create-view-doc-buffer
+      (anaconda-mode-format-definitions-view result)))))
+
+
+;;; Find assignments.
+
+(defun anaconda-mode-find-assignments ()
+  "Find assignments for thing at point."
+  (interactive)
+  (anaconda-mode-call "goto_assignments" 'anaconda-mode-find-assignments-callback))
+
+(defun anaconda-mode-find-assignments-callback (result)
+  "Process find assignments RESULT."
+  (when result
+    (pop-to-buffer
+     (anaconda-mode-create-view-doc-buffer
+      (anaconda-mode-format-definitions-view result)))))
+
+
+;;; Find references.
+
+(defun anaconda-mode-find-references ()
+  "Find references for thing at point."
+  (interactive)
+  (anaconda-mode-call "usages" 'anaconda-mode-find-references-callback))
+
+(defun anaconda-mode-find-references-callback (result)
+  "Process find references RESULT."
+  (when result
+    (pop-to-buffer
+     (anaconda-mode-create-view-doc-buffer
+      (anaconda-mode-format-definitions-view result)))))
+
+
 ;;; Eldoc.
 
 (defun anaconda-mode-eldoc-function ()
@@ -460,10 +505,11 @@ submitted."
 (defvar anaconda-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-M-i") 'anaconda-mode-complete)
-    (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
-    (define-key map (kbd "M-r") 'anaconda-mode-find-usages)
-    (define-key map (kbd "M-.") 'anaconda-mode-find-definition)
+    (define-key map (kbd "M-.") 'anaconda-mode-find-definitions)
+    (define-key map (kbd "M-,") 'anaconda-mode-find-assignments)
+    (define-key map (kbd "M-r") 'anaconda-mode-find-references)
     (define-key map (kbd "M-*") 'anaconda-mode-pop-mark)
+    (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
     map)
   "Keymap for `anaconda-mode'.")
 
