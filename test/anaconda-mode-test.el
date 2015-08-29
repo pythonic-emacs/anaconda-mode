@@ -771,6 +771,18 @@ test(" 3 5 "simple.py")
 
 ;;; Definitions handling.
 
+(ert-deftest test-anaconda-mode-view ()
+  "Create view buffer filled with content."
+  (let ((result "we are here")
+        (presenter (lambda (result) result)))
+    (unwind-protect
+        (progn
+          (anaconda-mode-view result presenter)
+          (should (equal "we are here"
+                         (with-current-buffer (window-buffer (selected-window))
+                           (buffer-string)))))
+      (kill-buffer "*Anaconda*"))))
+
 (ert-deftest test-anaconda-mode-format-definitions-view ()
   "Format definitions buffer from rpc call result."
   (let ((result '(((column . 19)

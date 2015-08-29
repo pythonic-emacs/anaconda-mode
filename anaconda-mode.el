@@ -475,6 +475,14 @@ submitted."
 
 ;;; Result view.
 
+(defun anaconda-mode-view (result presenter)
+  "Show RESULT to user for future selection.
+RESULT must be an RESULT field from json-rpc response.
+PRESENTER is the function used to format buffer content."
+  (pop-to-buffer
+   (anaconda-mode-get-view-buffer-create
+    (funcall presenter result))))
+
 (defun anaconda-mode-get-view-buffer-create (content)
   "Create view buffer and fill it with CONTENT."
   (let ((buf (get-buffer-create "*Anaconda*")))
