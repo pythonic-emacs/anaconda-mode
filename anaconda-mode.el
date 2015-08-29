@@ -494,6 +494,20 @@ PRESENTER is the function used to format buffer content."
       (view-mode 1)
       buf)))
 
+(defun anaconda-mode-view-make-bold (string)
+  "Make passed STRING look bold."
+  (propertize string 'face 'bold))
+
+(defun anaconda-mode-view-make-source (string)
+  "Make passed STRING look like python source."
+  (with-temp-buffer
+    (insert string)
+    (let ((delay-mode-hooks t))
+      (python-mode))
+    (run-hooks 'font-lock-mode-hook)
+    (font-lock-fontify-buffer)
+    (buffer-string)))
+
 (defun anaconda-mode-format-definitions-view (result)
   "Create definitions buffer content from rpc RESULT."
   (->>

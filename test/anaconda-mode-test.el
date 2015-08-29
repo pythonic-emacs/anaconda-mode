@@ -783,6 +783,18 @@ test(" 3 5 "simple.py")
                            (buffer-string)))))
       (kill-buffer "*Anaconda*"))))
 
+(ert-deftest test-anaconda-mode-view-make-bold ()
+  "Make bold string."
+  (should (equal 'bold
+                 (get-text-property 0 'face
+                                    (anaconda-mode-view-make-bold "test")))))
+
+(ert-deftest test-anaconda-mode-view-make-source ()
+  "Make string string fontified as python source."
+  (should (equal 'font-lock-keyword-face
+                 (get-text-property 0 'face
+                                    (anaconda-mode-view-make-source "from")))))
+
 (ert-deftest test-anaconda-mode-format-definitions-view ()
   "Format definitions buffer from rpc call result."
   (let ((result '(((column . 19)
