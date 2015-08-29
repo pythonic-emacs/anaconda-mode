@@ -513,39 +513,39 @@ tear" 3 4)
 
 ;;; Documentation.
 
-(ert-deftest test-anaconda-mode-view-doc ()
+(ert-deftest test-anaconda-mode-show-doc ()
   "Show documentation buffer on documentation lookup."
   (unwind-protect
       (with-current-buffer (fixture "
 def f(a, b=1):
     '''Docstring for f.'''
     pass" 2 5 "simple.py")
-        (anaconda-mode-view-doc)
+        (anaconda-mode-show-doc)
         (wait)
         (sleep-for 1)
         (should (equal "*Anaconda*"
                        (buffer-name (window-buffer (selected-window))))))
     (anaconda-mode-stop)))
 
-(ert-deftest test-anaconda-mode-view-doc-not-found ()
+(ert-deftest test-anaconda-mode-show-doc-not-found ()
   "Don't show documentation buffer in the case of missing docs."
   (unwind-protect
       (with-current-buffer (fixture "" 1 0 "simple.py")
-        (anaconda-mode-view-doc)
+        (anaconda-mode-show-doc)
         (wait)
         (sleep-for 1)
         (should (equal "simple.py"
                        (f-filename (buffer-file-name (window-buffer (selected-window)))))))
     (anaconda-mode-stop)))
 
-(ert-deftest test-anaconda-mode-view-doc-content ()
+(ert-deftest test-anaconda-mode-show-doc-content ()
   "Format documentation buffer from rpc response."
   (unwind-protect
       (with-current-buffer (fixture "
 def f(a, b=1):
     '''Docstring for f.'''
     pass" 2 5 "simple.py")
-        (anaconda-mode-view-doc)
+        (anaconda-mode-show-doc)
         (wait)
         (sleep-for 1)
         (should (equal "simple
@@ -557,7 +557,7 @@ Docstring for f.
                          (buffer-string)))))
     (anaconda-mode-stop)))
 
-(ert-deftest test-anaconda-mode-view-doc-callback ()
+(ert-deftest test-anaconda-mode-show-doc-callback ()
   "Fill documentation buffer content from response."
   (let ((result '(((type . "function")
                    (docstring . "f(a, b)
@@ -570,7 +570,7 @@ I'm documentation string.")
                    (full-name . "simple.f")
                    (description . "def f")
                    (line . 1)))))
-    (anaconda-mode-view-doc-callback result)
+    (anaconda-mode-show-doc-callback result)
     (should (equal "simple
 f(a, b)
 

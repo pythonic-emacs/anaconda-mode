@@ -336,12 +336,12 @@ submitted."
 
 ;;; View documentation.
 
-(defun anaconda-mode-view-doc ()
+(defun anaconda-mode-show-doc ()
   "Show documentation for context at point."
   (interactive)
-  (anaconda-mode-call "goto_definitions" 'anaconda-mode-view-doc-callback))
+  (anaconda-mode-call "goto_definitions" 'anaconda-mode-show-doc-callback))
 
-(defun anaconda-mode-view-doc-callback (result)
+(defun anaconda-mode-show-doc-callback (result)
   "Process view doc RESULT."
   (when result
     (pop-to-buffer
@@ -509,7 +509,7 @@ submitted."
     (define-key map (kbd "M-,") 'anaconda-mode-find-assignments)
     (define-key map (kbd "M-r") 'anaconda-mode-find-references)
     (define-key map (kbd "M-*") 'anaconda-mode-pop-mark)
-    (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
+    (define-key map (kbd "M-?") 'anaconda-mode-show-doc)
     map)
   "Keymap for `anaconda-mode'.")
 
