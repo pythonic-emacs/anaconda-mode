@@ -345,20 +345,9 @@ submitted."
   "Process view doc RESULT."
   (if result
       (pop-to-buffer
-       (anaconda-mode-create-view-doc-buffer
+       (anaconda-mode-get-view-buffer-create
         (anaconda-mode-format-view-doc-content result)))
     (message "No documentation available")))
-
-(defun anaconda-mode-create-view-doc-buffer (doc)
-  "Display documentation buffer with contents DOC."
-  (let ((buf (get-buffer-create "*Anaconda*")))
-    (with-current-buffer buf
-      (view-mode -1)
-      (erase-buffer)
-      (insert doc)
-      (goto-char (point-min))
-      (view-mode 1)
-      buf)))
 
 (defun anaconda-mode-format-view-doc-content (result)
   "Create content for documentation buffer from RESULT fields."
@@ -395,26 +384,6 @@ submitted."
     (forward-char (cdr (assoc 'column definition)))))
 
 
-;;; Definitions processing.
-
-(defun anaconda-mode-format-definitions-view (result)
-  "Create definitions buffer content from rpc RESULT."
-  (->>
-   (--group-by (cdr (assoc 'module-name it)) result)
-   (--map (anaconda-mode-format-definition-module it))
-   (apply 's-concat)))
-
-(defun anaconda-mode-format-definition-module (module)
-  "Format MODULE definition view."
-  (let ((module-name (car module))
-        (definitions (--map (concat "    " (cdr (assoc 'description it)))
-                            (cdr module))))
-    (->> definitions
-         (cons module-name)
-         (s-join "\n")
-         (s-append "\n"))))
-
-
 ;;; Find definitions.
 
 (defun anaconda-mode-find-definitions ()
@@ -426,7 +395,7 @@ submitted."
   "Process find definitions RESULT."
   (if result
       (pop-to-buffer
-       (anaconda-mode-create-view-doc-buffer
+       (anaconda-mode-get-view-buffer-create
         (anaconda-mode-format-definitions-view result)))
     (message "No definitions found")))
 
@@ -442,7 +411,7 @@ submitted."
   "Process find assignments RESULT."
   (if result
       (pop-to-buffer
-       (anaconda-mode-create-view-doc-buffer
+       (anaconda-mode-get-view-buffer-create
         (anaconda-mode-format-definitions-view result)))
     (message "No assignments found")))
 
@@ -458,7 +427,7 @@ submitted."
   "Process find references RESULT."
   (if result
       (pop-to-buffer
-       (anaconda-mode-create-view-doc-buffer
+       (anaconda-mode-get-view-buffer-create
         (anaconda-mode-format-definitions-view result)))
     (message "No reverses found")))
 
@@ -502,6 +471,37 @@ submitted."
       it))
    (-interpose ", ")
    (apply 'concat)))
+
+
+;;; Result view.
+
+(defun anaconda-mode-get-view-buffer-create (content)
+  "Create view buffer and fill it with CONTENT."
+  (let ((buf (get-buffer-create "*Anaconda*")))
+    (with-current-buffer buf
+      (view-mode -1)
+      (erase-buffer)
+      (insert content)
+      (goto-char (point-min))
+      (view-mode 1)
+      buf)))
+
+(defun anaconda-mode-format-definitions-view (result)
+  "Create definitions buffer content from rpc RESULT."
+  (->>
+   (--group-by (cdr (assoc 'module-name it)) result)
+   (--map (anaconda-mode-format-definition-module it))
+   (apply 's-concat)))
+
+(defun anaconda-mode-format-definition-module (module)
+  "Format MODULE definition view."
+  (let ((module-name (car module))
+        (definitions (--map (concat "    " (cdr (assoc 'description it)))
+                            (cdr module))))
+    (->> definitions
+         (cons module-name)
+         (s-join "\n")
+         (s-append "\n"))))
 
 
 ;;; Anaconda minor mode.
