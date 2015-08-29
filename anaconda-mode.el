@@ -343,10 +343,11 @@ submitted."
 
 (defun anaconda-mode-show-doc-callback (result)
   "Process view doc RESULT."
-  (when result
-    (pop-to-buffer
-     (anaconda-mode-create-view-doc-buffer
-      (anaconda-mode-format-view-doc-content result)))))
+  (if result
+      (pop-to-buffer
+       (anaconda-mode-create-view-doc-buffer
+        (anaconda-mode-format-view-doc-content result)))
+    (message "No documentation available")))
 
 (defun anaconda-mode-create-view-doc-buffer (doc)
   "Display documentation buffer with contents DOC."
@@ -423,10 +424,11 @@ submitted."
 
 (defun anaconda-mode-find-definitions-callback (result)
   "Process find definitions RESULT."
-  (when result
-    (pop-to-buffer
-     (anaconda-mode-create-view-doc-buffer
-      (anaconda-mode-format-definitions-view result)))))
+  (if result
+      (pop-to-buffer
+       (anaconda-mode-create-view-doc-buffer
+        (anaconda-mode-format-definitions-view result)))
+    (message "No definitions found")))
 
 
 ;;; Find assignments.
@@ -438,10 +440,11 @@ submitted."
 
 (defun anaconda-mode-find-assignments-callback (result)
   "Process find assignments RESULT."
-  (when result
-    (pop-to-buffer
-     (anaconda-mode-create-view-doc-buffer
-      (anaconda-mode-format-definitions-view result)))))
+  (if result
+      (pop-to-buffer
+       (anaconda-mode-create-view-doc-buffer
+        (anaconda-mode-format-definitions-view result)))
+    (message "No assignments found")))
 
 
 ;;; Find references.
@@ -453,10 +456,11 @@ submitted."
 
 (defun anaconda-mode-find-references-callback (result)
   "Process find references RESULT."
-  (when result
-    (pop-to-buffer
-     (anaconda-mode-create-view-doc-buffer
-      (anaconda-mode-format-definitions-view result)))))
+  (if result
+      (pop-to-buffer
+       (anaconda-mode-create-view-doc-buffer
+        (anaconda-mode-format-definitions-view result)))
+    (message "No reverses found")))
 
 
 ;;; Eldoc.
