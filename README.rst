@@ -108,10 +108,12 @@ Here are interactive commands available with anaconda-mode
 ==========  ==============================
 Keybinding  Description
 ==========  ==============================
-M-.         anaconda-mode-goto-definitions
-M-*         anaconda-nav-pop-marker
-M-?         anaconda-mode-view-doc
-M-r         anaconda-mode-usages
+C-M-i       anaconda-mode-complete
+M-.         anaconda-mode-find-definitions
+M-,         anaconda-mode-find-assignments
+M-r         anaconda-mode-find-references
+M-*         anaconda-mode-pop-mark
+M-?         anaconda-mode-show-doc
 ==========  ==============================
 
 If goto definitions, assignments or usages cause multiple candidates
