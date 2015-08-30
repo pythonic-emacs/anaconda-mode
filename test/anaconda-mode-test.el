@@ -774,7 +774,7 @@ test(" 3 5 "simple.py")
 (ert-deftest test-anaconda-mode-view ()
   "Create view buffer filled with content."
   (let ((result "we are here")
-        (presenter (lambda (result) result)))
+        (presenter (lambda (result) (insert result))))
     (unwind-protect
         (progn
           (anaconda-mode-view result presenter)

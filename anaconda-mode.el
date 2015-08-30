@@ -480,19 +480,19 @@ submitted."
 RESULT must be an RESULT field from json-rpc response.
 PRESENTER is the function used to format buffer content."
   (pop-to-buffer
-   (anaconda-mode-get-view-buffer-create
+   (anaconda-mode-with-view-buffer
     (funcall presenter result))))
 
-(defun anaconda-mode-get-view-buffer-create (content)
-  "Create view buffer and fill it with CONTENT."
-  (let ((buf (get-buffer-create "*Anaconda*")))
-    (with-current-buffer buf
-      (view-mode -1)
-      (erase-buffer)
-      (insert content)
-      (goto-char (point-min))
-      (view-mode 1)
-      buf)))
+(defmacro anaconda-mode-with-view-buffer (&rest body)
+  "Create view buffer and execute BODY in it."
+  `(let ((buf (get-buffer-create "*Anaconda*")))
+     (with-current-buffer buf
+       (view-mode -1)
+       (erase-buffer)
+       ,@body
+       (goto-char (point-min))
+       (view-mode 1)
+       buf)))
 
 (defun anaconda-mode-view-make-bold (string)
   "Make passed STRING look bold."
