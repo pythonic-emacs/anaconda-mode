@@ -836,6 +836,14 @@ views
     definition
 " (buffer-string))))
 
+(ert-deftest test-anaconda-mode-view-insert-module-definition-bold-module-name ()
+  "Insert module name with bold font."
+  (anaconda-mode-view-insert-module-definition
+   '("module.foo"
+     ((description . "definition"))
+     ((description . "definition"))))
+  (should (equal 'bold (get-char-property (point-min) 'face))))
+
 (ert-deftest test-anaconda-mode-view-make-bold ()
   "Make bold string."
   (should (equal 'bold
