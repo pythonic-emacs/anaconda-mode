@@ -525,22 +525,18 @@ PRESENTER is the function used to format buffer content."
                       'type 'anaconda-mode-definition-button
                       'definition definition))
 
-(defun anaconda-mode-format-definitions-view (result)
-  "Create definitions buffer content from rpc RESULT."
+(defun anaconda-mode-view-definitions-presenter (result)
+  "Insert definitions from RESULT."
   (->>
    (--group-by (cdr (assoc 'module-name it)) result)
-   (--map (anaconda-mode-format-definition-module it))
-   (apply 's-concat)))
+   (--map (anaconda-mode-view-insert-module-definition it))))
 
-(defun anaconda-mode-format-definition-module (module)
-  "Format MODULE definition view."
-  (let ((module-name (car module))
-        (definitions (--map (concat "    " (cdr (assoc 'description it)))
-                            (cdr module))))
-    (->> definitions
-         (cons module-name)
-         (s-join "\n")
-         (s-append "\n"))))
+(defun anaconda-mode-view-insert-module-definition (module)
+  "Insert MODULE definition into current buffer."
+  (insert (concat (car module) "\n"))
+  (--map
+   (insert (concat "    " (cdr (assoc 'description it)) "\n"))
+   (cdr module)))
 
 
 ;;; Anaconda minor mode.

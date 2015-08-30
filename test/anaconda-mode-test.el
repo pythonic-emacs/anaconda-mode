@@ -783,6 +783,48 @@ test(" 3 5 "simple.py")
                            (buffer-string)))))
       (kill-buffer "*Anaconda*"))))
 
+(ert-deftest test-anaconda-mode-view-definitions-presenter ()
+  "Format definitions buffer from rpc call result."
+  (let ((result '(((column . 19)
+                   (type . "import")
+                   (docstring . "")
+                   (full-name . "views.views")
+                   (name . "views")
+                   (module-name . "app")
+                   (module-path . "/vagrant/app/__init__.py")
+                   (description . "from .views import views")
+                   (line . 2))
+                  ((column . 0)
+                   (type . "statement")
+                   (docstring . "")
+                   (full-name . "views")
+                   (name . "views")
+                   (module-name . "views")
+                   (module-path . "/vagrant/app/views.py")
+                   (description . "views = Blueprint('views', __name__)")
+                   (line . 4))
+                  ((column . 1)
+                   (type . "decorator")
+                   (docstring . "")
+                   (full-name . "views")
+                   (name . "views")
+                   (module-name . "views")
+                   (module-path . "/vagrant/app/views.py")
+                   (description . "@views.route('/')")
+                   (line . 7)))))
+    (unwind-protect
+        (progn
+          (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)
+          (should (equal "app
+    from .views import views
+views
+    views = Blueprint('views', __name__)
+    @views.route('/')
+"
+                         (with-current-buffer (window-buffer (selected-window))
+                           (buffer-string)))))
+      (kill-buffer "*Anaconda*"))))
+
 (ert-deftest test-anaconda-mode-view-make-bold ()
   "Make bold string."
   (should (equal 'bold
@@ -821,42 +863,6 @@ test(" 3 5 "simple.py")
     (should (equal ntpath (buffer-file-name)))
     (should (equal 104 (line-number-at-pos (point))))
     (should (equal 4 (- (point) (line-beginning-position))))))
-
-(ert-deftest test-anaconda-mode-format-definitions-view ()
-  "Format definitions buffer from rpc call result."
-  (let ((result '(((column . 19)
-                   (type . "import")
-                   (docstring . "")
-                   (full-name . "views.views")
-                   (name . "views")
-                   (module-name . "app")
-                   (module-path . "/vagrant/app/__init__.py")
-                   (description . "from .views import views")
-                   (line . 2))
-                  ((column . 0)
-                   (type . "statement")
-                   (docstring . "")
-                   (full-name . "views")
-                   (name . "views")
-                   (module-name . "views")
-                   (module-path . "/vagrant/app/views.py")
-                   (description . "views = Blueprint('views', __name__)")
-                   (line . 4))
-                  ((column . 1)
-                   (type . "decorator")
-                   (docstring . "")
-                   (full-name . "views")
-                   (name . "views")
-                   (module-name . "views")
-                   (module-path . "/vagrant/app/views.py")
-                   (description . "@views.route('/')")
-                   (line . 7)))))
-    (should (equal "app
-    from .views import views
-views
-    views = Blueprint('views', __name__)
-    @views.route('/')
-" (anaconda-mode-format-definitions-view result)))))
 
 (ert-deftest test-anaconda-mode-format-definition-module ()
   "Format definition of single module."
