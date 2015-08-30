@@ -508,6 +508,23 @@ PRESENTER is the function used to format buffer content."
     (font-lock-fontify-buffer)
     (buffer-string)))
 
+(define-button-type 'anaconda-mode-definition-button
+  'action #'anaconda-mode-view-jump)
+
+(defun anaconda-mode-view-jump (button)
+  "Jump to definition file saved in BUTTON."
+  (let ((definition (button-get button 'definition)))
+    (find-file (cdr (assoc 'module-path definition)))
+    (goto-char 0)
+    (forward-line (1- (cdr (assoc 'line definition))))
+    (forward-char (cdr (assoc 'column definition)))))
+
+(defun anaconda-mode-view-insert-button (name definition)
+  "Insert text button with NAME opening the DEFINITION."
+  (insert-text-button name
+                      'type 'anaconda-mode-definition-button
+                      'definition definition))
+
 (defun anaconda-mode-format-definitions-view (result)
   "Create definitions buffer content from rpc RESULT."
   (->>

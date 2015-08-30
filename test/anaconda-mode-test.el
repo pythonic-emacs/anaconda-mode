@@ -795,6 +795,33 @@ test(" 3 5 "simple.py")
                  (get-text-property 0 'face
                                     (anaconda-mode-view-make-source "from")))))
 
+(ert-deftest test-anaconda-mode-view-insert-button ()
+  "Insert text button."
+  (with-temp-buffer
+    (anaconda-mode-view-insert-button "text" nil)
+    (should (looking-back "text"))))
+
+(ert-deftest test-anaconda-mode-view-insert-button-click ()
+  "Go to definition if click on button."
+  (let* ((ntpath (run-to-string '("-c" "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')")))
+         (definition `((description . "def join")
+                       (full-name . "os.path.join")
+                       (type . "function")
+                       (docstring . "join(path, *paths)
+
+")
+                       (module-path . ,ntpath)
+                       (column . 4)
+                       (line . 104)
+                       (name . "join")
+                       (module-name . "ntpath"))))
+    (anaconda-mode-view-insert-button "text" definition)
+    (goto-char (point-min))
+    (push-button (point))
+    (should (equal ntpath (buffer-file-name)))
+    (should (equal 104 (line-number-at-pos (point))))
+    (should (equal 4 (- (point) (line-beginning-position))))))
+
 (ert-deftest test-anaconda-mode-format-definitions-view ()
   "Format definitions buffer from rpc call result."
   (let ((result '(((column . 19)
