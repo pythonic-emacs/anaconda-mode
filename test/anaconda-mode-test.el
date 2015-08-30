@@ -825,6 +825,17 @@ views
                            (buffer-string)))))
       (kill-buffer "*Anaconda*"))))
 
+(ert-deftest test-anaconda-mode-view-insert-module-definition ()
+  "Insert definition of single module."
+  (anaconda-mode-view-insert-module-definition
+   '("module.foo"
+     ((description . "definition"))
+     ((description . "definition"))))
+  (should (equal "module.foo
+    definition
+    definition
+" (buffer-string))))
+
 (ert-deftest test-anaconda-mode-view-make-bold ()
   "Make bold string."
   (should (equal 'bold
@@ -863,16 +874,6 @@ views
     (should (equal ntpath (buffer-file-name)))
     (should (equal 104 (line-number-at-pos (point))))
     (should (equal 4 (- (point) (line-beginning-position))))))
-
-(ert-deftest test-anaconda-mode-format-definition-module ()
-  "Format definition of single module."
-  (should (equal "module.foo
-    definition
-    definition
-" (anaconda-mode-format-definition-module
-   '("module.foo"
-     ((description . "definition"))
-     ((description . "definition")))))))
 
 
 ;;; Definitions.
