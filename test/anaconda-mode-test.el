@@ -844,6 +844,14 @@ views
      ((description . "definition"))))
   (should (equal 'bold (get-char-property (point-min) 'face))))
 
+(ert-deftest test-anaconda-mode-view-insert-module-definition-source-face ()
+  "Insert definition with source fontification."
+  (anaconda-mode-view-insert-module-definition
+   '("module.foo"
+     ((description . "from foo import bar"))
+     ((description . "bar(1)"))))
+  (should (equal 'font-lock-keyword-face (get-char-property 18 'face))))
+
 (ert-deftest test-anaconda-mode-view-make-bold ()
   "Make bold string."
   (should (equal 'bold
