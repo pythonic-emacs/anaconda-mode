@@ -535,8 +535,12 @@ PRESENTER is the function used to format buffer content."
   "Insert MODULE definition into current buffer."
   (insert (concat (anaconda-mode-view-make-bold (car module)) "\n"))
   (--map
-   (insert
-    (concat "    " (anaconda-mode-view-make-source (cdr (assoc 'description it))) "\n"))
+   (progn
+     (insert "    ")
+     (anaconda-mode-view-insert-button
+      (anaconda-mode-view-make-source (cdr (assoc 'description it)))
+      it)
+     (insert "\n"))
    (cdr module)))
 
 

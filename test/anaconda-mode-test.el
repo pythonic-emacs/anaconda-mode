@@ -852,6 +852,28 @@ views
      ((description . "bar(1)"))))
   (should (equal 'font-lock-keyword-face (get-char-property 18 'face))))
 
+(ert-deftest test-anaconda-mode-view-insert-module-definition-click ()
+  "Click on the definition must open desired file."
+  (let* ((ntpath (run-to-string '("-c" "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')")))
+         (definition `((description . "def join")
+                       (full-name . "os.path.join")
+                       (type . "function")
+                       (docstring . "join(path, *paths)
+
+")
+                       (module-path . ,ntpath)
+                       (column . 4)
+                       (line . 104)
+                       (name . "join")
+                       (module-name . "ntpath"))))
+    (anaconda-mode-view-insert-module-definition
+     `("module.foo"
+       ,definition))
+    (push-button 18)
+    (should (equal ntpath (buffer-file-name)))
+    (should (equal 104 (line-number-at-pos (point))))
+    (should (equal 4 (- (point) (line-beginning-position))))))
+
 (ert-deftest test-anaconda-mode-view-make-bold ()
   "Make bold string."
   (should (equal 'bold
