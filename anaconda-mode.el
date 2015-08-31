@@ -487,11 +487,11 @@ PRESENTER is the function used to format buffer content."
   "Create view buffer and execute BODY in it."
   `(let ((buf (get-buffer-create "*Anaconda*")))
      (with-current-buffer buf
-       (view-mode -1)
+       (fundamental-mode)
        (erase-buffer)
        ,@body
        (goto-char (point-min))
-       (view-mode 1)
+       (anaconda-view-mode)
        buf)))
 
 (defun anaconda-mode-view-make-bold (string)
@@ -516,6 +516,14 @@ PRESENTER is the function used to format buffer content."
   "Jump to definition file saved in BUTTON."
   (let ((definition (button-get button 'definition)))
     (find-file (cdr (assoc 'module-path definition)))
+    (goto-char 0)
+    (forward-line (1- (cdr (assoc 'line definition))))
+    (forward-char (cdr (assoc 'column definition)))))
+
+(defun anaconda-mode-view-jump-other-window (button)
+  "Jump to definition file saved in BUTTON."
+  (let ((definition (button-get button 'definition)))
+    (find-file-other-window (cdr (assoc 'module-path definition)))
     (goto-char 0)
     (forward-line (1- (cdr (assoc 'line definition))))
     (forward-char (cdr (assoc 'column definition)))))
@@ -561,7 +569,8 @@ PRESENTER is the function used to format buffer content."
   "Navigate tot the next definition in the view buffer.
 NUM is the number of definitions to move forward.  RESET mean go
 to the beginning of buffer before definitions navigation."
-  (goto-char (next-button (point))))
+  (forward-button num)
+  (anaconda-mode-view-jump-other-window (button-at (point))))
 
 
 ;;; Anaconda minor mode.

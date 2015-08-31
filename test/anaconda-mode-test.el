@@ -825,6 +825,80 @@ views
                            (buffer-string)))))
       (kill-buffer "*Anaconda*"))))
 
+(ert-deftest test-anaconda-mode-view-definitions-presenter-next-error ()
+  "Use `next-error' to navigate next definition."
+  (let* ((ntpath (run-to-string '("-c" "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')")))
+         (posixpath (run-to-string '("-c" "from __future__ import print_function; import posixpath; print(posixpath.__file__, end='')")))
+         (result `(((description . "def join")
+                    (full-name . "os.path.join")
+                    (type . "function")
+                    (docstring . "join(path, *paths)
+
+")
+                    (module-path . ,ntpath)
+                    (column . 4)
+                    (line . 104)
+                    (name . "join")
+                    (module-name . "ntpath"))
+                   ((description . "def join")
+                    (full-name . "os.path.join")
+                    (type . "function")
+                    (docstring . "join(a, *p)
+
+Join two or more pathname components, inserting '/' as needed.
+If any component is an absolute path, all previous path components
+will be discarded.  An empty last part will result in a path that
+ends with a separator.")
+                    (module-path . ,posixpath)
+                    (column . 4)
+                    (line . 70)
+                    (name . "join")
+                    (module-name . "posixpath")))))
+    (unwind-protect
+        (progn
+          (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)
+          (next-error-no-select)
+          (should (equal 12 (point))))
+      (kill-buffer "*Anaconda*"))))
+
+(ert-deftest test-anaconda-mode-view-definitions-presenter-next-error-no-select ()
+  "Show definition at point in the no selected buffer."
+  (let* ((ntpath (run-to-string '("-c" "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')")))
+         (posixpath (run-to-string '("-c" "from __future__ import print_function; import posixpath; print(posixpath.__file__, end='')")))
+         (result `(((description . "def join")
+                    (full-name . "os.path.join")
+                    (type . "function")
+                    (docstring . "join(path, *paths)
+
+")
+                    (module-path . ,ntpath)
+                    (column . 4)
+                    (line . 104)
+                    (name . "join")
+                    (module-name . "ntpath"))
+                   ((description . "def join")
+                    (full-name . "os.path.join")
+                    (type . "function")
+                    (docstring . "join(a, *p)
+
+Join two or more pathname components, inserting '/' as needed.
+If any component is an absolute path, all previous path components
+will be discarded.  An empty last part will result in a path that
+ends with a separator.")
+                    (module-path . ,posixpath)
+                    (column . 4)
+                    (line . 70)
+                    (name . "join")
+                    (module-name . "posixpath")))))
+    (unwind-protect
+        (progn
+          (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)
+          (next-error-no-select)
+          (should (equal ntpath
+                         (with-current-buffer (window-buffer (previous-window))
+                           (buffer-file-name)))))
+      (kill-buffer "*Anaconda*"))))
+
 (ert-deftest test-anaconda-mode-view-insert-module-definition ()
   "Insert definition of single module."
   (anaconda-mode-view-insert-module-definition
