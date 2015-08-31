@@ -544,6 +544,25 @@ PRESENTER is the function used to format buffer content."
      (insert "\n"))
    (cdr module)))
 
+(defvar anaconda-view-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "n") 'next-error-no-select)
+    (define-key map (kbd "p") 'previous-error-no-select)
+    (define-key map (kbd "q") 'quit-window)
+    map))
+
+(define-derived-mode anaconda-view-mode special-mode "Anaconda-View"
+  "Major mode for definitions view and navigation for `anaconda-mode'.
+
+\\{anaconda-view-mode-map}"
+  (setq next-error-function #'anaconda-mode-next-definition))
+
+(defun anaconda-mode-next-definition (num reset)
+  "Navigate tot the next definition in the view buffer.
+NUM is the number of definitions to move forward.  RESET mean go
+to the beginning of buffer before definitions navigation."
+  (goto-char (next-button (point))))
+
 
 ;;; Anaconda minor mode.
 

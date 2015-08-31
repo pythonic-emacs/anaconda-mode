@@ -919,6 +919,16 @@ views
   (goto-char (point-min))
   (should-not (get-char-property (point) 'face)))
 
+(ert-deftest test-anaconda-view-mode ()
+  "Test anaconda-view major mode."
+  (with-temp-buffer
+    (anaconda-view-mode)
+    (should next-error-function)
+    (should buffer-read-only)
+    (should (equal 'next-error-no-select (key-binding "n")))
+    (should (equal 'previous-error-no-select (key-binding "p")))
+    (should (equal 'quit-window (key-binding "q")))))
+
 
 ;;; Definitions.
 
