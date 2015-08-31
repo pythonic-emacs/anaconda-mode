@@ -913,6 +913,12 @@ views
     (should (equal 104 (line-number-at-pos (point))))
     (should (equal 4 (- (point) (line-beginning-position))))))
 
+(ert-deftest test-anaconda-mode-view-insert-button-face ()
+  "Insert buttons without any face."
+  (anaconda-mode-view-insert-button "text" nil)
+  (goto-char (point-min))
+  (should-not (get-char-property (point) 'face)))
+
 
 ;;; Definitions.
 

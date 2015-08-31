@@ -509,7 +509,8 @@ PRESENTER is the function used to format buffer content."
     (buffer-string)))
 
 (define-button-type 'anaconda-mode-definition-button
-  'action #'anaconda-mode-view-jump)
+  'action #'anaconda-mode-view-jump
+  'face nil)
 
 (defun anaconda-mode-view-jump (button)
   "Jump to definition file saved in BUTTON."
