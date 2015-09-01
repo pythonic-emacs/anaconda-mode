@@ -394,9 +394,7 @@ submitted."
 (defun anaconda-mode-find-definitions-callback (result)
   "Process find definitions RESULT."
   (if result
-      (pop-to-buffer
-       (anaconda-mode-get-view-buffer-create
-        (anaconda-mode-format-definitions-view result)))
+      (anaconda-mode-definitions-view result)
     (message "No definitions found")))
 
 
@@ -410,9 +408,7 @@ submitted."
 (defun anaconda-mode-find-assignments-callback (result)
   "Process find assignments RESULT."
   (if result
-      (pop-to-buffer
-       (anaconda-mode-get-view-buffer-create
-        (anaconda-mode-format-definitions-view result)))
+      (anaconda-mode-definitions-view result)
     (message "No assignments found")))
 
 
@@ -426,9 +422,7 @@ submitted."
 (defun anaconda-mode-find-references-callback (result)
   "Process find references RESULT."
   (if result
-      (pop-to-buffer
-       (anaconda-mode-get-view-buffer-create
-        (anaconda-mode-format-definitions-view result)))
+      (anaconda-mode-definitions-view result)
     (message "No reverses found")))
 
 
@@ -474,6 +468,10 @@ submitted."
 
 
 ;;; Result view.
+
+(defun anaconda-mode-definitions-view (result)
+  "Show definitions view for rpc RESULT."
+  (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter))
 
 (defun anaconda-mode-view (result presenter)
   "Show RESULT to user for future selection.
