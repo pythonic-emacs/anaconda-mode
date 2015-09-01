@@ -435,7 +435,9 @@ submitted."
 
 (defun anaconda-mode-definitions-view (result)
   "Show definitions view for rpc RESULT."
-  (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter))
+  (if (eq 1 (length result))
+      (anaconda-mode-find-file (car result))
+    (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)))
 
 (defun anaconda-mode-documentation-view (result)
   "Show documentation view for rpc RESULT."
@@ -481,18 +483,26 @@ PRESENTER is the function used to format buffer content."
 (defun anaconda-mode-view-jump (button)
   "Jump to definition file saved in BUTTON."
   (let ((definition (button-get button 'definition)))
-    (find-file (cdr (assoc 'module-path definition)))
-    (goto-char 0)
-    (forward-line (1- (cdr (assoc 'line definition))))
-    (forward-char (cdr (assoc 'column definition)))))
+    (anaconda-mode-find-file definition)))
+
+(defun anaconda-mode-find-file (definition)
+  "Find DEFINITION file, go to DEFINITION point."
+  (find-file (cdr (assoc 'module-path definition)))
+  (goto-char 0)
+  (forward-line (1- (cdr (assoc 'line definition))))
+  (forward-char (cdr (assoc 'column definition))))
 
 (defun anaconda-mode-view-jump-other-window (button)
   "Jump to definition file saved in BUTTON."
   (let ((definition (button-get button 'definition)))
-    (find-file-other-window (cdr (assoc 'module-path definition)))
-    (goto-char 0)
-    (forward-line (1- (cdr (assoc 'line definition))))
-    (forward-char (cdr (assoc 'column definition)))))
+    (anaconda-mode-find-file-other-window definition)))
+
+(defun anaconda-mode-find-file-other-window (definition)
+  "Find DEFINITION file other window, go to DEFINITION point."
+  (find-file-other-window (cdr (assoc 'module-path definition)))
+  (goto-char 0)
+  (forward-line (1- (cdr (assoc 'line definition))))
+  (forward-char (cdr (assoc 'column definition))))
 
 (defun anaconda-mode-view-insert-button (name definition)
   "Insert text button with NAME opening the DEFINITION."

@@ -962,6 +962,17 @@ test" 10 3 "simple.py")
                        (f-filename (buffer-file-name (window-buffer (selected-window)))))))
     (anaconda-mode-stop)))
 
+(ert-deftest test-anaconda-mode-find-definitions-single-definition ()
+  "Jump to definition immediately in the case of single definition."
+  (unwind-protect
+      (with-current-buffer (fixture "from os import getenv" 1 21)
+        (anaconda-mode-find-definitions)
+        (wait)
+        (sleep-for 1)
+        (should (equal "os.py"
+                       (f-filename (buffer-file-name (window-buffer (selected-window)))))))
+    (anaconda-mode-stop)))
+
 
 ;;; Assignments.
 
@@ -994,6 +1005,17 @@ test" 10 3 "simple.py")
         (wait)
         (sleep-for 1)
         (should (equal "simple.py"
+                       (f-filename (buffer-file-name (window-buffer (selected-window)))))))
+    (anaconda-mode-stop)))
+
+(ert-deftest test-anaconda-mode-find-assignments-single-assignment ()
+  "Jump to assignment immediately in the case of single assignment."
+  (unwind-protect
+      (with-current-buffer (fixture "from os import getenv" 1 21)
+        (anaconda-mode-find-assignments)
+        (wait)
+        (sleep-for 1)
+        (should (equal "os.py"
                        (f-filename (buffer-file-name (window-buffer (selected-window)))))))
     (anaconda-mode-stop)))
 
@@ -1030,6 +1052,22 @@ else:
         (sleep-for 1)
         (should (equal "simple.py"
                        (f-filename (buffer-file-name (window-buffer (selected-window)))))))
+    (anaconda-mode-stop)))
+
+(ert-deftest test-anaconda-mode-find-references-single-reference ()
+  "Jump to reference immediately in the case of single reference."
+  (unwind-protect
+      (with-current-buffer (fixture "
+def test():
+    pass
+
+test()
+" 2 6)
+        (anaconda-mode-find-references)
+        (wait)
+        (sleep-for 1)
+        (should (equal 5 (line-number-at-pos (point))))
+        (should (equal 1 (- (point) (line-beginning-position)))))
     (anaconda-mode-stop)))
 
 
