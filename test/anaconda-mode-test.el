@@ -525,7 +525,8 @@ def f(a, b=1):
         (sleep-for 1)
         (should (equal "*Anaconda*"
                        (buffer-name (window-buffer (selected-window))))))
-    (anaconda-mode-stop)))
+    (anaconda-mode-stop)
+    (kill-buffer "*Anaconda*")))
 
 (ert-deftest test-anaconda-mode-show-doc-not-found ()
   "Don't show documentation buffer in the case of missing docs."
