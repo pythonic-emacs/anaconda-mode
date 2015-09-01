@@ -553,161 +553,12 @@ def f(a, b=1):
 f(a, b=1)
 
 Docstring for f.
+
 "
                        (with-current-buffer (window-buffer (selected-window))
                          (buffer-string)))))
-    (anaconda-mode-stop)))
-
-(ert-deftest test-anaconda-mode-show-doc-callback ()
-  "Fill documentation buffer content from response."
-  (let ((result '(((type . "function")
-                   (docstring . "f(a, b)
-
-I'm documentation string.")
-                   (name . "f")
-                   (module-name . "simple")
-                   (column . 4)
-                   (module-path . "/vagrant/simple.py")
-                   (full-name . "simple.f")
-                   (description . "def f")
-                   (line . 1)))))
-    (anaconda-mode-show-doc-callback result)
-    (should (equal "simple
-f(a, b)
-
-I'm documentation string.
-" (buffer-string)))))
-
-(ert-deftest test-anaconda-mode-view-doc-format-multiple-modules ()
-  "Format doc buffer for multiple modules."
-  (let ((result '(((description . "def join")
-                   (full-name . "os.path.join")
-                   (type . "function")
-                   (docstring . "join(path, *paths)
-
-")
-                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
-                   (column . 4)
-                   (line . 104)
-                   (name . "join")
-                   (module-name . "ntpath"))
-                  ((description . "def join")
-                   (full-name . "os.path.join")
-                   (type . "function")
-                   (docstring . "join(a, *p)
-
-Join two or more pathname components, inserting '/' as needed.
-If any component is an absolute path, all previous path components
-will be discarded.  An empty last part will result in a path that
-ends with a separator.")
-                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/posixpath.py")
-                   (column . 4)
-                   (line . 70)
-                   (name . "join")
-                   (module-name . "posixpath")))))
-    (should (equal "ntpath
-join(path, *paths)
-
-posixpath
-join(a, *p)
-
-Join two or more pathname components, inserting '/' as needed.
-If any component is an absolute path, all previous path components
-will be discarded.  An empty last part will result in a path that
-ends with a separator.
-"
-                   (anaconda-mode-format-view-doc-content result)))))
-
-(ert-deftest test-anaconda-mode-view-doc-extract-definition-bold-module-name ()
-  "Extract module definition will use bold font for module name."
-  (let* ((definition '((description . "def join")
-                       (full-name . "os.path.join")
-                       (type . "function")
-                       (docstring . "join(path, *paths)
-
-")
-                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
-                       (column . 4)
-                       (line . 104)
-                       (name . "join")
-                       (module-name . "ntpath")))
-         (module (anaconda-mode-view-doc-extract-definition definition))
-         (module-name (car module)))
-    (should (equal 'bold (get-text-property 0 'face module-name)))))
-
-(ert-deftest test-anaconda-mode-view-doc-extract-definition-module-name-link ()
-  "Extract module definition will make clickable link from module name."
-  (let* ((definition '((description . "def join")
-                       (full-name . "os.path.join")
-                       (type . "function")
-                       (docstring . "join(path, *paths)
-
-")
-                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
-                       (column . 4)
-                       (line . 104)
-                       (name . "join")
-                       (module-name . "ntpath")))
-         (module (anaconda-mode-view-doc-extract-definition definition))
-         (module-name (car module)))
-    (should (keymapp (get-text-property 0 'keymap module-name)))
-    (should (lookup-key (get-text-property 0 'keymap module-name) (kbd "RET")))
-    (should (lookup-key (get-text-property 0 'keymap module-name) (kbd "<mouse-2>")))))
-
-(ert-deftest test-anaconda-mode-view-doc-make-click-handler ()
-  "Create click handler for definition"
-  (let* ((ntpath (run-to-string '("-c" "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')")))
-         (definition `((description . "def join")
-                       (full-name . "os.path.join")
-                       (type . "function")
-                       (docstring . "join(path, *paths)
-
-")
-                       (module-path . ,ntpath)
-                       (column . 4)
-                       (line . 104)
-                       (name . "join")
-                       (module-name . "ntpath")))
-         (handler (anaconda-mode-view-doc-make-click-handler definition)))
-    (funcall handler)
-    (should (equal ntpath (buffer-file-name)))
-    (should (equal 104 (line-number-at-pos (point))))
-    (should (equal 4 (- (point) (line-beginning-position))))))
-
-(ert-deftest test-anaconda-mode-view-doc-extract-definition-mouse-face ()
-  "Extract module definition will highlight module definition under mouse cursor."
-  (let* ((definition '((description . "def join")
-                       (full-name . "os.path.join")
-                       (type . "function")
-                       (docstring . "join(path, *paths)
-
-")
-                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
-                       (column . 4)
-                       (line . 104)
-                       (name . "join")
-                       (module-name . "ntpath")))
-         (module (anaconda-mode-view-doc-extract-definition definition))
-         (module-name (car module)))
-    (should (equal 'highlight (get-text-property 0 'mouse-face module-name)))))
-
-(ert-deftest test-anaconda-mode-view-doc-extract-definition-help-text ()
-  "Extract module definition will show help text."
-  (let* ((definition '((description . "def join")
-                       (full-name . "os.path.join")
-                       (type . "function")
-                       (docstring . "join(path, *paths)
-
-")
-                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
-                       (column . 4)
-                       (line . 104)
-                       (name . "join")
-                       (module-name . "ntpath")))
-         (module (anaconda-mode-view-doc-extract-definition definition))
-         (module-name (car module)))
-    (should (equal "mouse-2: visit this module"
-                   (get-text-property 0 'help-echo module-name)))))
+    (anaconda-mode-stop)
+    (kill-buffer "*Anaconda*")))
 
 
 ;;; ElDoc.
@@ -948,6 +799,78 @@ ends with a separator.")
     (should (equal ntpath (buffer-file-name)))
     (should (equal 104 (line-number-at-pos (point))))
     (should (equal 4 (- (point) (line-beginning-position))))))
+
+(ert-deftest test-anaconda-mode-view-documentation-presenter ()
+  "Insert documentation in the view buffer."
+  (let ((result '(((type . "function")
+                   (docstring . "f(a, b)
+
+I'm documentation string.")
+                   (name . "f")
+                   (module-name . "simple")
+                   (column . 4)
+                   (module-path . "/vagrant/simple.py")
+                   (full-name . "simple.f")
+                   (description . "def f")
+                   (line . 1)))))
+    (unwind-protect
+        (progn
+          (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter)
+          (should (equal "simple
+f(a, b)
+
+I'm documentation string.
+
+"
+                         (with-current-buffer (window-buffer (selected-window))
+                           (buffer-string)))))
+      (kill-buffer "*Anaconda*"))))
+
+(ert-deftest test-anaconda-mode-view-documentation-presenter-multiple-modules ()
+  "Format doc buffer for multiple modules."
+  (let ((result '(((description . "def join")
+                   (full-name . "os.path.join")
+                   (type . "function")
+                   (docstring . "join(path, *paths)
+
+")
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
+                   (column . 4)
+                   (line . 104)
+                   (name . "join")
+                   (module-name . "ntpath"))
+                  ((description . "def join")
+                   (full-name . "os.path.join")
+                   (type . "function")
+                   (docstring . "join(a, *p)
+
+Join two or more pathname components, inserting '/' as needed.
+If any component is an absolute path, all previous path components
+will be discarded.  An empty last part will result in a path that
+ends with a separator.")
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/posixpath.py")
+                   (column . 4)
+                   (line . 70)
+                   (name . "join")
+                   (module-name . "posixpath")))))
+    (unwind-protect
+        (progn
+          (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter)
+          (should (equal "ntpath
+join(path, *paths)
+
+posixpath
+join(a, *p)
+
+Join two or more pathname components, inserting '/' as needed.
+If any component is an absolute path, all previous path components
+will be discarded.  An empty last part will result in a path that
+ends with a separator.
+
+"
+                         (with-current-buffer (window-buffer (selected-window))
+                           (buffer-string)))))
+      (kill-buffer "*Anaconda*"))))
 
 (ert-deftest test-anaconda-mode-view-make-bold ()
   "Make bold string."

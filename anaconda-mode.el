@@ -344,44 +344,8 @@ submitted."
 (defun anaconda-mode-show-doc-callback (result)
   "Process view doc RESULT."
   (if result
-      (pop-to-buffer
-       (anaconda-mode-get-view-buffer-create
-        (anaconda-mode-format-view-doc-content result)))
+      (anaconda-mode-documentation-view result)
     (message "No documentation available")))
-
-(defun anaconda-mode-format-view-doc-content (result)
-  "Create content for documentation buffer from RESULT fields."
-  (->>
-   result
-   (--map (anaconda-mode-view-doc-extract-definition it))
-   (--map (apply 's-concat it))
-   (-map 's-trim)
-   (s-join "\n\n")
-   (s-append "\n")))
-
-(defun anaconda-mode-view-doc-extract-definition (definition)
-  "Extract module DEFINITION from the response structure."
-  (let ((map (make-sparse-keymap))
-        (handler (anaconda-mode-view-doc-make-click-handler definition)))
-    (define-key map (kbd "RET") handler)
-    (define-key map (kbd "<mouse-2>") handler)
-    (list (propertize
-           (cdr (assoc 'module-name definition))
-           'face 'bold
-           'mouse-face 'highlight
-           'help-echo "mouse-2: visit this module"
-           'keymap map)
-          "\n"
-          (cdr (assoc 'docstring definition)))))
-
-(defun anaconda-mode-view-doc-make-click-handler (definition)
-  "Create interactive event handler to open DEFINITION module path."
-  (lambda ()
-    (interactive)
-    (find-file (cdr (assoc 'module-path definition)))
-    (goto-char 0)
-    (forward-line (1- (cdr (assoc 'line definition))))
-    (forward-char (cdr (assoc 'column definition)))))
 
 
 ;;; Find definitions.
@@ -473,6 +437,10 @@ submitted."
   "Show definitions view for rpc RESULT."
   (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter))
 
+(defun anaconda-mode-documentation-view (result)
+  "Show documentation view for rpc RESULT."
+  (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter))
+
 (defun anaconda-mode-view (result presenter)
   "Show RESULT to user for future selection.
 RESULT must be an RESULT field from json-rpc response.
@@ -549,6 +517,16 @@ PRESENTER is the function used to format buffer content."
       it)
      (insert "\n"))
    (cdr module)))
+
+(defun anaconda-mode-view-documentation-presenter (result)
+  "Insert documentation from RESULT."
+  (--map
+   (progn
+     (insert (cdr (assoc 'module-name it)))
+     (insert "\n")
+     (insert (s-trim-right (cdr (assoc 'docstring it))))
+     (insert "\n\n"))
+   result))
 
 (defvar anaconda-view-mode-map
   (let ((map (make-sparse-keymap)))
