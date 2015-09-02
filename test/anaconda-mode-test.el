@@ -1054,21 +1054,6 @@ else:
                        (f-filename (buffer-file-name (window-buffer (selected-window)))))))
     (anaconda-mode-stop)))
 
-(ert-deftest test-anaconda-mode-find-references-single-reference ()
-  "Jump to reference immediately in the case of single reference."
-  (unwind-protect
-      (with-current-buffer (fixture "
-def test():
-    pass
-" 2 6)
-        (anaconda-mode-find-references)
-        (wait)
-        (sleep-for 1)
-        ;; Go to definition beginning.
-        (should (equal 2 (line-number-at-pos (point))))
-        (should (equal 4 (- (point) (line-beginning-position)))))
-    (anaconda-mode-stop)))
-
 
 ;;; Minor mode.
 
