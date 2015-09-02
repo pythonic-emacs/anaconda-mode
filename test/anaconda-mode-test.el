@@ -1060,14 +1060,13 @@ else:
       (with-current-buffer (fixture "
 def test():
     pass
-
-test()
 " 2 6)
         (anaconda-mode-find-references)
         (wait)
         (sleep-for 1)
-        (should (equal 5 (line-number-at-pos (point))))
-        (should (equal 1 (- (point) (line-beginning-position)))))
+        ;; Go to definition beginning.
+        (should (equal 2 (line-number-at-pos (point))))
+        (should (equal 4 (- (point) (line-beginning-position)))))
     (anaconda-mode-stop)))
 
 
