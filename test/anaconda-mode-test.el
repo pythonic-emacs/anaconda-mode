@@ -375,8 +375,8 @@ if True:
                     0 'description
                     (car (anaconda-mode-complete-extract-names result)))))))
 
-(ert-deftest test-anaconda-mode-complete-extract-description-trim-new-line ()
-  "Remove new line characters from completions description."
+(ert-deftest test-anaconda-mode-complete-extract-description-statement ()
+  "Don't extract whole statement source code as its definition property."
   (let ((result '(((description . "statement: \napilevel = \"2.0\"")
                    (type . "statement")
                    (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/sqlite3/dbapi2.py")
@@ -386,7 +386,7 @@ if True:
                    (line . 33)
                    (name . "apilevel")
                    (full-name . "dbapi2")))))
-    (should (equal "statement: apilevel = \"2.0\""
+    (should (equal "statement"
                    (get-text-property
                     0 'description
                     (car (anaconda-mode-complete-extract-names result)))))))
@@ -477,6 +477,43 @@ The class bool is a subclass of the class int, and cannot be subclassed.")
 Possible completions are:
 True <instance: builtins.bool>
 Try <keyword: builtins.try>"
+                         (with-current-buffer "*Completions*"
+                           (buffer-string))))))
+    (kill-buffer "*Completions*")))
+
+(ert-deftest test-anaconda-mode-complete-callback-completions-annotations-statements ()
+  "Don't show statements description in the annotations since it maybe really large."
+  (unwind-protect
+      (let ((result '(((description . "statement:
+__all__ = [\"normcase\",\"isabs\",\"join\",\"splitdrive\",\"split\",\"splitext\",
+           \"basename\",\"dirname\",\"commonprefix\",\"getsize\",\"getmtime\",
+           \"getatime\",\"getctime\",\"islink\",\"exists\",\"lexists\",\"isdir\",\"isfile\",
+           \"ismount\", \"expanduser\",\"expandvars\",\"normpath\",\"abspath\",
+           \"samefile\",\"sameopenfile\",\"samestat\",
+           \"curdir\",\"pardir\",\"sep\",\"pathsep\",\"defpath\",\"altsep\",\"extsep\",
+           \"devnull\",\"realpath\",\"supports_unicode_filenames\",\"relpath\"]")
+                       (type . "statement")
+                       (line . 19)
+                       (full-name . "os.path")
+                       (column . 0)
+                       (module-name . "posixpath")
+                       (name . "__all__")
+                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/posixpath.py"))
+                      ((description . "function: ntpath._get_altsep")
+                       (type . "function")
+                       (line . 47)
+                       (full-name . "os.path._get_altsep")
+                       (column . 4)
+                       (module-name . "ntpath")
+                       (name . "_get_altsep")
+                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")))))
+        (with-current-buffer (fixture "from os.path import _" 1 21)
+          (anaconda-mode-complete-callback result)
+          (should (equal "In this buffer, type RET to select the completion near point.
+
+Possible completions are:
+__all__ <statement>
+_get_altsep <function: ntpath._get_altsep>"
                          (with-current-buffer "*Completions*"
                            (buffer-string))))))
     (kill-buffer "*Completions*")))
