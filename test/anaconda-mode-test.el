@@ -997,6 +997,15 @@ one" 4 3 "initial.py")
   "Show error if there is no previous navigation buffer."
   (should-error (anaconda-mode-go-back)))
 
+(ert-deftest test-anaconda-mode-find-file-not-set-go-back-definition ()
+  "`anaconda-mode-find-file-generic' doesn't set go back
+definition if current buffer doesn't has file name."
+  (with-current-buffer (fixture "test" 1 3)
+    (anaconda-mode-find-file '((module-path . "simple.py")
+                               (line . 1)
+                               (column . 0)))
+    (should-not anaconda-mode-go-back-definition)))
+
 
 ;;; Definitions.
 

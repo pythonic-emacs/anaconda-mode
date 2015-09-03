@@ -545,10 +545,10 @@ PRESENTER is the function used to format buffer content."
 
 (defun anaconda-mode-find-file-generic (definition find-function)
   "Find DEFINITION with FIND-FUNCTION."
-  (let ((backward-navigation `((module-path . ,(when (buffer-file-name)
-                                                 (pythonic-file-name (buffer-file-name))))
-                               (line . ,(line-number-at-pos (point)))
-                               (column . ,(- (point) (line-beginning-position))))))
+  (let ((backward-navigation (when (buffer-file-name)
+                               `((module-path . ,(buffer-file-name))
+                                 (line . ,(line-number-at-pos (point)))
+                                 (column . ,(- (point) (line-beginning-position)))))))
     (funcall find-function (cdr (assoc 'module-path definition)))
     (goto-char 0)
     (forward-line (1- (cdr (assoc 'line definition))))
