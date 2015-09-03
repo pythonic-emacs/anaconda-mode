@@ -524,24 +524,30 @@ PRESENTER is the function used to format buffer content."
   (let ((definition (button-get button 'definition)))
     (anaconda-mode-find-file definition)))
 
-(defun anaconda-mode-find-file (definition)
-  "Find DEFINITION file, go to DEFINITION point."
-  (find-file (cdr (assoc 'module-path definition)))
-  (goto-char 0)
-  (forward-line (1- (cdr (assoc 'line definition))))
-  (forward-char (cdr (assoc 'column definition))))
-
 (defun anaconda-mode-view-jump-other-window (button)
   "Jump to definition file saved in BUTTON."
   (let ((definition (button-get button 'definition)))
     (anaconda-mode-find-file-other-window definition)))
 
+(defun anaconda-mode-find-file (definition)
+  "Find DEFINITION file, go to DEFINITION point."
+  (anaconda-mode-find-file-generic definition 'find-file))
+
 (defun anaconda-mode-find-file-other-window (definition)
   "Find DEFINITION file other window, go to DEFINITION point."
-  (find-file-other-window (cdr (assoc 'module-path definition)))
-  (goto-char 0)
-  (forward-line (1- (cdr (assoc 'line definition))))
-  (forward-char (cdr (assoc 'column definition))))
+  (anaconda-mode-find-file-generic definition 'find-file-other-window))
+
+(defun anaconda-mode-find-file-generic (definition find-function)
+  "Find DEFINITION with FIND-FUNCTION."
+  (let ((backward-navigation `((module-path . ,(when (buffer-file-name)
+                                                 (pythonic-file-name (buffer-file-name))))
+                               (line . ,(line-number-at-pos (point)))
+                               (column . ,(- (point) (line-beginning-position))))))
+    (funcall find-function (cdr (assoc 'module-path definition)))
+    (goto-char 0)
+    (forward-line (1- (cdr (assoc 'line definition))))
+    (forward-char (cdr (assoc 'column definition)))
+    (setq anaconda-mode-go-back-definition backward-navigation)))
 
 (defun anaconda-mode-view-insert-button (name definition)
   "Insert text button with NAME opening the DEFINITION."
@@ -597,6 +603,15 @@ to the beginning of buffer before definitions navigation."
   (forward-button num)
   (anaconda-mode-view-jump-other-window (button-at (point))))
 
+(defvar-local anaconda-mode-go-back-definition nil
+  "Previous definition from which current buffer was navigated.")
+
+(defun anaconda-mode-go-back ()
+  "Jump backward if buffer was navigated from `anaconda-mode' command."
+  (if anaconda-mode-go-back-definition
+      (anaconda-mode-find-file anaconda-mode-go-back-definition)
+    (error "No previous buffer")))
+
 
 ;;; Anaconda minor mode.
 
@@ -606,7 +621,7 @@ to the beginning of buffer before definitions navigation."
     (define-key map (kbd "M-.") 'anaconda-mode-find-definitions)
     (define-key map (kbd "M-,") 'anaconda-mode-find-assignments)
     (define-key map (kbd "M-r") 'anaconda-mode-find-references)
-    (define-key map (kbd "M-*") 'anaconda-mode-pop-mark)
+    (define-key map (kbd "M-*") 'anaconda-mode-go-back)
     (define-key map (kbd "M-?") 'anaconda-mode-show-doc)
     map)
   "Keymap for `anaconda-mode'.")

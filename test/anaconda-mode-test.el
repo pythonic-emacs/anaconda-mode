@@ -964,6 +964,22 @@ ends with a separator.
     (should (equal 'previous-error-no-select (key-binding "p")))
     (should (equal 'quit-window (key-binding "q")))))
 
+(ert-deftest test-anaconda-mode-go-back ()
+  "Jump backward if buffer was navigated from `anaconda-mode' command."
+  (with-current-buffer (fixture "
+test
+
+one" 4 3 "initial.py")
+    (anaconda-mode-find-file '((module-path . "simple.py")
+                               (line . 1)
+                               (column . 0)))
+    (anaconda-mode-go-back)
+    (should (equal "initial.py" (f-filename (buffer-file-name))))))
+
+(ert-deftest test-anaconda-mode-go-back-no-backward-file ()
+  "Show error if there is no previous navigation buffer."
+  (should-error (anaconda-mode-go-back)))
+
 
 ;;; Definitions.
 
