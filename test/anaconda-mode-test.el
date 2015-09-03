@@ -350,6 +350,23 @@ if True:
     (should (equal '("test1" "test2")
                    (anaconda-mode-complete-extract-names result)))))
 
+(ert-deftest test-anaconda-mode-complete-extract-names-properties ()
+  "Set properties on each completion candidate name."
+  (let* ((result '(((module-path . "/vagrant/simple.py")
+                    (docstring . "test1(a, b)")
+                    (line . 1)
+                    (module-name . "simple")
+                    (column . 4)
+                    (type . "function")
+                    (name . "test1")
+                    (full-name . "simple.test1")
+                    (description . "function: simple.test1"))))
+         (name (car (anaconda-mode-complete-extract-names result))))
+    (should (get-text-property 0 'description name))
+    (should (get-text-property 0 'module-path name))
+    (should (get-text-property 0 'line name))
+    (should (get-text-property 0 'docstring name))))
+
 (ert-deftest test-anaconda-mode-complete-extract-description ()
   "Set description property on each completion candidate name."
   (let ((result '(((module-path . "/vagrant/simple.py")

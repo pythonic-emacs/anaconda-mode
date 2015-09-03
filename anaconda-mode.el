@@ -360,10 +360,16 @@ submitted."
   "Extract completion names from anaconda-mode RESULT."
   (--map (let* ((name (cdr (assoc 'name it)))
                 (type (cdr (assoc 'type it)))
+                (module-path (cdr (assoc 'module-path it)))
+                (line (cdr (assoc 'line it)))
+                (docstring (cdr (assoc 'docstring it)))
                 (description (if (equal type "statement")
                                  "statement"
                                (cdr (assoc 'description it)))))
            (put-text-property 0 1 'description description name)
+           (put-text-property 0 1 'module-path module-path name)
+           (put-text-property 0 1 'line line name)
+           (put-text-property 0 1 'docstring docstring name)
            name)
          result))
 
