@@ -971,10 +971,10 @@ ends with a separator.
   (goto-char (point-min))
   (should-not (get-char-property (point) 'face)))
 
-(ert-deftest test-anaconda-view-mode ()
+(ert-deftest test-anaconda-mode-view-mode ()
   "Test anaconda-view major mode."
   (with-temp-buffer
-    (anaconda-view-mode)
+    (anaconda-mode-view-mode)
     (should next-error-function)
     (should buffer-read-only)
     (should (equal 'next-error-no-select (key-binding "n")))
@@ -1005,6 +1005,16 @@ definition if current buffer doesn't has file name."
                                (line . 1)
                                (column . 0)))
     (should-not anaconda-mode-go-back-definition)))
+
+(ert-deftest test-anaconda-mode-with-view-buffer-multiple-times ()
+  "It is possible to reuse *Anaconda* buffer multiple times without errors."
+  (unwind-protect
+      (progn
+        (anaconda-mode-with-view-buffer
+         (insert "a"))
+        (anaconda-mode-with-view-buffer
+         (insert "b")))
+    (kill-buffer "*Anaconda*")))
 
 
 ;;; Definitions.

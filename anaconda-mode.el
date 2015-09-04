@@ -500,11 +500,11 @@ PRESENTER is the function used to format buffer content."
   "Create view buffer and execute BODY in it."
   `(let ((buf (get-buffer-create "*Anaconda*")))
      (with-current-buffer buf
-       (fundamental-mode)
+       (setq buffer-read-only nil)
        (erase-buffer)
        ,@body
        (goto-char (point-min))
-       (anaconda-view-mode)
+       (anaconda-mode-view-mode)
        buf)))
 
 (defun anaconda-mode-view-make-bold (string)
@@ -589,17 +589,17 @@ PRESENTER is the function used to format buffer content."
      (insert "\n\n"))
    result))
 
-(defvar anaconda-view-mode-map
+(defvar anaconda-mode-view-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "n") 'next-error-no-select)
     (define-key map (kbd "p") 'previous-error-no-select)
     (define-key map (kbd "q") 'quit-window)
     map))
 
-(define-derived-mode anaconda-view-mode special-mode "Anaconda-View"
+(define-derived-mode anaconda-mode-view-mode special-mode "Anaconda-View"
   "Major mode for definitions view and navigation for `anaconda-mode'.
 
-\\{anaconda-view-mode-map}"
+\\{anaconda-mode-view-mode-map}"
   (setq next-error-function #'anaconda-mode-next-definition))
 
 (defun anaconda-mode-next-definition (num reset)
