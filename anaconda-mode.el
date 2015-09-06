@@ -432,7 +432,7 @@ submitted."
   "Process find references RESULT."
   (if result
       (anaconda-mode-definitions-view result)
-    (message "No reverses found")))
+    (message "No references found")))
 
 
 ;;; Eldoc.
