@@ -1,11 +1,11 @@
-;;; anaconda-mode.el --- Code navigation, documentation lookup and completion for Python
+;;; anaconda-mode.el --- Code navigation, documentation lookup and completion for Python  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2013-2015 by Artem Malyshev
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "24") (json-rpc "0.0.1") (cl-lib "0.5.0") (dash "2.6.0") (f "0.16.2"))
+;; Package-Requires: ((emacs "24") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -26,527 +26,609 @@
 
 ;;; Code:
 
-(require 'python)
-(require 'json-rpc)
 (require 'tramp)
-(require 'cl-lib)
+(require 'url)
+(require 'json)
+(require 'pythonic)
 (require 'dash)
+(require 's)
 (require 'f)
+
+(defgroup anaconda-mode nil
+  "Code navigation, documentation lookup and completion for Python."
+  :group 'programming)
+
+(defcustom anaconda-mode-complete-callback
+  'anaconda-mode-complete-callback
+  "Callback function used to display `anaconda-mode-complete' result."
+  :group 'anaconda-mode
+  :type 'function)
+
+(defcustom anaconda-mode-show-doc-callback
+  'anaconda-mode-show-doc-callback
+  "Callback function used to display `anaconda-mode-show-doc' result."
+  :group 'anaconda-mode
+  :type 'function)
+
+(defcustom anaconda-mode-find-definitions-callback
+  'anaconda-mode-find-definitions-callback
+  "Callback function used to display `anaconda-mode-find-definitions' result."
+  :group 'anaconda-mode
+  :type 'function)
+
+(defcustom anaconda-mode-find-assignments-callback
+  'anaconda-mode-find-assignments-callback
+  "Callback function used to display `anaconda-mode-find-assignments' result."
+  :group 'anaconda-mode
+  :type 'function)
+
+(defcustom anaconda-mode-find-references-callback
+  'anaconda-mode-find-references-callback
+  "Callback function used to display `anaconda-mode-find-references' result."
+  :group 'anaconda-mode
+  :type 'function)
+
+(defcustom anaconda-mode-eldoc-callback
+  'anaconda-mode-eldoc-callback
+  "Callback function used to display `anaconda-mode-eldoc-function' result."
+  :group 'anaconda-mode
+  :type 'function)
+
+(defcustom anaconda-mode-eldoc-as-single-line nil
+  "If not nil, trim eldoc string to frame width."
+  :group 'anaconda-mode
+  :type 'boolean)
 
 
 ;;; Server.
 
-(defvar anaconda-mode-server
-  (f-join (f-dirname load-file-name) "anaconda_mode.py")
-  "Script file with anaconda_mode server.")
+(defvar anaconda-mode-server-version "0.1.1"
+  "Server version needed to run anaconda-mode.")
 
-(defvar anaconda-mode-remote-p nil
-  "Determine whatever connect to remove server or a local machine.")
+(defvar anaconda-mode-server-directory
+  (f-join "~" ".emacs.d" "anaconda-mode" anaconda-mode-server-version)
+  "Anaconda mode installation directory.")
 
-(defvar anaconda-mode-host "localhost"
-  "Target host with anaconda_mode server.")
+(defvar anaconda-mode-server-script "anaconda_mode.py"
+  "Script file with anaconda-mode server.")
 
-(defvar anaconda-mode-port nil
-  "Port for anaconda_mode connection.")
+(defvar anaconda-mode-process-name "anaconda-mode"
+  "Process name for anaconda-mode processes.")
+
+(defvar anaconda-mode-process-buffer "*anaconda-mode*"
+  "Buffer name for anaconda-mode processes.")
 
 (defvar anaconda-mode-process nil
-  "Currently running anaconda_mode process.")
+  "Currently running anaconda-mode process.")
 
-(defvar anaconda-mode-process-pythonpath nil
-  "PYTHONPATH value used to start anaconda_mode server last time.")
+(defvar anaconda-mode-port nil
+  "Port for anaconda-mode connection.")
 
-(defvar anaconda-mode-connection nil
-  "Json Rpc connection to anaconda_mode process.")
+(defvar anaconda-mode-ensure-directory-command
+  (list
+   "-c" "
+import os
+import sys
+directory = sys.argv[1]
+if not os.path.exists(directory):
+    os.makedirs(directory)
+" anaconda-mode-server-directory)
+  "Create `anaconda-mode-server-directory' if necessary.")
 
-(defvaralias 'anaconda-mode-virtualenv-variable (if (version< emacs-version "25.1")
-                                                    'python-shell-virtualenv-path
-                                                  'python-shell-virtualenv-root)
-  "Alias to `python.el' virtualenv variable.")
+(defvar anaconda-mode-check-installation-command
+  (list "-c" "
+from pkg_resources import get_distribution
+def check_deps(deps=['anaconda_mode']):
+    for each in deps:
+        distrib = get_distribution(each)
+        requirements = distrib.requires()
+        check_deps(requirements)
+check_deps()
+")
+  "Check if `anaconda-mode' server is installed or not.")
 
-(defun anaconda-mode-python ()
-  "Detect python executable."
-  (let ((python (if (eq system-type 'windows-nt) "pythonw" "python"))
-        (bin-dir (if (eq system-type 'windows-nt) "Scripts" "bin")))
-    (--if-let anaconda-mode-virtualenv-variable
-        (f-join it bin-dir python)
-      python)))
+(defvar anaconda-mode-install-server-command
+  (list "-m" "pip" "install" "-t" "."
+        (concat "anaconda_mode" "=="
+                anaconda-mode-server-version))
+  "Install `anaconda_mode' server.")
 
-(defun anaconda-mode-pythonpath ()
-  "Get current PYTHONPATH value."
-  (getenv "PYTHONPATH"))
+(defun anaconda-mode-host ()
+  "Target host with anaconda-mode server."
+  (if (pythonic-remote-p)
+      (tramp-file-name-host
+       (tramp-dissect-file-name
+        (pythonic-tramp-connection)))
+    "127.0.0.1"))
 
-(defun anaconda-mode-start ()
-  "Start anaconda_mode.py server."
+(defun anaconda-mode-start (&optional callback)
+  "Start anaconda-mode server.
+CALLBACK function will be called when `anaconda-mode-port' will
+be bound."
   (when (anaconda-mode-need-restart)
     (anaconda-mode-stop))
-  (unless (anaconda-mode-running-p)
-    (anaconda-mode-bootstrap)))
+  (if (anaconda-mode-running-p)
+      (when callback
+        (funcall callback))
+    (anaconda-mode-ensure-directory callback)))
 
 (defun anaconda-mode-stop ()
-  "Stop anaconda_mode.py server."
+  "Stop anaconda-mode server."
   (when (anaconda-mode-running-p)
+    (set-process-filter anaconda-mode-process nil)
+    (set-process-sentinel anaconda-mode-process nil)
     (kill-process anaconda-mode-process)
-    (setq anaconda-mode-process nil)))
+    (setq anaconda-mode-process nil
+          anaconda-mode-port nil)))
 
 (defun anaconda-mode-running-p ()
-  "Check for running anaconda_mode server."
+  "Is `anaconda-mode' server running."
   (and anaconda-mode-process
        (process-live-p anaconda-mode-process)))
 
+(defun anaconda-mode-bound-p ()
+  "Is `anaconda-mode' port bound."
+  (numberp anaconda-mode-port))
+
 (defun anaconda-mode-need-restart ()
-  "Check if current `anaconda-mode-process' need restart with new args.
-Return nil if it run under proper environment."
-  (or (anaconda-mode-virtualenv-has-been-changed)
-      (anaconda-mode-pythonpath-has-been-changed)))
+  "Check if we need to restart `anaconda-mode-server'."
+  (when (anaconda-mode-running-p)
+    (not (pythonic-proper-environment-p anaconda-mode-process))))
 
-(defun anaconda-mode-virtualenv-has-been-changed ()
-  "Determine if virtual environment has been changed."
-  (and (anaconda-mode-running-p)
-       (not (equal (car (process-command anaconda-mode-process))
-                   (anaconda-mode-python)))))
-
-(defun anaconda-mode-pythonpath-has-been-changed ()
-  "Determine if PYTHONPATH has been changed."
-  (and (anaconda-mode-running-p)
-       (not (equal anaconda-mode-process-pythonpath
-                   (anaconda-mode-pythonpath)))))
-
-(defun anaconda-mode-bootstrap ()
-  "Run anaconda-mode-command process."
-  (let ((exec-path (python-shell-calculate-exec-path)))
-    (unless (executable-find "pip")
-      (error "Unable to find pip executable")))
+(defun anaconda-mode-ensure-directory (&optional callback)
+  "Ensure if `anaconda-mode-server-directory' exists.
+CALLBACK function will be called when `anaconda-mode-port' will
+be bound."
   (setq anaconda-mode-process
-        (start-process
-         "anaconda_mode"
-         "*anaconda-mode*"
-         (anaconda-mode-python)
-         anaconda-mode-server))
-  (setq anaconda-mode-process-pythonpath (anaconda-mode-pythonpath))
-  (set-process-filter anaconda-mode-process 'anaconda-mode-process-filter)
-  (while (null anaconda-mode-port)
-    (accept-process-output anaconda-mode-process)
-    (unless (anaconda-mode-running-p)
-      (error "Unable to run anaconda-mode server")))
-  (set-process-filter anaconda-mode-process nil)
-  (set-process-query-on-exit-flag anaconda-mode-process nil))
+        (start-pythonic :process anaconda-mode-process-name
+                        :buffer anaconda-mode-process-buffer
+                        :sentinel (lambda (process event) (anaconda-mode-ensure-directory-sentinel process event callback))
+                        :args anaconda-mode-ensure-directory-command)))
 
-(defun anaconda-mode-process-filter (process output)
-  "Set `anaconda-mode-port' from PROCESS OUTPUT."
-  (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
-    (setq anaconda-mode-port (string-to-number (cadr it))))
+(defun anaconda-mode-ensure-directory-sentinel (process event &optional callback)
+  "Run `anaconda-mode-check' if `anaconda-mode-server-directory' exists.
+Raise error otherwise.  PROCESS and EVENT are basic sentinel
+parameters.  CALLBACK function will be called when
+`anaconda-mode-port' will be bound."
+  (if (eq 0 (process-exit-status process))
+      (anaconda-mode-check callback)
+    (pop-to-buffer anaconda-mode-process-buffer)
+    (error "Can't create %s directory" anaconda-mode-server-directory)))
+
+(defun anaconda-mode-check (&optional callback)
+  "Check `anaconda-mode' server installation.
+CALLBACK function will be called when `anaconda-mode-port' will
+be bound."
+  (setq anaconda-mode-process
+        (start-pythonic :process anaconda-mode-process-name
+                        :buffer anaconda-mode-process-buffer
+                        :cwd anaconda-mode-server-directory
+                        :sentinel (lambda (process event) (anaconda-mode-check-sentinel process event callback))
+                        :args anaconda-mode-check-installation-command)))
+
+(defun anaconda-mode-check-sentinel (process event &optional callback)
+  "Run `anaconda-mode-bootstrap' if server installation check passed.
+Try to install `anaconda-mode' server otherwise.  PROCESS and
+EVENT are basic sentinel parameters.  CALLBACK function will be
+called when `anaconda-mode-port' will be bound."
+  (if (eq 0 (process-exit-status process))
+      (anaconda-mode-bootstrap callback)
+    (anaconda-mode-install callback)))
+
+(defun anaconda-mode-install (&optional callback)
+  "Try to install `anaconda-mode' server.
+CALLBACK function will be called when `anaconda-mode-port' will
+be bound."
+  (setq anaconda-mode-process
+        (start-pythonic :process anaconda-mode-process-name
+                        :buffer anaconda-mode-process-buffer
+                        :cwd anaconda-mode-server-directory
+                        :sentinel (lambda (process event) (anaconda-mode-install-sentinel process event callback))
+                        :args anaconda-mode-install-server-command)))
+
+(defun anaconda-mode-install-sentinel (process event &optional callback)
+  "Run `anaconda-mode-bootstrap' if server installation complete successfully.
+Raise error otherwise.  PROCESS and EVENT are basic sentinel
+parameters.  CALLBACK function will be called when
+`anaconda-mode-port' will be bound."
+  (if (eq 0 (process-exit-status process))
+      (anaconda-mode-bootstrap callback)
+    (pop-to-buffer anaconda-mode-process-buffer)
+    (error "Can't install `anaconda-mode' server")))
+
+(defun anaconda-mode-bootstrap (&optional callback)
+  "Run `anaconda-mode' server.
+CALLBACK function will be called when `anaconda-mode-port' will
+be bound."
+  (setq anaconda-mode-process
+        (start-pythonic :process anaconda-mode-process-name
+                        :buffer anaconda-mode-process-buffer
+                        :cwd anaconda-mode-server-directory
+                        :filter (lambda (process output) (anaconda-mode-bootstrap-filter process output callback))
+                        :sentinel 'anaconda-mode-bootstrap-sentinel
+                        :query-on-exit nil
+                        :args (list anaconda-mode-server-script))))
+
+(defun anaconda-mode-bootstrap-filter (process output &optional callback)
+  "Set `anaconda-mode-port' from PROCESS OUTPUT.
+Connect to the `anaconda-mode' server.  CALLBACK function will be
+called when `anaconda-mode-port' will be bound."
   ;; Mimic default filter.
   (when (buffer-live-p (process-buffer process))
     (with-current-buffer (process-buffer process)
       (save-excursion
         (goto-char (process-mark process))
         (insert output)
-        (set-marker (process-mark process) (point))))))
+        (set-marker (process-mark process) (point)))))
+  (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
+    (setq anaconda-mode-port (string-to-number (cadr it)))
+    (set-process-filter process nil)
+    (when callback
+      (funcall callback))))
 
-
-;;; Connection.
-
-(defun anaconda-mode-connect ()
-  "Connect to anaconda_mode.py server."
-  (when (anaconda-mode-need-reconnect)
-    (anaconda-mode-disconnect))
-  (unless (anaconda-mode-connected-p)
-    (setq anaconda-mode-connection
-          (json-rpc-connect anaconda-mode-host anaconda-mode-port))
-    (set-process-query-on-exit-flag
-     (json-rpc-process anaconda-mode-connection) nil)))
-
-(defun anaconda-mode-disconnect ()
-  "Disconnect from anaconda_mode.py server."
-  (when (anaconda-mode-connected-p)
-    (json-rpc-close anaconda-mode-connection)
-    (setq anaconda-mode-connection nil)))
-
-(defun anaconda-mode-connected-p ()
-  "Check if `anaconda-mode' connected to server."
-  (and anaconda-mode-connection
-       (json-rpc-live-p anaconda-mode-connection)))
-
-(defun anaconda-mode-need-reconnect ()
-  "Check if current `anaconda-mode-connection' need to be reconnected."
-  (and (anaconda-mode-connected-p)
-       (or (not (equal (json-rpc-host anaconda-mode-connection)
-                       anaconda-mode-host))
-           (not (equal (json-rpc-port anaconda-mode-connection)
-                       anaconda-mode-port)))))
+(defun anaconda-mode-bootstrap-sentinel (process event)
+  "Raise error if `anaconda-mode' server exit abnormally.
+PROCESS and EVENT are basic sentinel parameters."
+  (unless (eq 0 (process-exit-status process))
+    (pop-to-buffer anaconda-mode-process-buffer)
+    (error "Can't start `anaconda-mode' server")))
 
 
 ;;; Interaction.
 
-;;;###autoload
-(defun anaconda-mode-remote (host port)
-  "Suggest anaconda_mode.py running on HOST at PORT."
-  (interactive (list (read-string "Host: ") (read-number "Port: ")))
-  (setq anaconda-mode-remote-p t
-        anaconda-mode-host host
-        anaconda-mode-port port))
+(defun anaconda-mode-call (command callback)
+  "Make remote procedure call for COMMAND.
+Apply CALLBACK to it result."
+  (anaconda-mode-start
+   (lambda () (anaconda-mode-jsonrpc command callback))))
 
-;;;###autoload
-(defun anaconda-mode-local ()
-  "Suggest anaconda_mode.py running on localhost."
-  (interactive)
-  (setq anaconda-mode-remote-p nil
-        anaconda-mode-host "localhost"
-        anaconda-mode-port nil))
+(defun anaconda-mode-jsonrpc (command callback)
+  "Perform JSONRPC call for COMMAND.
+Apply CALLBACK to the call result when retrieve it.  Remote
+COMMAND must expect four arguments: python buffer content, line
+number position, column number position and file path."
+  (let ((url-request-method "POST")
+        (url-request-data (anaconda-mode-jsonrpc-request command)))
+    (url-retrieve
+     (format "http://%s:%s" (anaconda-mode-host) anaconda-mode-port)
+     (anaconda-mode-create-response-handler command callback)
+     nil
+     t)))
 
-(defun anaconda-mode-call (command)
-  "Make remote procedure call for COMMAND."
-  (unless anaconda-mode-remote-p
-    (anaconda-mode-start))
-  (anaconda-mode-connect)
-  ;; use list since not all dash functions operate on vectors
-  (let ((json-array-type 'list))
-    (json-rpc
-     anaconda-mode-connection
-     command
-     (buffer-substring-no-properties (point-min) (point-max))
-     (line-number-at-pos (point))
-     (- (point) (line-beginning-position))
-     (anaconda-mode-file-name))))
+(defun anaconda-mode-jsonrpc-request (command)
+  "Prepare JSON encoded buffer data for COMMAND call."
+  (json-encode (anaconda-mode-jsonrpc-request-data command)))
 
-(defun anaconda-mode-file-name ()
-  "Return appropriate buffer file name both for local and tramp files."
-  (if (tramp-tramp-file-p (buffer-file-name))
-      (tramp-file-name-localname
-       (tramp-dissect-file-name
-        (buffer-file-name)))
-    (buffer-file-name)))
+(defun anaconda-mode-jsonrpc-request-data (command)
+  "Prepare buffer data for COMMAND call."
+  `((jsonrpc . "2.0")
+    (id . 1)
+    (method . ,command)
+    (params . ((source . ,(buffer-substring-no-properties (point-min) (point-max)))
+               (line . ,(line-number-at-pos (point)))
+               (column . ,(- (point) (line-beginning-position)))
+               (path . ,(when (buffer-file-name)
+                          (pythonic-file-name (buffer-file-name))))))))
+
+(defun anaconda-mode-create-response-handler (command callback)
+  "Create server response handler based on COMMAND and CALLBACK function.
+COMMAND argument will be used for response skip message.
+Response can be skipped if point was moved sense request was
+submitted."
+  (let ((anaconda-mode-request-point (point))
+        (anaconda-mode-request-buffer (current-buffer))
+        (anaconda-mode-request-window (selected-window))
+        (anaconda-mode-request-tick (buffer-chars-modified-tick)))
+    (lambda (status)
+      (unwind-protect
+          (if (or (not (equal anaconda-mode-request-window (selected-window)))
+                  (with-current-buffer (window-buffer anaconda-mode-request-window)
+                    (or (not (equal anaconda-mode-request-buffer (current-buffer)))
+                        (not (equal anaconda-mode-request-point (point)))
+                        (not (equal anaconda-mode-request-tick (buffer-chars-modified-tick))))))
+              (message "Skip anaconda-mode %s response" command)
+            (goto-char url-http-end-of-headers)
+            (let* ((json-array-type 'list)
+                   (response (json-read)))
+              (if (assoc 'error response)
+                  (error (cdr (assoc 'error response)))
+                (with-current-buffer anaconda-mode-request-buffer
+                  ;; Terminate `apply' call with empty list so response
+                  ;; will be treated as single argument.
+                  (apply callback (cdr (assoc 'result response)) nil)))))
+        (kill-buffer (current-buffer))))))
 
 
 ;;; Code completion.
 
-(defun anaconda-mode-complete-at-point ()
-  "Complete at point with anaconda_mode."
-  (let* ((bounds (bounds-of-thing-at-point 'symbol))
-         (start (or (car bounds) (point)))
-         (stop (or (cdr bounds) (point))))
-    (list start stop
-          (completion-table-dynamic
-           'anaconda-mode-complete-thing))))
-
-(defun anaconda-mode-complete-thing (&rest ignored)
-  "Complete python thing at point.
-Do nothing in comments block.
-IGNORED parameter is the string for which completion is required."
-  (unless (python-syntax-comment-or-string-p)
-    (--map (plist-get it :name)
-           (anaconda-mode-complete))))
-
 (defun anaconda-mode-complete ()
   "Request completion candidates."
-  (anaconda-mode-call "complete"))
+  (interactive)
+  (unless (python-syntax-comment-or-string-p)
+    (anaconda-mode-call "complete" anaconda-mode-complete-callback)))
+
+(defun anaconda-mode-complete-callback (result)
+  "Start interactive completion on RESULT receiving."
+  (let* ((bounds (bounds-of-thing-at-point 'symbol))
+         (start (or (car bounds) (point)))
+         (stop (or (cdr bounds) (point)))
+         (collection (anaconda-mode-complete-extract-names result))
+         (completion-extra-properties '(:annotation-function anaconda-mode-complete-annotation)))
+    (completion-in-region start stop collection)))
+
+(defun anaconda-mode-complete-extract-names (result)
+  "Extract completion names from anaconda-mode RESULT."
+  (--map (let* ((name (cdr (assoc 'name it)))
+                (type (cdr (assoc 'type it)))
+                (module-path (cdr (assoc 'module-path it)))
+                (line (cdr (assoc 'line it)))
+                (docstring (cdr (assoc 'docstring it)))
+                (description (if (equal type "statement")
+                                 "statement"
+                               (cdr (assoc 'description it)))))
+           (put-text-property 0 1 'description description name)
+           (put-text-property 0 1 'module-path module-path name)
+           (put-text-property 0 1 'line line name)
+           (put-text-property 0 1 'docstring docstring name)
+           name)
+         result))
+
+(defun anaconda-mode-complete-annotation (candidate)
+  "Get annotation for CANDIDATE."
+  (--when-let (get-text-property 0 'description candidate)
+    (concat " <" it ">")))
 
 
 ;;; View documentation.
 
-(defun anaconda-mode-view-doc ()
+(defun anaconda-mode-show-doc ()
   "Show documentation for context at point."
   (interactive)
-  (pop-to-buffer
-   (anaconda-mode-doc-buffer
-    (or (anaconda-mode-call "doc")
-        (error "No documentation found")))))
+  (anaconda-mode-call "goto_definitions" anaconda-mode-show-doc-callback))
 
-(defun anaconda-mode-doc-buffer (doc)
-  "Display documentation buffer with contents DOC."
-  (let ((buf (get-buffer-create "*anaconda-doc*")))
-    (with-current-buffer buf
-      (view-mode -1)
-      (erase-buffer)
-      (insert doc)
-      (goto-char (point-min))
-      (view-mode 1)
-      buf)))
+(defun anaconda-mode-show-doc-callback (result)
+  "Process view doc RESULT."
+  (if result
+      (anaconda-mode-documentation-view result)
+    (message "No documentation available")))
 
 
-;;; Usages.
+;;; Find definitions.
 
-(defun anaconda-mode-usages ()
-  "Show usages for thing at point."
+(defun anaconda-mode-find-definitions ()
+  "Find definitions for thing at point."
   (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "usages")
-       (error "No usages found"))))
+  (anaconda-mode-call "goto_definitions" anaconda-mode-find-definitions-callback))
+
+(defun anaconda-mode-find-definitions-callback (result)
+  "Process find definitions RESULT."
+  (if result
+      (anaconda-mode-definitions-view result)
+    (message "No definitions found")))
 
 
-;;; Definitions and assignments.
+;;; Find assignments.
 
-(defun anaconda-mode-goto-definitions ()
-  "Goto definition for thing at point."
+(defun anaconda-mode-find-assignments ()
+  "Find assignments for thing at point."
   (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "goto_definitions")
-       (error "No definition found"))
-   t))
+  (anaconda-mode-call "goto_assignments" anaconda-mode-find-assignments-callback))
 
-(defun anaconda-mode-goto-assignments ()
-  "Goto assignment for thing at point."
-  (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "goto_assignments")
-       (error "No assignment found"))
-   t))
-
-(defun anaconda-mode-goto ()
-  "Goto definition or fallback to assignment for thing at point."
-  (interactive)
-  (anaconda-nav-navigate
-   (or (anaconda-mode-call "goto_definitions")
-       (anaconda-mode-call "goto_assignments")
-       (error "No definition found"))
-   t))
+(defun anaconda-mode-find-assignments-callback (result)
+  "Process find assignments RESULT."
+  (if result
+      (anaconda-mode-definitions-view result)
+    (message "No assignments found")))
 
 
-;;; Anaconda navigator mode
+;;; Find references.
 
-(defvar anaconda-nav--last-marker nil)
-(defvar anaconda-nav--markers ())
-
-(defun anaconda-nav-pop-marker ()
-  "Switch to buffer of most recent marker."
+(defun anaconda-mode-find-references ()
+  "Find references for thing at point."
   (interactive)
-  (unless anaconda-nav--markers
-    (error "No marker available"))
-  (let* ((marker (pop anaconda-nav--markers))
-         (buffer (marker-buffer marker)))
-    (unless (buffer-live-p buffer)
-      (error "Buffer no longer available"))
-    (switch-to-buffer buffer)
-    (goto-char (marker-position marker))
-    (set-marker marker nil)
-    (anaconda-nav--cleanup-buffers)))
+  (anaconda-mode-call "usages" anaconda-mode-find-references-callback))
 
-(defun anaconda-nav--push-last-marker ()
-  "Add last marker to markers."
-  (when (markerp anaconda-nav--last-marker)
-    (push anaconda-nav--last-marker anaconda-nav--markers)
-    (setq anaconda-nav--last-marker nil)))
-
-(defun anaconda-nav--all-markers ()
-  "Markers including last-marker."
-  (if anaconda-nav--last-marker
-      (cons anaconda-nav--last-marker anaconda-nav--markers)
-    anaconda-nav--markers))
-
-(defvar anaconda-nav--window-configuration nil)
-(defvar anaconda-nav--created-buffers ())
-
-(defun anaconda-nav--cleanup-buffers ()
-  "Kill unmodified buffers (without markers) created by anaconda-nav."
-  (let* ((marker-buffers (-map 'marker-buffer (anaconda-nav--all-markers)))
-         (result (--separate (-contains? marker-buffers it)
-                             anaconda-nav--created-buffers)))
-    (setq anaconda-nav--created-buffers (car result))
-    (-each (cadr result) 'kill-buffer-if-not-modified)))
-
-(defun anaconda-nav--get-or-create-buffer (path)
-  "Get buffer for PATH, and record if buffer was created."
-  (or (find-buffer-visiting path)
-      (let ((created-buffer (find-file-noselect path)))
-        (anaconda-nav--cleanup-buffers)
-        (push created-buffer anaconda-nav--created-buffers)
-        created-buffer)))
-
-(defun anaconda-nav--restore-window-configuration ()
-  "Restore window configuration."
-  (when anaconda-nav--window-configuration
-    (set-window-configuration anaconda-nav--window-configuration)
-    (setq anaconda-nav--window-configuration nil)))
-
-(defun anaconda-nav-navigate (result &optional goto-if-single-item)
-  "Navigate RESULT, jump if only one item and GOTO-IF-SINGLE-ITEM is non-nil."
-  (setq anaconda-nav--last-marker (point-marker))
-  (if (and goto-if-single-item (= 1 (length result)))
-      (progn (anaconda-nav--push-last-marker)
-             (switch-to-buffer (anaconda-nav--item-buffer (car result))))
-    (setq anaconda-nav--window-configuration (current-window-configuration))
-    (delete-other-windows)
-    (switch-to-buffer-other-window (anaconda-nav--prepare-buffer result))))
-
-(defun anaconda-nav--prepare-buffer (result)
-  "Render RESULT in the navigation buffer."
-  (with-current-buffer (get-buffer-create "*anaconda-nav*")
-    (setq buffer-read-only nil)
-    (erase-buffer)
-    (setq-local overlay-arrow-position nil)
-    (--> result
-      (--group-by (cons (plist-get it :module)
-                        (plist-get it :path)) it)
-      (--each it (apply 'anaconda-nav--insert-module it)))
-    (goto-char (point-min))
-    (anaconda-nav-mode)
-    (current-buffer)))
-
-(defun anaconda-nav--insert-module (header &rest items)
-  "Insert a module consisting of a HEADER with ITEMS."
-  (insert (propertize (car header)
-                      'face 'bold
-                      'anaconda-nav-module t)
-          "\n")
-  (--each items (insert (anaconda-nav--format-item it) "\n"))
-  (insert "\n"))
-
-(defun anaconda-nav--format-item (item)
-  "Format ITEM as a row."
-  (propertize
-   (concat (propertize (format "%7d " (plist-get item :line))
-                       'face 'compilation-line-number)
-           (anaconda-nav--get-item-description item))
-   'anaconda-nav-item item
-   'follow-link t
-   'mouse-face 'highlight))
-
-(defun anaconda-nav--get-item-description (item)
-  "Format description of ITEM."
-  (cl-destructuring-bind (&key column name description type &allow-other-keys) item
-    (cond ((string= type "module") "«module definition»")
-          (t (let ((to (+ column (length name))))
-               (when (string= name (substring description column to))
-                 (put-text-property column to 'face 'highlight description))
-               description)))))
-
-(defun anaconda-nav-next-error (&optional argp reset)
-  "Move to the ARGP'th next match, searching from start if RESET is non-nil."
-  (interactive "p")
-  (with-current-buffer (get-buffer "*anaconda-nav*")
-    (goto-char (cond (reset (point-min))
-                     ((cl-minusp argp) (line-beginning-position))
-                     ((cl-plusp argp) (line-end-position))
-                     ((point))))
-
-    (--dotimes (abs argp)
-      (anaconda-nav--goto-property 'anaconda-nav-item (cl-plusp argp)))
-
-    (setq-local overlay-arrow-position (copy-marker (line-beginning-position)))
-    (--when-let (get-text-property (point) 'anaconda-nav-item)
-      (pop-to-buffer (anaconda-nav--item-buffer it)))))
-
-(defun anaconda-nav--goto-property (prop forwardp)
-  "Goto next property PROP in direction FORWARDP."
-  (--if-let (anaconda-nav--find-property prop forwardp)
-      (goto-char it)
-    (error "No more matches")))
-
-(defun anaconda-nav--find-property (prop forwardp)
-  "Find next property PROP in direction FORWARDP."
-  (let ((search (if forwardp #'next-single-property-change
-                  #'previous-single-property-change)))
-    (-when-let (pos (funcall search (point) prop))
-      (if (get-text-property pos prop) pos
-        (funcall search pos prop)))))
-
-(defun anaconda-nav--item-buffer (item)
-  "Get buffer of ITEM and position the point."
-  (cl-destructuring-bind (&key line column name path &allow-other-keys) item
-    (with-current-buffer (anaconda-nav--get-or-create-buffer path)
-      (goto-char (point-min))
-      (forward-line (1- line))
-      (forward-char column)
-      (anaconda-nav--highlight name)
-      (current-buffer))))
-
-(defun anaconda-nav--highlight (name)
-  "Highlight NAME or line at point."
-  (isearch-highlight (point)
-                     (if (string= (symbol-at-point) name)
-                         (+ (point) (length name))
-                       (point-at-eol)))
-  (run-with-idle-timer 0.5 nil 'isearch-dehighlight))
-
-(defvar anaconda-nav-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map [mouse-2] 'anaconda-nav-goto-item)
-    (define-key map (kbd "RET") 'anaconda-nav-goto-item)
-    (define-key map (kbd "n") 'next-error)
-    (define-key map (kbd "p") 'previous-error)
-    (define-key map (kbd "N") 'anaconda-nav-next-module)
-    (define-key map (kbd "P") 'anaconda-nav-previous-module)
-    (define-key map (kbd "q") 'anaconda-nav-quit)
-    map)
-  "Keymap for `anaconda-nav-mode'.")
-
-(defun anaconda-nav-next-module ()
-  "Visit first error of next module."
-  (interactive)
-  (anaconda-nav--goto-property 'anaconda-nav-module t)
-  (next-error))
-
-(defun anaconda-nav-previous-module ()
-  "Visit first error of previous module."
-  (interactive)
-  (anaconda-nav--goto-property 'anaconda-nav-item nil)
-  (anaconda-nav--goto-property 'anaconda-nav-module nil)
-  (next-error))
-
-(defun anaconda-nav-quit ()
-  "Quit `anaconda-nav-mode' and restore window configuration."
-  (interactive)
-  (quit-window)
-  (anaconda-nav--restore-window-configuration))
-
-(defun anaconda-nav-goto-item (&optional event)
-  "Go to the location of the item from EVENT."
-  (interactive (list last-input-event))
-  (when event (goto-char (posn-point (event-end event))))
-  (-when-let (buffer (anaconda-nav-next-error 0))
-    (anaconda-nav--restore-window-configuration)
-    (anaconda-nav--push-last-marker)
-    (switch-to-buffer buffer)))
-
-(define-derived-mode anaconda-nav-mode special-mode "anaconda-nav"
-  "Major mode for navigating a list of source locations."
-  (use-local-map anaconda-nav-mode-map)
-  (setq next-error-function 'anaconda-nav-next-error)
-  (setq next-error-last-buffer (current-buffer))
-  (next-error-follow-minor-mode 1))
+(defun anaconda-mode-find-references-callback (result)
+  "Process find references RESULT."
+  (if result
+      (anaconda-mode-definitions-view result)
+    (message "No references found")))
 
 
 ;;; Eldoc.
 
-(defvar anaconda-eldoc-as-single-line nil
-  "If not nil, trim eldoc string to frame width.")
+(defun anaconda-mode-eldoc-function ()
+  "Show eldoc for context at point."
+  (anaconda-mode-call "eldoc" anaconda-mode-eldoc-callback))
 
-(defun anaconda-eldoc-format-params (args index)
-  "Build colorized ARGS string with current arg pointed to INDEX."
-  (apply
-   'concat
-   (->> args
-     (--map-indexed
-      (if (= index it-index)
-          (propertize it 'face 'eldoc-highlight-function-argument)
-        it))
-     (-interpose ", "))))
+(defun anaconda-mode-eldoc-callback (result)
+  "Display eldoc from server RESULT."
+  (eldoc-message (anaconda-mode-eldoc-format result)))
 
-(cl-defun anaconda-eldoc-format (&key name index params)
+(defun anaconda-mode-eldoc-format (result)
+  "Format eldoc string from RESULT."
+  (when result
+    (let* ((name (cdr (assoc 'name result)))
+           (index (cdr (assoc 'index result)))
+           (params (cdr (assoc 'params result)))
+           (doc (anaconda-mode-eldoc-format-definition name index params)))
+      (if anaconda-mode-eldoc-as-single-line
+          (substring doc 0 (min (frame-width) (length doc)))
+        doc))))
+
+(defun anaconda-mode-eldoc-format-definition (name index params)
+  "Format function definition from NAME, INDEX and PARAMS."
   (concat
    (propertize name 'face 'font-lock-function-name-face)
    "("
-   (anaconda-eldoc-format-params params index)
+   (anaconda-mode-eldoc-format-params params index)
    ")"))
 
-(defun anaconda-eldoc-function ()
-  "Show eldoc for context at point."
-  (ignore-errors
-    (-when-let* ((res (anaconda-mode-call "eldoc"))
-                 (doc (apply 'anaconda-eldoc-format res)))
-      (if anaconda-eldoc-as-single-line
-          (substring doc 0 (min (frame-width) (length doc)))
-        doc))))
+(defun anaconda-mode-eldoc-format-params (args index)
+  "Build colorized ARGS string with current arg pointed to INDEX."
+  (->>
+   args
+   (--map-indexed
+    (if (= index it-index)
+        (propertize it 'face 'eldoc-highlight-function-argument)
+      it))
+   (-interpose ", ")
+   (apply 'concat)))
+
+
+;;; Result view.
+
+(defun anaconda-mode-definitions-view (result)
+  "Show definitions view for rpc RESULT."
+  (if (eq 1 (length result))
+      (anaconda-mode-find-file (car result))
+    (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)))
+
+(defun anaconda-mode-documentation-view (result)
+  "Show documentation view for rpc RESULT."
+  (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter))
+
+(defun anaconda-mode-view (result presenter)
+  "Show RESULT to user for future selection.
+RESULT must be an RESULT field from json-rpc response.
+PRESENTER is the function used to format buffer content."
+  (pop-to-buffer
+   (anaconda-mode-with-view-buffer
+    (funcall presenter result))))
+
+(defmacro anaconda-mode-with-view-buffer (&rest body)
+  "Create view buffer and execute BODY in it."
+  `(let ((buf (get-buffer-create "*Anaconda*")))
+     (with-current-buffer buf
+       (setq buffer-read-only nil)
+       (erase-buffer)
+       ,@body
+       (goto-char (point-min))
+       (anaconda-mode-view-mode)
+       buf)))
+
+(defun anaconda-mode-view-make-bold (string)
+  "Make passed STRING look bold."
+  (propertize string 'face 'bold))
+
+(defun anaconda-mode-view-make-source (string)
+  "Make passed STRING look like python source."
+  (with-temp-buffer
+    (insert string)
+    (let ((delay-mode-hooks t))
+      (python-mode))
+    (run-hooks 'font-lock-mode-hook)
+    (font-lock-fontify-buffer)
+    (buffer-string)))
+
+(define-button-type 'anaconda-mode-definition-button
+  'action #'anaconda-mode-view-jump
+  'face nil)
+
+(defun anaconda-mode-view-jump (button)
+  "Jump to definition file saved in BUTTON."
+  (let ((definition (button-get button 'definition)))
+    (anaconda-mode-find-file definition)))
+
+(defun anaconda-mode-view-jump-other-window (button)
+  "Jump to definition file saved in BUTTON."
+  (let ((definition (button-get button 'definition)))
+    (anaconda-mode-find-file-other-window definition)))
+
+(defun anaconda-mode-find-file (definition)
+  "Find DEFINITION file, go to DEFINITION point."
+  (anaconda-mode-find-file-generic definition 'find-file))
+
+(defun anaconda-mode-find-file-other-window (definition)
+  "Find DEFINITION file other window, go to DEFINITION point."
+  (anaconda-mode-find-file-generic definition 'find-file-other-window))
+
+(defun anaconda-mode-find-file-generic (definition find-function)
+  "Find DEFINITION with FIND-FUNCTION."
+  (let ((backward-navigation (when (buffer-file-name)
+                               `((module-path . ,(buffer-file-name))
+                                 (line . ,(line-number-at-pos (point)))
+                                 (column . ,(- (point) (line-beginning-position)))))))
+    (funcall find-function (cdr (assoc 'module-path definition)))
+    (goto-char 0)
+    (forward-line (1- (cdr (assoc 'line definition))))
+    (forward-char (cdr (assoc 'column definition)))
+    (setq anaconda-mode-go-back-definition backward-navigation)))
+
+(defun anaconda-mode-view-insert-button (name definition)
+  "Insert text button with NAME opening the DEFINITION."
+  (insert-text-button name
+                      'type 'anaconda-mode-definition-button
+                      'definition definition))
+
+(defun anaconda-mode-view-definitions-presenter (result)
+  "Insert definitions from RESULT."
+  (->>
+   (--group-by (cdr (assoc 'module-name it)) result)
+   (--map (anaconda-mode-view-insert-module-definition it))))
+
+(defun anaconda-mode-view-insert-module-definition (module)
+  "Insert MODULE definition into current buffer."
+  (insert (concat (anaconda-mode-view-make-bold (car module)) "\n"))
+  (--map
+   (progn
+     (insert "    ")
+     (anaconda-mode-view-insert-button
+      (anaconda-mode-view-make-source (cdr (assoc 'description it)))
+      it)
+     (insert "\n"))
+   (cdr module)))
+
+(defun anaconda-mode-view-documentation-presenter (result)
+  "Insert documentation from RESULT."
+  (--map
+   (progn
+     (insert (anaconda-mode-view-make-bold (cdr (assoc 'module-name it))))
+     (insert "\n")
+     (insert (s-trim-right (cdr (assoc 'docstring it))))
+     (insert "\n\n"))
+   result))
+
+(defvar anaconda-mode-view-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "n") 'next-error-no-select)
+    (define-key map (kbd "p") 'previous-error-no-select)
+    (define-key map (kbd "q") 'quit-window)
+    map))
+
+(define-derived-mode anaconda-mode-view-mode special-mode "Anaconda-View"
+  "Major mode for definitions view and navigation for `anaconda-mode'.
+
+\\{anaconda-mode-view-mode-map}"
+  (setq next-error-function #'anaconda-mode-next-definition))
+
+(defun anaconda-mode-next-definition (num reset)
+  "Navigate tot the next definition in the view buffer.
+NUM is the number of definitions to move forward.  RESET mean go
+to the beginning of buffer before definitions navigation."
+  (forward-button num)
+  (anaconda-mode-view-jump-other-window (button-at (point))))
+
+(defvar-local anaconda-mode-go-back-definition nil
+  "Previous definition from which current buffer was navigated.")
+
+(defun anaconda-mode-go-back ()
+  "Jump backward if buffer was navigated from `anaconda-mode' command."
+  (if anaconda-mode-go-back-definition
+      (anaconda-mode-find-file anaconda-mode-go-back-definition)
+    (error "No previous buffer")))
 
 
 ;;; Anaconda minor mode.
 
 (defvar anaconda-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "M-?") 'anaconda-mode-view-doc)
-    (define-key map (kbd "M-r") 'anaconda-mode-usages)
-    (define-key map [remap find-tag] 'anaconda-mode-goto)
-    (define-key map [remap pop-tag-mark] 'anaconda-nav-pop-marker)
+    (define-key map (kbd "C-M-i") 'anaconda-mode-complete)
+    (define-key map (kbd "M-.") 'anaconda-mode-find-definitions)
+    (define-key map (kbd "M-,") 'anaconda-mode-find-assignments)
+    (define-key map (kbd "M-r") 'anaconda-mode-find-references)
+    (define-key map (kbd "M-*") 'anaconda-mode-go-back)
+    (define-key map (kbd "M-?") 'anaconda-mode-show-doc)
     map)
   "Keymap for `anaconda-mode'.")
 
@@ -563,15 +645,11 @@ IGNORED parameter is the string for which completion is required."
 
 (defun turn-on-anaconda-mode ()
   "Turn on `anaconda-mode'."
-  (add-hook 'completion-at-point-functions
-            'anaconda-mode-complete-at-point nil t)
   (make-local-variable 'eldoc-documentation-function)
-  (setq-local eldoc-documentation-function 'anaconda-eldoc-function))
+  (setq-local eldoc-documentation-function 'anaconda-mode-eldoc-function))
 
 (defun turn-off-anaconda-mode ()
   "Turn off `anaconda-mode'."
-  (remove-hook 'completion-at-point-functions
-               'anaconda-mode-complete-at-point t)
   (kill-local-variable 'eldoc-documentation-function))
 
 (provide 'anaconda-mode)

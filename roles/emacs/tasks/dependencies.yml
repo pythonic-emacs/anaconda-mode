@@ -1,0 +1,13 @@
+- name: install emacs build dependencies
+  apt: name={{ item }}
+  with_items:
+    - libncurses-dev
+    - libxpm-dev
+    - libxaw7-dev
+    - libtiff4-dev
+    - libpng-dev
+    - libgif-dev
+    - autoconf
+    - automake
+    - texinfo
+  become: yes

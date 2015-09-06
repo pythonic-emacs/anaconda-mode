@@ -13,48 +13,9 @@ from __future__ import (
 
 import sys
 from functools import wraps
-from os.path import abspath, dirname
-from subprocess import Popen
 
-project_path = dirname(abspath(__file__))
-
-sys.path.insert(0, project_path)
-
-missing_dependencies = []
-
-try:
-    from pkg_resources import get_distribution, DistributionNotFound
-except ImportError:
-    missing_dependencies.append('setuptools')
-
-try:
-    from jedi import Script, NotFoundError
-except ImportError:
-    missing_dependencies.append('jedi')
-
-try:
-    from service_factory import service_factory
-except ImportError:
-    missing_dependencies.append('service_factory')
-
-if missing_dependencies:
-    command = ['pip', 'install', '-t', project_path] + missing_dependencies
-    pip = Popen(command)
-    pip.communicate()
-    assert pip.returncode is 0, 'PyPi installation fails.'
-    from pkg_resources import get_distribution, DistributionNotFound
-    from jedi import Script, NotFoundError
-    from service_factory import service_factory
-
-print('Python executable:', sys.executable)
-for package in ['jedi', 'service_factory']:
-    try:
-        version = get_distribution(package).version
-    except DistributionNotFound:
-        print('Unable to find {package} version'.format(package=package))
-    else:
-        print('{package} version: {version}'.format(
-            package=package, version=version))
+from jedi import Script, NotFoundError
+from service_factory import service_factory
 
 
 def script_method(f):
@@ -70,94 +31,73 @@ def script_method(f):
     return wrapper
 
 
-@script_method
-def complete(script):
-    """Select auto-complete candidates for source position."""
-
-    def first_line(text):
-        """Return text first line."""
-        return text.strip().split('\n', 1)[0]
-
-    return [{'name': comp.name,
-             'doc': comp.docstring() or None,
-             'info': first_line(comp.docstring(raw=True)) or None,
-             'type': comp.type,
-             'path': comp.module_path or None,
-             'line': comp.line}
-            for comp in script.completions()]
-
-
-@script_method
-def doc(script):
-    """Documentation for all definitions at point."""
-    docs = ['\n'.join([d.module_name + ' - ' + d.description,
-                       '=' * 40,
-                       d.docstring() or "- No docstring -"]).strip()
-            for d in script.goto_definitions()]
-
-    return ('\n' + '-' * 40 + '\n').join(docs)
-
-
 def process_definitions(f):
+    """Call f and convert it result into json dumpable format."""
 
     @wraps(f)
     def wrapper(script):
-        cache = {script.path: script.source.splitlines()}
 
-        def get_description(d):
-            if d.module_path not in cache:
-                with open(d.module_path, 'r') as file:
-                    cache[d.module_path] = file.read().splitlines()
-
-            return cache[d.module_path][d.line - 1]
-
-        return [{'line': d.line,
-                 'column': d.column,
-                 'name': d.name,
-                 'description': get_description(d),
-                 'module': d.module_name,
-                 'type': d.type,
-                 'path': d.module_path}
-                for d in f(script) if not d.in_builtin_module()]
+        return [{'name': definition.name,
+                 'type': definition.type,
+                 'module-name': definition.module_name,
+                 'module-path': definition.module_path,
+                 'line': definition.line,
+                 'column': definition.column,
+                 'docstring': definition.docstring(),
+                 'description': definition.description,
+                 'full-name': definition.full_name}
+                for definition in f(script)]
 
     return wrapper
 
 
 @script_method
 @process_definitions
+def complete(script):
+    """Select auto-complete candidates for source position."""
+
+    return script.completions()
+
+
+@script_method
+@process_definitions
 def goto_definitions(script):
+    """Get definitions for thing under cursor."""
+
     return script.goto_definitions()
 
 
 @script_method
 @process_definitions
 def goto_assignments(script):
+    """Get assignments for thing under cursor."""
+
     return script.goto_assignments()
 
 
 @script_method
 @process_definitions
 def usages(script):
+    """Get usage information for thing under cursor."""
+
     return script.usages()
 
 
 @script_method
 def eldoc(script):
     """Return eldoc format documentation string or ''."""
-    signatures = script.call_signatures()
 
+    signatures = script.call_signatures()
     if len(signatures) == 1:
-        sgn = signatures[0]
+        signature = signatures[0]
         return {
-            'name': sgn.name,
-            'index': sgn.index,
-            'params': [p.description for p in sgn.params]
+            'name': signature.name,
+            'index': signature.index,
+            'params': [param.description for param in signature.params]
         }
 
-    return {}
 
-
-app = [complete, doc, goto_definitions, goto_assignments, usages, eldoc]
+app = [complete, goto_definitions, goto_assignments, usages, eldoc]
 
 
 if __name__ == '__main__':

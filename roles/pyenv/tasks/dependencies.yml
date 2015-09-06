@@ -1,0 +1,14 @@
+- name: install python build dependencies
+  apt: name={{ item }}
+  with_items:
+    - build-essential
+    - curl
+    - libbz2-dev
+    - libreadline-dev
+    - libsqlite3-dev
+    - libssl-dev
+    - llvm
+    - make
+    - wget
+    - zlib1g-dev
+  become: yes

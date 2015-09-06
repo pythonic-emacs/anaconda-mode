@@ -1,3 +1,2 @@
-# This file exists only for requires.io purpose.
-jedi
-service_factory
+pytest
+pytest-cov

@@ -1,0 +1,12 @@
+- hosts: all
+  roles:
+    - git
+    - pyenv
+    - tox
+    - emacs
+- hosts: vagrant
+  roles:
+    - bashrc
+- hosts: travis
+  roles:
+    - coveralls

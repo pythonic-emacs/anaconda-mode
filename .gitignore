@@ -1,4 +1,3 @@
-*.dist-info/
 *.egg-info/
 *.elc
 *.pyc
@@ -6,8 +5,8 @@
 .cask/
 .coverage
 .tox/
+.vagrant/
 [#]*[#]
 __pycache__/
-jedi/
-service_factory/
-six.py
+build/
+dist/

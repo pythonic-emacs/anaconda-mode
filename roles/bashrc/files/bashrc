@@ -1,0 +1,8 @@
+alias l='ls -CF'
+alias la='ls -A'
+alias ll='ls -alF'
+alias ls='ls --color=auto'
+
+export PATH=$HOME/.pyenv/bin:$HOME/.pyenv/shims:$HOME/.evm/bin:$HOME/.cask/bin:$PATH
+
+cd /vagrant
