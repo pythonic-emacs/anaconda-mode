@@ -583,7 +583,7 @@ PRESENTER is the function used to format buffer content."
   "Insert documentation from RESULT."
   (--map
    (progn
-     (insert (cdr (assoc 'module-name it)))
+     (insert (anaconda-mode-view-make-bold (cdr (assoc 'module-name it))))
      (insert "\n")
      (insert (s-trim-right (cdr (assoc 'docstring it))))
      (insert "\n\n"))

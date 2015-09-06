@@ -880,6 +880,25 @@ I'm documentation string.
                            (buffer-string)))))
       (kill-buffer "*Anaconda*"))))
 
+(ert-deftest test-anaconda-mode-view-documentation-presenter-bold-module-name ()
+  "Insert module name with bold font in the documentation view."
+  (let ((result '(((description . "def join")
+                   (full-name . "os.path.join")
+                   (type . "function")
+                   (docstring . "join(path, *paths)
+
+")
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
+                   (column . 4)
+                   (line . 104)
+                   (name . "join")
+                   (module-name . "ntpath")))))
+    (unwind-protect
+        (progn
+          (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter)
+          (should (equal 'bold (get-char-property (point-min) 'face))))
+      (kill-buffer "*Anaconda*"))))
+
 (ert-deftest test-anaconda-mode-view-documentation-presenter-multiple-modules ()
   "Format doc buffer for multiple modules."
   (let ((result '(((description . "def join")
