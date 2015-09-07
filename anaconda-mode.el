@@ -478,6 +478,17 @@ submitted."
 
 ;;; Result view.
 
+(defmacro anaconda-mode-with-view-buffer (&rest body)
+  "Create view buffer and execute BODY in it."
+  `(let ((buf (get-buffer-create "*Anaconda*")))
+     (with-current-buffer buf
+       (setq buffer-read-only nil)
+       (erase-buffer)
+       ,@body
+       (goto-char (point-min))
+       (anaconda-mode-view-mode)
+       buf)))
+
 (defun anaconda-mode-definitions-view (result)
   "Show definitions view for rpc RESULT."
   (if (eq 1 (length result))
@@ -495,17 +506,6 @@ PRESENTER is the function used to format buffer content."
   (pop-to-buffer
    (anaconda-mode-with-view-buffer
     (funcall presenter result))))
-
-(defmacro anaconda-mode-with-view-buffer (&rest body)
-  "Create view buffer and execute BODY in it."
-  `(let ((buf (get-buffer-create "*Anaconda*")))
-     (with-current-buffer buf
-       (setq buffer-read-only nil)
-       (erase-buffer)
-       ,@body
-       (goto-char (point-min))
-       (anaconda-mode-view-mode)
-       buf)))
 
 (defun anaconda-mode-view-make-bold (string)
   "Make passed STRING look bold."
