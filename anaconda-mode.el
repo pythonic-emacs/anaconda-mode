@@ -614,6 +614,7 @@ to the beginning of buffer before definitions navigation."
 
 (defun anaconda-mode-go-back ()
   "Jump backward if buffer was navigated from `anaconda-mode' command."
+  (interactive)
   (if anaconda-mode-go-back-definition
       (anaconda-mode-find-file anaconda-mode-go-back-definition)
     (error "No previous buffer")))
