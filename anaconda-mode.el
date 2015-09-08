@@ -109,7 +109,7 @@
    "-c" "
 import os
 import sys
-directory = sys.argv[1]
+directory = sys.argv[-1]
 if not os.path.exists(directory):
     os.makedirs(directory)
 " anaconda-mode-server-directory)
