@@ -1,0 +1,2 @@
+- name: setup virtualenv pyenv plugin
+  git: repo=https://github.com/yyuu/pyenv-virtualenv dest=~/.pyenv/plugins/pyenv-virtualenv

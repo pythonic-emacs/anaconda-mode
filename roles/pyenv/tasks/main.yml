@@ -1,3 +1,5 @@
 - include: dependencies.yml
 - include: pyenv.yml
+- include: virtualenv-plugin.yml
 - include: setuptools.yml
+- include: ipython.yml
