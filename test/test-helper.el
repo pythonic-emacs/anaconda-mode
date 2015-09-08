@@ -14,6 +14,9 @@
 
 (setq python-indent-guess-indent-offset nil)
 
+(when (string= "ipython" (getenv "PYENV_VERSION"))
+  (setq python-shell-interpreter "ipython"))
+
 (provide 'test-helper)
 
 ;;; test-helper.el ends here
