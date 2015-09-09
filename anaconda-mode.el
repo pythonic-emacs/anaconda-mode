@@ -117,13 +117,18 @@ if not os.path.exists(directory):
 
 (defvar anaconda-mode-check-installation-command
   (list "-c" "
-from pkg_resources import get_distribution
+from pkg_resources import get_distribution, DistributionNotFound
 def check_deps(deps=['anaconda_mode']):
     for each in deps:
         distrib = get_distribution(each)
         requirements = distrib.requires()
         check_deps(requirements)
-check_deps()
+try:
+    check_deps()
+except DistributionNotFound:
+    # IPython patch sys.exit, so we can't use it.
+    import os
+    os._exit(1)
 ")
   "Check if `anaconda-mode' server is installed or not.")
 
