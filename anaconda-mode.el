@@ -133,9 +133,9 @@ except DistributionNotFound:
   "Check if `anaconda-mode' server is installed or not.")
 
 (defvar anaconda-mode-install-server-command
-  (list "-m" "pip" "install" "-t" "."
-        (concat "anaconda_mode" "=="
-                anaconda-mode-server-version))
+  (list "-c" (concat "import pip; pip.main(['install', '-t', '.', "
+                     "'anaconda_mode" "=="
+                     anaconda-mode-server-version "'])"))
   "Install `anaconda_mode' server.")
 
 (defun anaconda-mode-host ()
