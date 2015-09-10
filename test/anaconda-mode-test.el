@@ -93,8 +93,12 @@ name."
 
 (ert-deftest test-anaconda-mode-install-server ()
   "`anaconda-mode-install-server-code' must install `anaconda-mode' server."
-  (run anaconda-mode-install-server-command)
-  (should (zerop (run anaconda-mode-check-installation-command))))
+  (unwind-protect
+      (progn
+        (run anaconda-mode-ensure-directory-command)
+        (run anaconda-mode-install-server-command)
+        (should (zerop (run anaconda-mode-check-installation-command))))
+    (f-delete anaconda-mode-server-directory t)))
 
 (ert-deftest test-anaconda-mode-restart-on-environment-change ()
   "`anaconda-mode' server will be restarted if any variable of

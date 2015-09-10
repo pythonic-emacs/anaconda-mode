@@ -117,25 +117,26 @@ if not os.path.exists(directory):
 
 (defvar anaconda-mode-check-installation-command
   (list "-c" "
-from pkg_resources import get_distribution, DistributionNotFound
-def check_deps(deps=['anaconda_mode']):
-    for each in deps:
-        distrib = get_distribution(each)
-        requirements = distrib.requires()
-        check_deps(requirements)
-try:
-    check_deps()
-except DistributionNotFound:
+import sys, os
+from pkg_resources import find_distributions
+directory = sys.argv[-1]
+for dist in find_distributions(directory, only=True):
+    if dist.project_name == 'anaconda-mode':
+        break
+else:
     # IPython patch sys.exit, so we can't use it.
-    import os
     os._exit(1)
-")
+" anaconda-mode-server-directory)
   "Check if `anaconda-mode' server is installed or not.")
 
 (defvar anaconda-mode-install-server-command
-  (list "-c" (concat "import pip; pip.main(['install', '-t', '.', "
-                     "'anaconda_mode" "=="
-                     anaconda-mode-server-version "'])"))
+  (list "-c" "
+import sys
+import pip
+directory = sys.argv[-2]
+version = sys.argv[-1]
+pip.main(['install', '-t', directory, 'anaconda_mode==' + version])
+" anaconda-mode-server-directory anaconda-mode-server-version)
   "Install `anaconda_mode' server.")
 
 (defun anaconda-mode-host ()
@@ -207,7 +208,6 @@ be bound."
   (setq anaconda-mode-process
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
-                        :cwd anaconda-mode-server-directory
                         :sentinel (lambda (process event) (anaconda-mode-check-sentinel process event callback))
                         :args anaconda-mode-check-installation-command)))
 
@@ -227,7 +227,6 @@ be bound."
   (setq anaconda-mode-process
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
-                        :cwd anaconda-mode-server-directory
                         :sentinel (lambda (process event) (anaconda-mode-install-sentinel process event callback))
                         :args anaconda-mode-install-server-command)))
 
