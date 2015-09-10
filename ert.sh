@@ -14,7 +14,7 @@ function run_ert() {
 }
 
 unset PYENV_VERSION
-run_ert
+run_ert $@
 
 export PYENV_VERSION=ipython
-run_ert
+run_ert $@
