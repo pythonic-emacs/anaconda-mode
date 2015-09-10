@@ -12,9 +12,8 @@ env:
   global:
     - PATH=$HOME/.pyenv/bin:$HOME/.pyenv/shims:$HOME/.evm/bin:$HOME/.cask/bin:$PATH
 before_install:
-  - sudo apt-add-repository -y ppa:ansible/ansible
-  - sudo apt-get update
-  - sudo apt-get install -y ansible
+  # Use ansible from git unless 2.0 version will be released.
+  - sudo pip install git+https://github.com/ansible/ansible
 install:
   - ./travis.sh
 script:
