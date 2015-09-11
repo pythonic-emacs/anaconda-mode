@@ -233,6 +233,18 @@ even if an error occurs in response callback."
                      (buffer-list))))
       (anaconda-mode-stop))))
 
+(ert-deftest test-anaconda-mode-jsonrpc-show-server-response-on-unreadable-response ()
+  "Show server HTTP response if it is invalid JSON format."
+  (with-current-buffer (fixture "" 1 0)
+    (let ((handler (anaconda-mode-create-response-handler nil nil)))
+      (with-temp-buffer
+        (insert "I'm not a JSON")
+        (let ((url-http-end-of-headers (point-min)))
+          (should-error (funcall handler nil))
+          (should (equal "*Anaconda-Response*"
+                         (buffer-name (window-buffer (selected-window)))))
+          (should (equal "I'm not a JSON" (buffer-string))))))))
+
 (ert-deftest test-anaconda-mode-jsonrpc-skip-response-on-point-movement ()
   "Don't run response callback if point position was changed."
   (let (result)

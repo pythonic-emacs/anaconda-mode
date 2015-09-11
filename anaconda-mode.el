@@ -324,23 +324,34 @@ submitted."
         (anaconda-mode-request-window (selected-window))
         (anaconda-mode-request-tick (buffer-chars-modified-tick)))
     (lambda (status)
-      (unwind-protect
-          (if (or (not (equal anaconda-mode-request-window (selected-window)))
-                  (with-current-buffer (window-buffer anaconda-mode-request-window)
-                    (or (not (equal anaconda-mode-request-buffer (current-buffer)))
-                        (not (equal anaconda-mode-request-point (point)))
-                        (not (equal anaconda-mode-request-tick (buffer-chars-modified-tick))))))
-              (message "Skip anaconda-mode %s response" command)
-            (goto-char url-http-end-of-headers)
-            (let* ((json-array-type 'list)
-                   (response (json-read)))
-              (if (assoc 'error response)
-                  (error (cdr (assoc 'error response)))
-                (with-current-buffer anaconda-mode-request-buffer
-                  ;; Terminate `apply' call with empty list so response
-                  ;; will be treated as single argument.
-                  (apply callback (cdr (assoc 'result response)) nil)))))
-        (kill-buffer (current-buffer))))))
+      (let ((http-buffer (current-buffer)))
+        (unwind-protect
+            (if (or (not (equal anaconda-mode-request-window (selected-window)))
+                    (with-current-buffer (window-buffer anaconda-mode-request-window)
+                      (or (not (equal anaconda-mode-request-buffer (current-buffer)))
+                          (not (equal anaconda-mode-request-point (point)))
+                          (not (equal anaconda-mode-request-tick (buffer-chars-modified-tick))))))
+                (message "Skip anaconda-mode %s response" command)
+              (goto-char url-http-end-of-headers)
+              (let* ((json-array-type 'list)
+                     (response (condition-case nil
+                                   (json-read)
+                                 (json-readtable-error
+                                  (progn
+                                    (let ((response-string (buffer-string)))
+                                      (pop-to-buffer
+                                       (with-current-buffer (get-buffer-create "*Anaconda-Response*")
+                                         (insert response-string)
+                                         (goto-char (point-min))
+                                         (current-buffer))))
+                                    (error "Can't read anaconda-mode server response"))))))
+                (if (assoc 'error response)
+                    (error (cdr (assoc 'error response)))
+                  (with-current-buffer anaconda-mode-request-buffer
+                    ;; Terminate `apply' call with empty list so response
+                    ;; will be treated as single argument.
+                    (apply callback (cdr (assoc 'result response)) nil)))))
+          (kill-buffer http-buffer))))))
 
 
 ;;; Code completion.
