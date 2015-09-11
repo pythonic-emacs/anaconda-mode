@@ -1029,6 +1029,20 @@ definition if current buffer doesn't has file name."
                                (column . 0)))
     (should-not anaconda-mode-go-back-definition)))
 
+(ert-deftest test-anaconda-mode-find-file-builtins ()
+  "Show description message if user try to open definition without module name."
+  (with-current-buffer (fixture "test" 1 4 "simple.py")
+    (anaconda-mode-find-file '((column)
+                               (description . "class int")
+                               (line)
+                               (full-name . "int")
+                               (module-path)
+                               (module-name . "builtins")
+                               (name . "int")
+                               (type . "instance")))
+    (should (equal "simple.py"
+                   (f-filename (buffer-file-name (window-buffer (selected-window))))))))
+
 (ert-deftest test-anaconda-mode-with-view-buffer-multiple-times ()
   "It is possible to reuse *Anaconda* buffer multiple times without errors."
   (unwind-protect

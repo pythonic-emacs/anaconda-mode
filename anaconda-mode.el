@@ -553,11 +553,14 @@ PRESENTER is the function used to format buffer content."
                                `((module-path . ,(buffer-file-name))
                                  (line . ,(line-number-at-pos (point)))
                                  (column . ,(- (point) (line-beginning-position)))))))
-    (funcall find-function (cdr (assoc 'module-path definition)))
-    (goto-char 0)
-    (forward-line (1- (cdr (assoc 'line definition))))
-    (forward-char (cdr (assoc 'column definition)))
-    (setq anaconda-mode-go-back-definition backward-navigation)))
+    (--if-let (cdr (assoc 'module-path definition))
+        (progn
+          (funcall find-function it)
+          (goto-char 0)
+          (forward-line (1- (cdr (assoc 'line definition))))
+          (forward-char (cdr (assoc 'column definition)))
+          (setq anaconda-mode-go-back-definition backward-navigation))
+      (message "Can't open %s module" (cdr (assoc 'module-name definition))))))
 
 (defun anaconda-mode-view-insert-button (name definition)
   "Insert text button with NAME opening the DEFINITION."
