@@ -453,7 +453,7 @@ submitted."
   "Format eldoc string from RESULT."
   (when result
     (let* ((name (cdr (assoc 'name result)))
-           (index (cdr (assoc 'index result)))
+           (index (or (cdr (assoc 'index result)) 0))
            (params (cdr (assoc 'params result)))
            (doc (anaconda-mode-eldoc-format-definition name index params)))
       (if anaconda-mode-eldoc-as-single-line

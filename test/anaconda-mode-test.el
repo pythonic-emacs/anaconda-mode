@@ -8,6 +8,7 @@
 ;; * test server start chain behavior
 ;; * test server start doesn't reinstall server
 ;; * M-* must go backward after doc view jump
+;; * unbind sentinel after successful port bind
 
 ;;; Code:
 
@@ -677,6 +678,21 @@ test(" 3 5 "simple.py")
                   (index . 0))))
     (should (equal (frame-width)
                    (length (anaconda-mode-eldoc-format result))))))
+
+(ert-deftest test-anaconda-mode-eldoc-no-index-on-set-spec ()
+  "Call signatures on `set' builtin some time return result without index field."
+  (let (eldoc-last-message)
+    (unwind-protect
+        (with-current-buffer (fixture "
+data = set([
+    1,
+    2,
+])" 4 0 "simple.py")
+          (anaconda-mode-eldoc-function)
+          (wait)
+          (sleep-for 1)
+          (should (equal "set()" eldoc-last-message)))
+      (anaconda-mode-stop))))
 
 
 ;;; Definitions handling.
