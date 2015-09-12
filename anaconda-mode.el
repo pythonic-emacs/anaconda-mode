@@ -340,7 +340,7 @@ submitted."
                                   (progn
                                     (let ((response-string (buffer-string)))
                                       (pop-to-buffer
-                                       (with-current-buffer (get-buffer-create "*Anaconda-Response*")
+                                       (with-current-buffer (get-buffer-create "*anaconda-response*")
                                          (insert response-string)
                                          (goto-char (point-min))
                                          (current-buffer))))

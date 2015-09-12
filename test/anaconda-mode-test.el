@@ -241,7 +241,7 @@ even if an error occurs in response callback."
         (insert "I'm not a JSON")
         (let ((url-http-end-of-headers (point-min)))
           (should-error (funcall handler nil))
-          (should (equal "*Anaconda-Response*"
+          (should (equal "*anaconda-response*"
                          (buffer-name (window-buffer (selected-window)))))
           (should (equal "I'm not a JSON" (buffer-string))))))))
 
