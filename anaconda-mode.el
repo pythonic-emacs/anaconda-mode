@@ -91,10 +91,6 @@
 (defvar anaconda-mode-server-version "0.1.1"
   "Server version needed to run anaconda-mode.")
 
-(defvar anaconda-mode-server-directory
-  (f-join "~" ".emacs.d" "anaconda-mode" anaconda-mode-server-version)
-  "Anaconda mode installation directory.")
-
 (defvar anaconda-mode-server-script "anaconda_mode.py"
   "Script file with anaconda-mode server.")
 
@@ -110,19 +106,15 @@
 (defvar anaconda-mode-port nil
   "Port for anaconda-mode connection.")
 
-(defvar anaconda-mode-ensure-directory-command
-  (list
-   "-c" "
+(defvar anaconda-mode-ensure-directory-command "
 import os
 import sys
 directory = sys.argv[-1]
 if not os.path.exists(directory):
     os.makedirs(directory)
-" anaconda-mode-server-directory)
-  "Create `anaconda-mode-server-directory' if necessary.")
+" "Create `anaconda-mode-server-directory' if necessary.")
 
-(defvar anaconda-mode-check-installation-command
-  (list "-c" "
+(defvar anaconda-mode-check-installation-command "
 import sys, os
 from pkg_resources import find_distributions
 directory = sys.argv[-1]
@@ -132,18 +124,15 @@ for dist in find_distributions(directory, only=True):
 else:
     # IPython patch sys.exit, so we can't use it.
     os._exit(1)
-" anaconda-mode-server-directory)
-  "Check if `anaconda-mode' server is installed or not.")
+" "Check if `anaconda-mode' server is installed or not.")
 
-(defvar anaconda-mode-install-server-command
-  (list "-c" "
+(defvar anaconda-mode-install-server-command "
 import sys
 import pip
 directory = sys.argv[-2]
 version = sys.argv[-1]
 pip.main(['install', '-t', directory, 'anaconda_mode==' + version])
-" anaconda-mode-server-directory anaconda-mode-server-version)
-  "Install `anaconda_mode' server.")
+" "Install `anaconda_mode' server.")
 
 (defun anaconda-mode-server-directory ()
   "Anaconda mode installation directory."
@@ -199,7 +188,9 @@ be bound."
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
                         :sentinel (lambda (process event) (anaconda-mode-ensure-directory-sentinel process event callback))
-                        :args anaconda-mode-ensure-directory-command)))
+                        :args (list "-c"
+                                    anaconda-mode-ensure-directory-command
+                                    (anaconda-mode-server-directory)))))
 
 (defun anaconda-mode-ensure-directory-sentinel (process event &optional callback)
   "Run `anaconda-mode-check' if `anaconda-mode-server-directory' exists.
@@ -209,7 +200,8 @@ parameters.  CALLBACK function will be called when
   (if (eq 0 (process-exit-status process))
       (anaconda-mode-check callback)
     (pop-to-buffer anaconda-mode-process-buffer)
-    (error "Can't create %s directory" anaconda-mode-server-directory)))
+    (error "Can't create %s directory"
+           (anaconda-mode-server-directory))))
 
 (defun anaconda-mode-check (&optional callback)
   "Check `anaconda-mode' server installation.
@@ -219,7 +211,9 @@ be bound."
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
                         :sentinel (lambda (process event) (anaconda-mode-check-sentinel process event callback))
-                        :args anaconda-mode-check-installation-command)))
+                        :args (list "-c"
+                                    anaconda-mode-check-installation-command
+                                    (anaconda-mode-server-directory)))))
 
 (defun anaconda-mode-check-sentinel (process event &optional callback)
   "Run `anaconda-mode-bootstrap' if server installation check passed.
@@ -238,7 +232,10 @@ be bound."
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
                         :sentinel (lambda (process event) (anaconda-mode-install-sentinel process event callback))
-                        :args anaconda-mode-install-server-command)))
+                        :args (list "-c"
+                                    anaconda-mode-install-server-command
+                                    (anaconda-mode-server-directory)
+                                    anaconda-mode-server-version))))
 
 (defun anaconda-mode-install-sentinel (process event &optional callback)
   "Run `anaconda-mode-bootstrap' if server installation complete successfully.
@@ -257,7 +254,7 @@ be bound."
   (setq anaconda-mode-process
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
-                        :cwd anaconda-mode-server-directory
+                        :cwd (anaconda-mode-server-directory)
                         :filter (lambda (process output) (anaconda-mode-bootstrap-filter process output callback))
                         :sentinel 'anaconda-mode-bootstrap-sentinel
                         :query-on-exit nil
