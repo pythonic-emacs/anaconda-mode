@@ -38,6 +38,12 @@
   "Code navigation, documentation lookup and completion for Python."
   :group 'programming)
 
+(defcustom anaconda-mode-installation-directory
+  "~/.emacs.d/anaconda-mode"
+  "Installation directory for anaconda-mode server."
+  :group 'anaconda-mode
+  :type 'string)
+
 (defcustom anaconda-mode-complete-callback
   'anaconda-mode-complete-callback
   "Callback function used to display `anaconda-mode-complete' result."
@@ -138,6 +144,10 @@ version = sys.argv[-1]
 pip.main(['install', '-t', directory, 'anaconda_mode==' + version])
 " anaconda-mode-server-directory anaconda-mode-server-version)
   "Install `anaconda_mode' server.")
+
+(defun anaconda-mode-server-directory ()
+  "Anaconda mode installation directory."
+  (f-join anaconda-mode-installation-directory anaconda-mode-server-version))
 
 (defun anaconda-mode-host ()
   "Target host with anaconda-mode server."

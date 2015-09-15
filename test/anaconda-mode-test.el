@@ -150,6 +150,11 @@ environment keeps the same."
         (should var))
     (anaconda-mode-stop)))
 
+(ert-deftest test-anaconda-mode-server-directory ()
+  "Calculate server directory."
+  (should (equal (expand-file-name "~/.emacs.d/anaconda-mode/0.1.1")
+                 (anaconda-mode-server-directory))))
+
 
 ;;; JSONRPC implementation.
 
