@@ -42,7 +42,7 @@
   "~/.emacs.d/anaconda-mode"
   "Installation directory for anaconda-mode server."
   :group 'anaconda-mode
-  :type 'string)
+  :type 'directory)
 
 (defcustom anaconda-mode-complete-callback
   'anaconda-mode-complete-callback
@@ -178,7 +178,10 @@ be bound."
 (defun anaconda-mode-need-restart ()
   "Check if we need to restart `anaconda-mode-server'."
   (when (anaconda-mode-running-p)
-    (not (pythonic-proper-environment-p anaconda-mode-process))))
+    (and (not (pythonic-proper-environment-p anaconda-mode-process))
+         (--if-let (process-get anaconda-mode-process 'server-directory)
+             (equal it (anaconda-mode-server-directory))
+           t))))
 
 (defun anaconda-mode-ensure-directory (&optional callback)
   "Ensure if `anaconda-mode-server-directory' exists.
@@ -258,7 +261,8 @@ be bound."
                         :filter (lambda (process output) (anaconda-mode-bootstrap-filter process output callback))
                         :sentinel 'anaconda-mode-bootstrap-sentinel
                         :query-on-exit nil
-                        :args (list anaconda-mode-server-script))))
+                        :args (list anaconda-mode-server-script)))
+  (process-put anaconda-mode-process 'server-directory (anaconda-mode-server-directory)))
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.

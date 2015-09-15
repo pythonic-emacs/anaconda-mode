@@ -1,4 +1,4 @@
-;;; anaconda-mode-test.el --- anaconda-mode test suite
+;;; anaconda-mode-test.el --- anaconda-mode test suite  -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -121,6 +121,23 @@ was changed."
           (setq id2 (process-id anaconda-mode-process)))
         (should-not (equal id1 id2)))
     (anaconda-mode-stop)))
+
+(ert-deftest test-anaconda-mode-restart-on-installation-directory-change ()
+  "`anaconda-mode' server will be restarted if user change server
+installation directory."
+  (unwind-protect
+      (let (id1 id2)
+        (anaconda-mode-start)
+        (wait)
+        (setq id1 (process-id anaconda-mode-process))
+        (let ((anaconda-mode-installation-directory "~/.emacs.d/anaconda_mode"))
+          (anaconda-mode-start)
+          (wait)
+          (setq id2 (process-id anaconda-mode-process)))
+        (should-not (equal id1 id2))
+        (should (f-dir? "~/.emacs.d/anaconda_mode")))
+    (anaconda-mode-stop)
+    (f-delete "~/.emacs.d/anaconda_mode" t)))
 
 (ert-deftest test-anaconda-mode-not-restart-in-the-same-envinment ()
   "`anaconda-mode' server will not be restarted if pythonic
