@@ -561,6 +561,9 @@ PRESENTER is the function used to format buffer content."
   "Find DEFINITION file other window, go to DEFINITION point."
   (anaconda-mode-find-file-generic definition 'find-file-other-window))
 
+(defvar-local anaconda-mode-go-back-definition nil
+  "Previous definition from which current buffer was navigated.")
+
 (defun anaconda-mode-find-file-generic (definition find-function)
   "Find DEFINITION with FIND-FUNCTION."
   (let ((backward-navigation (when (buffer-file-name)
@@ -629,9 +632,6 @@ NUM is the number of definitions to move forward.  RESET mean go
 to the beginning of buffer before definitions navigation."
   (forward-button num)
   (anaconda-mode-view-jump-other-window (button-at (point))))
-
-(defvar-local anaconda-mode-go-back-definition nil
-  "Previous definition from which current buffer was navigated.")
 
 (defun anaconda-mode-go-back ()
   "Jump backward if buffer was navigated from `anaconda-mode' command."
