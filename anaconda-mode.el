@@ -26,6 +26,9 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (defvar url-http-end-of-headers))
+
 (require 'tramp)
 (require 'url)
 (require 'json)
