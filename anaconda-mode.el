@@ -26,6 +26,9 @@
 
 ;;; Code:
 
+(eval-when-compile
+  (defvar url-http-end-of-headers))
+
 (require 'tramp)
 (require 'url)
 (require 'json)
@@ -191,7 +194,7 @@ be bound."
                         :sentinel (lambda (process event) (anaconda-mode-ensure-directory-sentinel process event callback))
                         :args anaconda-mode-ensure-directory-command)))
 
-(defun anaconda-mode-ensure-directory-sentinel (process event &optional callback)
+(defun anaconda-mode-ensure-directory-sentinel (process _event &optional callback)
   "Run `anaconda-mode-check' if `anaconda-mode-server-directory' exists.
 Raise error otherwise.  PROCESS and EVENT are basic sentinel
 parameters.  CALLBACK function will be called when
@@ -211,7 +214,7 @@ be bound."
                         :sentinel (lambda (process event) (anaconda-mode-check-sentinel process event callback))
                         :args anaconda-mode-check-installation-command)))
 
-(defun anaconda-mode-check-sentinel (process event &optional callback)
+(defun anaconda-mode-check-sentinel (process _event &optional callback)
   "Run `anaconda-mode-bootstrap' if server installation check passed.
 Try to install `anaconda-mode' server otherwise.  PROCESS and
 EVENT are basic sentinel parameters.  CALLBACK function will be
@@ -230,7 +233,7 @@ be bound."
                         :sentinel (lambda (process event) (anaconda-mode-install-sentinel process event callback))
                         :args anaconda-mode-install-server-command)))
 
-(defun anaconda-mode-install-sentinel (process event &optional callback)
+(defun anaconda-mode-install-sentinel (process _event &optional callback)
   "Run `anaconda-mode-bootstrap' if server installation complete successfully.
 Raise error otherwise.  PROCESS and EVENT are basic sentinel
 parameters.  CALLBACK function will be called when
@@ -270,7 +273,7 @@ called when `anaconda-mode-port' will be bound."
     (when callback
       (funcall callback))))
 
-(defun anaconda-mode-bootstrap-sentinel (process event)
+(defun anaconda-mode-bootstrap-sentinel (process _event)
   "Raise error if `anaconda-mode' server exit abnormally.
 PROCESS and EVENT are basic sentinel parameters."
   (unless (eq 0 (process-exit-status process))
@@ -323,7 +326,7 @@ submitted."
         (anaconda-mode-request-buffer (current-buffer))
         (anaconda-mode-request-window (selected-window))
         (anaconda-mode-request-tick (buffer-chars-modified-tick)))
-    (lambda (status)
+    (lambda (_status)
       (let ((http-buffer (current-buffer)))
         (unwind-protect
             (if (or (not (equal anaconda-mode-request-window (selected-window)))
@@ -558,6 +561,9 @@ PRESENTER is the function used to format buffer content."
   "Find DEFINITION file other window, go to DEFINITION point."
   (anaconda-mode-find-file-generic definition 'find-file-other-window))
 
+(defvar-local anaconda-mode-go-back-definition nil
+  "Previous definition from which current buffer was navigated.")
+
 (defun anaconda-mode-find-file-generic (definition find-function)
   "Find DEFINITION with FIND-FUNCTION."
   (let ((backward-navigation (when (buffer-file-name)
@@ -620,15 +626,12 @@ PRESENTER is the function used to format buffer content."
 \\{anaconda-mode-view-mode-map}"
   (setq next-error-function #'anaconda-mode-next-definition))
 
-(defun anaconda-mode-next-definition (num reset)
+(defun anaconda-mode-next-definition (num _reset)
   "Navigate tot the next definition in the view buffer.
 NUM is the number of definitions to move forward.  RESET mean go
 to the beginning of buffer before definitions navigation."
   (forward-button num)
   (anaconda-mode-view-jump-other-window (button-at (point))))
-
-(defvar-local anaconda-mode-go-back-definition nil
-  "Previous definition from which current buffer was navigated.")
 
 (defun anaconda-mode-go-back ()
   "Jump backward if buffer was navigated from `anaconda-mode' command."
