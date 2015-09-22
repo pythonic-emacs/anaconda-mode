@@ -1,4 +1,4 @@
-;;; anaconda-mode-test.el --- anaconda-mode test suite  -*- lexical-binding: t; -*-
+;;; anaconda-mode-test.el --- anaconda-mode test suite
 
 ;;; Commentary:
 
