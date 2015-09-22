@@ -177,11 +177,11 @@ be bound."
 
 (defun anaconda-mode-need-restart ()
   "Check if we need to restart `anaconda-mode-server'."
-  (when (anaconda-mode-running-p)
-    (and (not (pythonic-proper-environment-p anaconda-mode-process))
-         (--if-let (process-get anaconda-mode-process 'server-directory)
-             (equal it (anaconda-mode-server-directory))
-           t))))
+  (when (and (anaconda-mode-running-p)
+             (anaconda-mode-bound-p))
+    (or (not (pythonic-proper-environment-p anaconda-mode-process))
+        (not (equal (process-get anaconda-mode-process 'server-directory)
+                    (anaconda-mode-server-directory))))))
 
 (defun anaconda-mode-ensure-directory (&optional callback)
   "Ensure if `anaconda-mode-server-directory' exists.
