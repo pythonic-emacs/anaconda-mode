@@ -25,9 +25,9 @@
   (while (not (anaconda-mode-bound-p))
     (sleep-for 0.5)))
 
-(defun run (args)
+(defun run (&rest args)
   "Run python interpreter synchronously with ARGS passed directly to it."
-  (call-pythonic :args args))
+  (call-pythonic :args `("-c" ,@args)))
 
 (defun run-to-string (args)
   "Run python interpreter synchronously with ARGS.
@@ -89,17 +89,22 @@ name."
 (ert-deftest test-anaconda-mode-create-server-directory ()
   "`anaconda-mode-ensure-directory-code' must create
 `anaconda-mode-server-directory'."
-  (run anaconda-mode-ensure-directory-command)
-  (should (f-dir? anaconda-mode-server-directory)))
+  (run anaconda-mode-ensure-directory-command
+       (anaconda-mode-server-directory))
+  (should (f-dir? (anaconda-mode-server-directory))))
 
 (ert-deftest test-anaconda-mode-install-server ()
   "`anaconda-mode-install-server-code' must install `anaconda-mode' server."
   (unwind-protect
       (progn
-        (run anaconda-mode-ensure-directory-command)
-        (run anaconda-mode-install-server-command)
-        (should (zerop (run anaconda-mode-check-installation-command))))
-    (f-delete anaconda-mode-server-directory t)))
+        (run anaconda-mode-ensure-directory-command
+             (anaconda-mode-server-directory))
+        (run anaconda-mode-install-server-command
+             (anaconda-mode-server-directory)
+             anaconda-mode-server-version)
+        (should (zerop (run anaconda-mode-check-installation-command
+                            (anaconda-mode-server-directory)))))
+    (f-delete (anaconda-mode-server-directory) t)))
 
 (ert-deftest test-anaconda-mode-restart-on-environment-change ()
   "`anaconda-mode' server will be restarted if any variable of
@@ -116,6 +121,23 @@ was changed."
           (setq id2 (process-id anaconda-mode-process)))
         (should-not (equal id1 id2)))
     (anaconda-mode-stop)))
+
+(ert-deftest test-anaconda-mode-restart-on-installation-directory-change ()
+  "`anaconda-mode' server will be restarted if user change server
+installation directory."
+  (unwind-protect
+      (let (id1 id2)
+        (anaconda-mode-start)
+        (wait)
+        (setq id1 (process-id anaconda-mode-process))
+        (let ((anaconda-mode-installation-directory "~/.emacs.d/anaconda_mode"))
+          (anaconda-mode-start)
+          (wait)
+          (setq id2 (process-id anaconda-mode-process)))
+        (should-not (equal id1 id2))
+        (should (f-dir? "~/.emacs.d/anaconda_mode")))
+    (anaconda-mode-stop)
+    (f-delete "~/.emacs.d/anaconda_mode" t)))
 
 (ert-deftest test-anaconda-mode-not-restart-in-the-same-envinment ()
   "`anaconda-mode' server will not be restarted if pythonic
@@ -149,6 +171,11 @@ environment keeps the same."
         (anaconda-mode-start (lambda () (setq var t)))
         (should var))
     (anaconda-mode-stop)))
+
+(ert-deftest test-anaconda-mode-server-directory ()
+  "Calculate server directory."
+  (should (equal (expand-file-name "~/.emacs.d/anaconda-mode/0.1.1")
+                 (anaconda-mode-server-directory))))
 
 
 ;;; JSONRPC implementation.
