@@ -1,5 +1,6 @@
 - hosts: all
   roles:
+    - tramp
     - git
     - pyenv
     - tox
