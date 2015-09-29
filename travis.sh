@@ -6,4 +6,4 @@ do
     echo -n .
 done &
 
-ansible-playbook -i deploy/inventories/travis playbook.yml
+ansible-playbook -i deploy/inventories/travis deploy/playbook.yml
