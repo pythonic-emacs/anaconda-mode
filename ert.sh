@@ -3,13 +3,14 @@
 function run_ert() {
     for emacs in emacs-24.3 emacs-24.4 emacs-24.5
     do
-        echo "On boot cleanup."
+        echo -ne '\e[01;34m'"On boot cleanup... "'\e[0m'
         rm -rf $HOME/.emacs.d/anaconda-mode/
-        evm use $emacs
-        emacs --version
-        echo "Python version:"
-        pyenv version
-        cask exec ert-runner $@
+        echo done
+        echo -ne '\e[01;34m'"Emacs version: "'\e[0m'
+        echo $emacs
+        echo -ne '\e[01;34m'"Python version: "'\e[0m'
+        python -V
+        EMACS=$emacs cask exec ert-runner $@
     done
 }
 
