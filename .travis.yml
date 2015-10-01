@@ -7,17 +7,17 @@ cache:
     - $HOME/.cask
     - $TRAVIS_BUILD_DIR/.cask
     - $TRAVIS_BUILD_DIR/.tox
-    - /usr/local/evm
+    - /usr/local/emacs/
 env:
   global:
-    - PATH=$HOME/.pyenv/bin:$HOME/.pyenv/shims:$HOME/.evm/bin:$HOME/.cask/bin:$PATH
+    - PATH=$HOME/.pyenv/bin:$HOME/.pyenv/shims:/usr/local/emacs/emacs-24.3/bin:/usr/local/emacs/emacs-24.4/bin:/usr/local/emacs/emacs-24.5/bin:$HOME/.cask/bin:$PATH
 before_install:
   # Use ansible from git unless 2.0 version will be released.
   - sudo pip install git+https://github.com/ansible/ansible
 install:
-  - ./travis.sh
+  - ./script/travis.sh
 script:
   - tox
-  - ./ert.sh
+  - ./script/ert.sh
 after_success:
   - coveralls-merge emacs-coveralls.json
