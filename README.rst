@@ -203,7 +203,7 @@ try to downgrade jedi version down to 0.8.
 
 ::
 
-   M-x find-library RET anaconda-mode RET
+   M-: (dired (anaconda-mode-server-directory)) RET
    M-! rm -rf jedi* RET
    M-! pip install "jedi<0.9" -t . RET
 
