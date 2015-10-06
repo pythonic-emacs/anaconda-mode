@@ -63,6 +63,15 @@ name."
         (should (anaconda-mode-running-p)))
     (anaconda-mode-stop)))
 
+(ert-deftest test-anaconda-mode-start-remote ()
+  "`anaconda-mode' server starts successfully on remote host."
+  (unwind-protect
+      (let ((python-shell-interpreter "/ssh:test@localhost:/usr/bin/python"))
+        (anaconda-mode-start)
+        (wait)
+        (should (anaconda-mode-running-p)))
+    (anaconda-mode-stop)))
+
 (ert-deftest test-anaconda-mode-start-bind-port ()
   "`anaconda-mode' server bind port successfully."
   (unwind-protect
