@@ -110,9 +110,8 @@
   "Port for anaconda-mode connection.")
 
 (defvar anaconda-mode-ensure-directory-command "
-import os
-import sys
-directory = sys.argv[-1]
+import os, sys
+directory = os.path.expanduser(sys.argv[-1])
 if not os.path.exists(directory):
     os.makedirs(directory)
 " "Create `anaconda-mode-server-directory' if necessary.")
@@ -120,7 +119,7 @@ if not os.path.exists(directory):
 (defvar anaconda-mode-check-installation-command "
 import sys, os
 from pkg_resources import find_distributions
-directory = sys.argv[-1]
+directory = os.path.expanduser(sys.argv[-1])
 for dist in find_distributions(directory, only=True):
     if dist.project_name == 'anaconda-mode':
         break
@@ -130,9 +129,8 @@ else:
 " "Check if `anaconda-mode' server is installed or not.")
 
 (defvar anaconda-mode-install-server-command "
-import sys
-import pip
-directory = sys.argv[-2]
+import os, sys, pip
+directory = os.path.expanduser(sys.argv[-2])
 version = sys.argv[-1]
 pip.main(['install', '-t', directory, 'anaconda_mode==' + version])
 " "Install `anaconda_mode' server.")
