@@ -182,8 +182,10 @@ environment keeps the same."
     (anaconda-mode-stop)))
 
 (ert-deftest test-anaconda-mode-server-directory ()
-  "Calculate server directory."
-  (should (equal (expand-file-name "~/.emacs.d/anaconda-mode/0.1.1")
+  "Calculate server directory.
+File name expansion should not be done.  It must happens inside
+pythonic library with tramp connection add as necessary."
+  (should (equal "~/.emacs.d/anaconda-mode/0.1.1"
                  (anaconda-mode-server-directory))))
 
 

@@ -139,7 +139,8 @@ pip.main(['install', '-t', directory, 'anaconda_mode==' + version])
 
 (defun anaconda-mode-server-directory ()
   "Anaconda mode installation directory."
-  (f-join anaconda-mode-installation-directory anaconda-mode-server-version))
+  (f-short (f-join anaconda-mode-installation-directory
+                   anaconda-mode-server-version)))
 
 (defun anaconda-mode-host ()
   "Target host with anaconda-mode server."
