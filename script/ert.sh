@@ -3,7 +3,7 @@
 function cleanup() {
     echo -ne '\e[01;34m'"On boot cleanup... "'\e[0m'
     rm -rf $HOME/.emacs.d/anaconda-mode/
-    ssh test@localhost rm -rf $HOME/.emacs.d/anaconda-mode/
+    ssh test@localhost 'rm -rf $HOME/.emacs.d/anaconda-mode/'
     echo done
 }
 
