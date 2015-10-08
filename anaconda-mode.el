@@ -106,6 +106,15 @@
 (defvar anaconda-mode-process nil
   "Currently running anaconda-mode process.")
 
+(defun anaconda-mode-show-process-buffer ()
+  "Display `anaconda-mode-process-buffer'."
+  (pop-to-buffer anaconda-mode-process-buffer))
+
+(defvar anaconda-mode-process-fail-hook nil
+  "Hook running when any of `anaconda-mode' fails by some reason.")
+
+(add-hook 'anaconda-mode-process-fail-hook 'anaconda-mode-show-process-buffer)
+
 (defvar anaconda-mode-port nil
   "Port for anaconda-mode connection.")
 
@@ -204,7 +213,7 @@ parameters.  CALLBACK function will be called when
 `anaconda-mode-port' will be bound."
   (if (eq 0 (process-exit-status process))
       (anaconda-mode-check callback)
-    (pop-to-buffer anaconda-mode-process-buffer)
+    (run-hooks 'anaconda-mode-process-fail-hook)
     (error "Can't create %s directory"
            (anaconda-mode-server-directory))))
 
@@ -249,7 +258,7 @@ parameters.  CALLBACK function will be called when
 `anaconda-mode-port' will be bound."
   (if (eq 0 (process-exit-status process))
       (anaconda-mode-bootstrap callback)
-    (pop-to-buffer anaconda-mode-process-buffer)
+    (run-hooks 'anaconda-mode-process-fail-hook)
     (error "Can't install `anaconda-mode' server")))
 
 (defun anaconda-mode-bootstrap (&optional callback)
@@ -287,7 +296,7 @@ called when `anaconda-mode-port' will be bound."
   "Raise error if `anaconda-mode' server exit abnormally.
 PROCESS and EVENT are basic sentinel parameters."
   (unless (eq 0 (process-exit-status process))
-    (pop-to-buffer anaconda-mode-process-buffer)
+    (run-hooks 'anaconda-mode-process-fail-hook)
     (error "Can't start `anaconda-mode' server")))
 
 
