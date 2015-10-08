@@ -17,6 +17,13 @@
 (when (string= "ipython" (getenv "PYENV_VERSION"))
   (setq python-shell-interpreter "ipython"))
 
+(defun ert-anaconda-mode-message-fail-process-message ()
+  "Print failed process output."
+  (with-current-buffer anaconda-mode-process-buffer
+    (message (buffer-string))))
+
+(add-hook 'anaconda-mode-process-fail-hook 'ert-anaconda-mode-message-fail-process-message)
+
 (provide 'test-helper)
 
 ;;; test-helper.el ends here
