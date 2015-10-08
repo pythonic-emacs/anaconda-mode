@@ -19,8 +19,10 @@
 
 (defun ert-anaconda-mode-message-fail-process-message ()
   "Print failed process output."
-  (with-current-buffer anaconda-mode-process-buffer
-    (message (buffer-string))))
+  (if (bufferp anaconda-mode-process-buffer)
+      (with-current-buffer anaconda-mode-process-buffer
+        (message (buffer-string)))
+    (message "No buffer named *anaconda-mode*")))
 
 (add-hook 'anaconda-mode-process-fail-hook 'ert-anaconda-mode-message-fail-process-message)
 
