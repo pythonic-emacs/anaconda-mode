@@ -1,0 +1,3 @@
+- name: install pip globally to use it within tramp user
+  apt: name=python-pip
+  become: yes
