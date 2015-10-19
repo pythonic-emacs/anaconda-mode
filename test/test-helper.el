@@ -12,10 +12,11 @@
 
 (undercover "anaconda-mode.el" (:report-file "emacs-coveralls.json") (:send-report nil))
 
+(require 'python)
+
 (setq python-indent-guess-indent-offset nil)
 
-(when (string= "ipython" (getenv "PYENV_VERSION"))
-  (setq python-shell-interpreter "ipython"))
+(require 'anaconda-mode)
 
 (defun ert-anaconda-mode-message-fail-process-message ()
   "Print failed process output."
@@ -25,6 +26,39 @@
     (message "No buffer named *anaconda-mode*")))
 
 (add-hook 'anaconda-mode-process-fail-hook 'ert-anaconda-mode-message-fail-process-message)
+
+(defun wait ()
+  "Wait for `anaconda-mode' server start."
+  (while (not (anaconda-mode-bound-p))
+    (sleep-for 0.5)))
+
+(defun run (&rest args)
+  "Run python interpreter synchronously with ARGS passed directly to it."
+  (call-pythonic :args `("-c" ,@args)))
+
+(defun run-to-string (args)
+  "Run python interpreter synchronously with ARGS.
+Return process output."
+  (let ((buffer (generate-new-buffer-name "*out*")))
+    (call-pythonic :buffer buffer :args args)
+    (with-current-buffer buffer
+      (buffer-string))))
+
+(defun fixture (source line column &optional path)
+  "Open SOURCE fixture.
+Put point on LINE at COLUMN position.  Set PATH as current file
+name."
+  (with-current-buffer (generate-new-buffer "*fixture*")
+    (python-mode)
+    (insert source)
+    (goto-char 0)
+    (forward-line (1- line))
+    (forward-char column)
+    (setq buffer-file-name (and path (f-full path)))
+    (switch-to-buffer (current-buffer))
+    (current-buffer)))
+
+(require 'eldoc)
 
 (provide 'test-helper)
 
