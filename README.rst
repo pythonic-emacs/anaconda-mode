@@ -44,7 +44,7 @@ following features
 Installation
 ------------
 
-To use this package you need to install ``pip``.
+To use this package you need to install ``pip``. Some distributions have an old version of ``pip``. Be sure to upgrade with ``sudo pip install --upgrade pip`` if that is the case.
 
 package.el
 ``````````
