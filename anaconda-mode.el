@@ -346,7 +346,7 @@ submitted."
                           (not (equal anaconda-mode-request-point (point)))
                           (not (equal anaconda-mode-request-tick (buffer-chars-modified-tick))))))
                 (message "Skip anaconda-mode %s response" command)
-              (goto-char url-http-end-of-headers)
+              (goto-char (re-search-forward "^\r?$" nil t))
               (let* ((json-array-type 'list)
                      (response (condition-case nil
                                    (json-read)
