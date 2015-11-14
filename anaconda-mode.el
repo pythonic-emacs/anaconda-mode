@@ -468,7 +468,8 @@ submitted."
 
 (defun anaconda-mode-eldoc-function ()
   "Show eldoc for context at point."
-  (anaconda-mode-call "eldoc" anaconda-mode-eldoc-callback))
+  (anaconda-mode-call "eldoc" anaconda-mode-eldoc-callback)
+  nil)
 
 (defun anaconda-mode-eldoc-callback (result)
   "Display eldoc from server RESULT."

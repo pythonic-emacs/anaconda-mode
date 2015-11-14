@@ -671,7 +671,7 @@ def test(one, other):
     return one is other
 
 test(" 6 5 "simple.py")
-          (anaconda-mode-eldoc-function)
+          (should-not (anaconda-mode-eldoc-function))
           (wait)
           (sleep-for 1)
           (should (equal "test(one, other)" eldoc-last-message)))
@@ -690,7 +690,7 @@ test(" 6 5 "simple.py")
   (let (eldoc-last-message)
     (unwind-protect
         (with-current-buffer (fixture "invalid(" 1 8 "simple.py")
-          (anaconda-mode-eldoc-function)
+          (should-not (anaconda-mode-eldoc-function))
           (wait)
           (sleep-for 1)
           (should-not eldoc-last-message))
@@ -703,7 +703,7 @@ test(" 6 5 "simple.py")
         (with-current-buffer (fixture "
 def test(): pass
 test(" 3 5 "simple.py")
-          (anaconda-mode-eldoc-function)
+          (should-not (anaconda-mode-eldoc-function))
           (wait)
           (sleep-for 1)
           (should (equal "test()" eldoc-last-message)))
@@ -727,7 +727,7 @@ data = set([
     1,
     2,
 ])" 4 0 "simple.py")
-          (anaconda-mode-eldoc-function)
+          (should-not (anaconda-mode-eldoc-function))
           (wait)
           (sleep-for 1)
           (should (equal "set()" eldoc-last-message)))
