@@ -409,6 +409,20 @@ data = set([
           (should (equal "set()" eldoc-last-message)))
       (anaconda-mode-stop))))
 
+(ert-deftest test-anaconda-mode-eldoc-sigrature ()
+  "Asynchronous eldoc function must return `nil'."
+  (let (eldoc-last-message)
+    (unwind-protect
+        (with-current-buffer (fixture "
+data = set([
+    1,
+    2,
+])" 4 0 "simple.py")
+          (should-not (anaconda-mode-eldoc-function))
+          (wait)
+          (sleep-for 1))
+      (anaconda-mode-stop))))
+
 
 ;;; Definitions.
 
