@@ -10,12 +10,9 @@ cache:
     - /usr/local/emacs/
 env:
   global:
-    - PATH=$HOME/.pyenv/bin:$HOME/.pyenv/shims:/usr/local/emacs/emacs-24.3/bin:/usr/local/emacs/emacs-24.4/bin:/usr/local/emacs/emacs-24.5/bin:$HOME/.cask/bin:$PATH
-before_install:
-  # Use ansible from git unless 2.0 version will be released.
-  - sudo pip install git+https://github.com/ansible/ansible
+    - PATH=$HOME/.emacs/emacs-24.3/bin:$HOME/.emacs/emacs-24.4/bin:$HOME/.emacs/emacs-24.5/bin:$HOME/.pyenv/bin:$HOME/.pyenv/shims:$HOME/.cask/bin:$PATH
 install:
-  - ./script/travis.sh
+  - ./script/deploy.sh
 script:
   - tox
   - ./script/ert.sh

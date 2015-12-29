@@ -1,6 +1,0 @@
-- name: add known hosts file
-  file: dest={{ ansible_env.HOME }}/.ssh/known_hosts state=touch
-- name: remove all keys belongs to localhost
-  command: ssh-keygen -R localhost
-- name: add localhost to the known hosts
-  shell: ssh-keyscan -H localhost >> {{ ansible_env.HOME }}/.ssh/known_hosts

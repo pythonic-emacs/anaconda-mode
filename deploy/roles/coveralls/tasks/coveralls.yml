@@ -1,3 +1,0 @@
-- name: install coveralls package
-  pip: name=coveralls-merge
-  environment: pyenv_env

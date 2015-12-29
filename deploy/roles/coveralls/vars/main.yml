@@ -1,2 +1,0 @@
-pyenv_env:
-  PATH: "{{ ansible_env.HOME }}/.pyenv/bin:{{ ansible_env.HOME }}/.pyenv/shims:{{ ansible_env.PATH }}"

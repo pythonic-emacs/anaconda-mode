@@ -1,2 +1,0 @@
-[travis]
-localhost ansible_connection=local

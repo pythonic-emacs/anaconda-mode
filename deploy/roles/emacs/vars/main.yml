@@ -1,7 +1,0 @@
-emacs_env:
-  PATH: "{{ emacs_directory }}/emacs-24.3/bin:{{ emacs_directory }}/emacs-24.4/bin:{{ emacs_directory }}/emacs-24.5/bin:{{ ansible_env.HOME }}/.cask/bin:{{ ansible_env.PATH }}"
-emacs_versions:
-  - emacs-24.3
-  - emacs-24.4
-  - emacs-24.5
-emacs_directory: /usr/local/emacs

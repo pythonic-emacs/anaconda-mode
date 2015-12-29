@@ -1,4 +1,0 @@
-- include: user.yml
-- include: ssh_key.yml
-- include: copy_ssh_key.yml
-- include: known_host.yml
