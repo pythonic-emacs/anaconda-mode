@@ -1,5 +1,5 @@
 language: emacs-lisp
-sudo: true
+sudo: false
 env:
   global:
     - PATH=$HOME/.emacs/emacs-24.3/bin:$HOME/.emacs/emacs-24.4/bin:$HOME/.emacs/emacs-24.5/bin:$HOME/.pyenv/bin:$HOME/.pyenv/shims:$HOME/.cask/bin:$PATH
