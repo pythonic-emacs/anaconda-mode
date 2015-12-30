@@ -63,13 +63,7 @@ done
 
 CASK_DIR=$HOME/.cask
 
-if [ -d $CASK_DIR ]
-then
-    cd $CASK_DIR
-    git pull
-else
-    git clone https://github.com/cask/cask $CASK_DIR
-fi
+git clone https://github.com/cask/cask $CASK_DIR
 
 cd $PROJECT_ROOT
 
@@ -85,23 +79,11 @@ done
 
 PYENV_DIR=$HOME/.pyenv
 
-if [ -d $PYENV_DIR ]
-then
-    cd $PYENV_DIR
-    git pull
-else
-    git clone https://github.com/yyuu/pyenv $PYENV_DIR
-fi
+git clone https://github.com/yyuu/pyenv $PYENV_DIR
 
 PYENV_VIRTUALENV_DIR=$PYENV_DIR/plugins/pyenv-virtualenv
 
-if [ -d $PYENV_VIRTUALENV_DIR ]
-then
-    cd $PYENV_VIRTUALENV_DIR
-    git pull
-else
-    git clone https://github.com/yyuu/pyenv-virtualenv $PYENV_VIRTUALENV_DIR
-fi
+git clone https://github.com/yyuu/pyenv-virtualenv $PYENV_VIRTUALENV_DIR
 
 export PATH=$PATH:$HOME/.pyenv/bin:$HOME/.pyenv/shims
 
