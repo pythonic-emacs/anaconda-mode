@@ -79,6 +79,8 @@ done
 
 PYENV_DIR=$HOME/.pyenv
 
+rm -rf $PYENV_DIR  # Clean up Travis-CI cache.
+
 git clone https://github.com/yyuu/pyenv $PYENV_DIR
 
 PYENV_VIRTUALENV_DIR=$PYENV_DIR/plugins/pyenv-virtualenv
