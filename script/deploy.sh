@@ -95,7 +95,7 @@ pyenv virtualenv 3.4.3 ipython
 
 pyenv global 3.4.3
 pip install -U setuptools pip wheel
-pip install tox coveralls
+pip install tox coveralls coveralls-merge
 PYENV_VERSION=ipython pip install ipython
 pyenv rehash
 
