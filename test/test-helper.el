@@ -58,6 +58,21 @@ name."
     (switch-to-buffer (current-buffer))
     (current-buffer)))
 
+(defmacro ert-integration (testname args doc &rest body)
+  "Generate `ert-deftest' with proper teardown."
+  (declare (indent 2))
+  `(ert-deftest ,testname ,args
+     ,doc
+     (unwind-protect
+         (progn
+           ,@body)
+       (anaconda-mode-stop)
+       (f-delete anaconda-mode-installation-directory t)
+       (when (get-buffer "*Completions*")
+         (kill-buffer "*Completions*"))
+       (when (get-buffer "*Anaconda*")
+         (kill-buffer "*Anaconda*")))))
+
 (require 'eldoc)
 
 (provide 'test-helper)
