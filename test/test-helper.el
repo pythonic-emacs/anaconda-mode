@@ -67,7 +67,7 @@ name."
          (progn
            ,@body)
        (anaconda-mode-stop)
-       (f-delete anaconda-mode-installation-directory t)
+       (run "import sys, os; os.remove(sys.argv[-1])" anaconda-mode-installation-directory)
        (when (get-buffer "*Completions*")
          (kill-buffer "*Completions*"))
        (when (get-buffer "*Anaconda*")
