@@ -71,7 +71,11 @@ name."
        (when (get-buffer "*Completions*")
          (kill-buffer "*Completions*"))
        (when (get-buffer "*Anaconda*")
-         (kill-buffer "*Anaconda*")))))
+         (kill-buffer "*Anaconda*"))
+       (when (get-buffer "*tramp/ssh test@localhost*")
+         (kill-buffer "*tramp/ssh test@localhost*")
+         (setq tramp-current-connection)
+         (sleep-for 0.5)))))
 
 (require 'eldoc)
 
