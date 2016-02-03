@@ -23,12 +23,11 @@ pythonic library with tramp connection add as necessary."
     (let ((handler (anaconda-mode-create-response-handler nil nil)))
       (with-temp-buffer
         (insert "I'm not a JSON")
-        (let ((url-http-end-of-headers (point-min)))
-          (should-error (funcall handler nil))
-          (should (equal anaconda-mode-response-buffer
-                         (buffer-name (window-buffer (selected-window)))))
-          (should (equal (format "# point: %s\nI'm not a JSON" (point-min))
-                         (buffer-string))))))))
+        (should-error (funcall handler nil))
+        (should (equal anaconda-mode-response-buffer
+                       (buffer-name (window-buffer (selected-window)))))
+        (should (equal (format "# point: %s\nI'm not a JSON" (point-min))
+                       (buffer-string)))))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-request ()
   "Prepare JSON encoded data for procedure call."
