@@ -27,6 +27,8 @@
 
 (add-hook 'anaconda-mode-process-fail-hook 'ert-anaconda-mode-message-fail-process-message)
 
+(add-hook 'anaconda-mode-response-read-fail-hook 'message)
+
 (defun wait ()
   "Wait for `anaconda-mode' server start."
   (while (not (anaconda-mode-bound-p))
@@ -72,8 +74,8 @@ name."
          (kill-buffer "*Completions*"))
        (when (get-buffer "*anaconda-mode*")
          (kill-buffer "*anaconda-mode*"))
-       (when (get-buffer "*anaconda-response*")
-         (kill-buffer "*anaconda-response*"))
+       (when (get-buffer anaconda-mode-response-buffer)
+         (kill-buffer anaconda-mode-response-buffer))
        (when (get-buffer "*Anaconda*")
          (kill-buffer "*Anaconda*"))
        (when (get-buffer "*tramp/ssh test@localhost*")

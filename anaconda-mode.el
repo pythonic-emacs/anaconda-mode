@@ -360,12 +360,7 @@ submitted."
                                    (json-read)
                                  (json-readtable-error
                                   (progn
-                                    (let ((response-string (buffer-string)))
-                                      (pop-to-buffer
-                                       (with-current-buffer (get-buffer-create "*anaconda-response*")
-                                         (insert response-string)
-                                         (goto-char (point-min))
-                                         (current-buffer))))
+                                    (run-hook-with-args 'anaconda-mode-response-read-fail-hook (buffer-string))
                                     (error "Can't read anaconda-mode server response"))))))
                 (if (assoc 'error response)
                     (error (cdr (assoc 'error response)))
@@ -374,6 +369,22 @@ submitted."
                     ;; will be treated as single argument.
                     (apply callback (cdr (assoc 'result response)) nil)))))
           (kill-buffer http-buffer))))))
+
+(defvar anaconda-mode-response-buffer "*anaconda-response*"
+  "Buffer name for error report when `anaconda-mode' fail to read server response.")
+
+(defvar anaconda-mode-response-read-fail-hook nil
+  "Hook running when `anaconda-mode' fail to read server response.")
+
+(add-hook 'anaconda-mode-response-read-fail-hook 'anaconda-mode-show-unreadable-response)
+
+(defun anaconda-mode-show-unreadable-response (response)
+  "Show unreadable RESPONSE to user, so he can report it properly."
+  (pop-to-buffer
+   (with-current-buffer (get-buffer-create anaconda-mode-response-buffer)
+     (insert response)
+     (goto-char (point-min))
+     (current-buffer))))
 
 
 ;;; Code completion.

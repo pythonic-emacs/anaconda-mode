@@ -25,7 +25,7 @@ pythonic library with tramp connection add as necessary."
         (insert "I'm not a JSON")
         (let ((url-http-end-of-headers (point-min)))
           (should-error (funcall handler nil))
-          (should (equal "*anaconda-response*"
+          (should (equal anaconda-mode-response-buffer
                          (buffer-name (window-buffer (selected-window)))))
           (should (equal "I'm not a JSON" (buffer-string))))))))
 
