@@ -360,7 +360,9 @@ submitted."
                                    (json-read)
                                  (json-readtable-error
                                   (progn
-                                    (run-hook-with-args 'anaconda-mode-response-read-fail-hook (buffer-string))
+                                    (let ((response (concat (format "# point: %s\n" url-http-end-of-headers)
+                                                            (buffer-string))))
+                                      (run-hook-with-args 'anaconda-mode-response-read-fail-hook response))
                                     (error "Can't read anaconda-mode server response"))))))
                 (if (assoc 'error response)
                     (error (cdr (assoc 'error response)))

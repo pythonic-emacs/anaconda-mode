@@ -27,7 +27,8 @@ pythonic library with tramp connection add as necessary."
           (should-error (funcall handler nil))
           (should (equal anaconda-mode-response-buffer
                          (buffer-name (window-buffer (selected-window)))))
-          (should (equal "I'm not a JSON" (buffer-string))))))))
+          (should (equal (format "# point: %s\nI'm not a JSON" (point-min))
+                         (buffer-string))))))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-request ()
   "Prepare JSON encoded data for procedure call."
