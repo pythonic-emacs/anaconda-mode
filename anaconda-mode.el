@@ -26,9 +26,6 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (defvar url-http-end-of-headers))
-
 (require 'tramp)
 (require 'url)
 (require 'json)
@@ -360,7 +357,7 @@ submitted."
                                    (json-read)
                                  (json-readtable-error
                                   (progn
-                                    (let ((response (concat (format "# point: %s\n" url-http-end-of-headers)
+                                    (let ((response (concat (format "# point: %s\n" (point))
                                                             (buffer-string))))
                                       (run-hook-with-args 'anaconda-mode-response-read-fail-hook response))
                                     (error "Can't read anaconda-mode server response"))))))

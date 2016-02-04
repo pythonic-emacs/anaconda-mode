@@ -23,6 +23,7 @@ pythonic library with tramp connection add as necessary."
     (let ((handler (anaconda-mode-create-response-handler nil nil)))
       (with-temp-buffer
         (insert "I'm not a JSON")
+        (goto-char (point-min))
         (should-error (funcall handler nil))
         (should (equal anaconda-mode-response-buffer
                        (buffer-name (window-buffer (selected-window)))))
