@@ -355,7 +355,7 @@ submitted."
               (let* ((json-array-type 'list)
                      (response (condition-case nil
                                    (json-read)
-                                 (json-readtable-error
+                                 ((json-readtable-error json-end-of-file)
                                   (progn
                                     (let ((response (concat (format "# point: %s\n" (point))
                                                             (buffer-string))))
@@ -381,6 +381,7 @@ submitted."
   "Show unreadable RESPONSE to user, so he can report it properly."
   (pop-to-buffer
    (with-current-buffer (get-buffer-create anaconda-mode-response-buffer)
+     (erase-buffer)
      (insert response)
      (goto-char (point-min))
      (current-buffer))))

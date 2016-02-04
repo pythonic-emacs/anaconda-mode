@@ -18,7 +18,7 @@ pythonic library with tramp connection add as necessary."
 ;;; JSONRPC implementation.
 
 (ert-deftest test-anaconda-mode-jsonrpc-show-server-response-on-unreadable-response ()
-  "Show server HTTP response if it is invalid JSON format."
+  "Show server HTTP response if parser meat unexpected character."
   (with-current-buffer (fixture "" 1 0)
     (let ((handler (anaconda-mode-create-response-handler nil nil)))
       (with-temp-buffer
@@ -27,8 +27,18 @@ pythonic library with tramp connection add as necessary."
         (should-error (funcall handler nil))
         (should (equal anaconda-mode-response-buffer
                        (buffer-name (window-buffer (selected-window)))))
-        (should (equal (format "# point: %s\nI'm not a JSON" (point-min))
-                       (buffer-string)))))))
+        (should (equal "# point: 1\nI'm not a JSON" (buffer-string)))))))
+
+(ert-deftest test-anaconda-mode-jsonrpc-show-server-response-on-json-end-of-file ()
+  "Show server HTTP response if parser meat end of file."
+  (with-current-buffer (fixture "" 1 0)
+    (let ((handler (anaconda-mode-create-response-handler nil nil)))
+      (with-temp-buffer
+        (insert "I'm not a JSON")
+        (should-error (funcall handler nil))
+        (should (equal anaconda-mode-response-buffer
+                       (buffer-name (window-buffer (selected-window)))))
+        (should (equal "# point: 15\nI'm not a JSON" (buffer-string)))))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-request ()
   "Prepare JSON encoded data for procedure call."
