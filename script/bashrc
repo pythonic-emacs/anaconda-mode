@@ -3,6 +3,6 @@ alias la='ls -A'
 alias ll='ls -alF'
 alias ls='ls --color=auto'
 
-export PATH=$HOME/.emacs/emacs-24.3/bin:$HOME/.emacs/emacs-24.4/bin:$HOME/.emacs/emacs-24.5/bin:$HOME/.pyenv/bin:$HOME/.pyenv/shims:$HOME/.cask/bin:$PATH
+export PATH=$HOME/.emacs/emacs-24.3/bin:$HOME/.emacs/emacs-24.4/bin:$HOME/.emacs/emacs-24.5/bin:$HOME/.emacs/emacs-25.0/bin:$HOME/.pyenv/bin:$HOME/.pyenv/shims:$HOME/.cask/bin:$PATH
 
 cd /vagrant

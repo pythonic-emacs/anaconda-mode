@@ -19,7 +19,7 @@ function info_interpreter() {
 
 function run_unit() {
     echo -e '\e[01;34m'"Run unit tests."'\e[0m\n'
-    for emacs in emacs-24.3 emacs-24.4 emacs-24.5
+    for emacs in emacs-24.3 emacs-24.4 emacs-24.5 emacs-25.0
     do
         info
         EMACS=$emacs cask exec ert-runner test/unit-test.el
@@ -28,7 +28,7 @@ function run_unit() {
 
 function run_integration() {
     echo -e '\e[01;34m'"Run integration tests."'\e[0m\n'
-    for emacs in emacs-24.3 emacs-24.4 emacs-24.5
+    for emacs in emacs-24.3 emacs-24.4 emacs-24.5 emacs-25.0
     do
         for interpreter in test/interpreters/*.el
         do

@@ -59,15 +59,31 @@ do
     rm $PREFIX/bin/emacs
 done
 
+# Build Emacs master.
+
+VERSION=emacs-25.0
+PREFIX=$EMACS_DIR/$VERSION
+cd $EMACS_SRC
+git clone https://github.com/emacs-mirror/emacs $VERSION
+cd $VERSION
+git checkout emacs-25
+./autogen.sh
+./configure --prefix=$PREFIX
+make
+make install
+rm $PREFIX/bin/emacs
+ln -s $PREFIX/bin/emacs-25.0.* $PREFIX/bin/emacs-25.0
+
 # Install cask.
 
+EMACS_VERSIONS=(emacs-24.3 emacs-24.4 emacs-24.5 emacs-25.0)
 CASK_DIR=$HOME/.cask
 
 git clone https://github.com/cask/cask $CASK_DIR
 
 cd $PROJECT_ROOT
 
-export PATH=$PATH:$HOME/.cask/bin:$EMACS_DIR/emacs-24.3/bin:$EMACS_DIR/emacs-24.4/bin:$EMACS_DIR/emacs-24.5/bin
+export PATH=$PATH:$HOME/.cask/bin:$EMACS_DIR/emacs-24.3/bin:$EMACS_DIR/emacs-24.4/bin:$EMACS_DIR/emacs-24.5/bin:$EMACS_DIR/emacs-25.0/bin
 
 for VERSION in ${EMACS_VERSIONS[@]}
 do
