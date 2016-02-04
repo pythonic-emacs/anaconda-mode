@@ -106,12 +106,12 @@ git clone https://github.com/yyuu/pyenv-virtualenv $PYENV_VIRTUALENV_DIR
 export PATH=$PATH:$HOME/.pyenv/bin:$HOME/.pyenv/shims
 
 pyenv install 2.6.9
-pyenv install 2.7.10
+pyenv install 2.7.11
 pyenv install 3.3.6
-pyenv install 3.4.3
-pyenv virtualenv 3.4.3 ipython
+pyenv install 3.4.4
+pyenv virtualenv 3.4.4 ipython
 
-pyenv global 3.4.3
+pyenv global 3.4.4
 pip install -U setuptools pip wheel
 pip install tox coveralls coveralls-merge
 PYENV_VERSION=ipython pip install ipython

@@ -136,7 +136,7 @@ if True:
   "Don't extract whole statement source code as its definition property."
   (let ((result '(((description . "statement: \napilevel = \"2.0\"")
                    (type . "statement")
-                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/sqlite3/dbapi2.py")
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.4/lib/python3.4/sqlite3/dbapi2.py")
                    (docstring . "")
                    (column . 0)
                    (module-name . "dbapi2")
@@ -255,7 +255,7 @@ __all__ = [\"normcase\",\"isabs\",\"join\",\"splitdrive\",\"split\",\"splitext\"
                        (column . 0)
                        (module-name . "posixpath")
                        (name . "__all__")
-                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/posixpath.py"))
+                       (module-path . "/home/vagrant/.pyenv/versions/3.4.4/lib/python3.4/posixpath.py"))
                       ((description . "function: ntpath._get_altsep")
                        (type . "function")
                        (line . 47)
@@ -263,7 +263,7 @@ __all__ = [\"normcase\",\"isabs\",\"join\",\"splitdrive\",\"split\",\"splitext\"
                        (column . 4)
                        (module-name . "ntpath")
                        (name . "_get_altsep")
-                       (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")))))
+                       (module-path . "/home/vagrant/.pyenv/versions/3.4.4/lib/python3.4/ntpath.py")))))
         (with-current-buffer (fixture "from os.path import _" 1 21)
           (anaconda-mode-complete-callback result)
           (should (equal "In this buffer, type RET to select the completion near point.
@@ -509,7 +509,7 @@ I'm documentation string.
                    (docstring . "join(path, *paths)
 
 ")
-                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.4/lib/python3.4/ntpath.py")
                    (column . 4)
                    (line . 104)
                    (name . "join")
@@ -528,7 +528,7 @@ I'm documentation string.
                    (docstring . "join(path, *paths)
 
 ")
-                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/ntpath.py")
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.4/lib/python3.4/ntpath.py")
                    (column . 4)
                    (line . 104)
                    (name . "join")
@@ -542,7 +542,7 @@ Join two or more pathname components, inserting '/' as needed.
 If any component is an absolute path, all previous path components
 will be discarded.  An empty last part will result in a path that
 ends with a separator.")
-                   (module-path . "/home/vagrant/.pyenv/versions/3.4.3/lib/python3.4/posixpath.py")
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.4/lib/python3.4/posixpath.py")
                    (column . 4)
                    (line . 70)
                    (name . "join")
