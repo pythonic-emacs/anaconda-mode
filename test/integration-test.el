@@ -230,6 +230,14 @@ even if an error occurs in response callback."
     (sleep-for 1)
     (should (get-buffer "*Completions*"))))
 
+(ert-integration test-anaconda-mode-complete-unicode ()
+  "Test completion at point works fine with unicode."
+  (with-current-buffer (fixture "'你好 世界!'." 1 9)
+    (anaconda-mode-complete)
+    (wait)
+    (sleep-for 1)
+    (should (get-buffer "*Completions*"))))
+
 (ert-integration test-anaconda-mode-complete-insert-candidates-base ()
   "Completion must insert common candidates base."
   (with-current-buffer (fixture "
