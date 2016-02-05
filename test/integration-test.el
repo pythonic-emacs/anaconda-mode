@@ -364,8 +364,8 @@ data = set([
 (ert-integration test-anaconda-mode-find-definitions ()
   "Show definitions buffer on documentation lookup."
   (with-current-buffer (fixture "
-import sys
-if sys.version[0] < 2:
+import random
+if random.randint(0, 1):
     def test():
         pass
 else:
@@ -403,8 +403,8 @@ test" 10 3 "simple.py")
 (ert-integration test-anaconda-mode-find-assignments ()
   "Show assignments buffer on documentation lookup."
   (with-current-buffer (fixture "
-import sys
-if sys.version[0] < 2:
+import random
+if random.randint(0, 1):
     def test():
         pass
 else:
