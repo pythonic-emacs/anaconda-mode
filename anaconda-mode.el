@@ -355,7 +355,7 @@ submitted."
               (let* ((json-array-type 'list)
                      (response (condition-case nil
                                    (json-read)
-                                 ((json-readtable-error json-end-of-file)
+                                 ((json-readtable-error json-end-of-file end-of-file)
                                   (progn
                                     (let ((response (concat (format "# point: %s\n" (point))
                                                             (buffer-string))))
