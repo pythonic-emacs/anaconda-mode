@@ -16,6 +16,8 @@
 
 (setq python-indent-guess-indent-offset nil)
 
+(setq tramp-verbose 2)
+
 (require 'anaconda-mode)
 
 (defun ert-anaconda-mode-message-fail-process-message ()
