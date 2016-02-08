@@ -84,6 +84,10 @@ if True:
                                 (column . 8)
                                 (path . ,(f-full "simple.py")))))))))
 
+;; TODO:
+;; * trim tramp file name;
+;; * tramp interpreter and opened file mismatch;
+
 
 ;;; Completion.
 
@@ -689,6 +693,12 @@ definition if current buffer doesn't has file name."
         (anaconda-mode-with-view-buffer
          (insert "b")))
     (kill-buffer "*Anaconda*")))
+
+;; TODO:
+;; * if `pythonic-remote-p' is true then prefix file path with
+;;   `pythonic-tramp-connection' inside `anaconda-mode-find-file-generic'.
+;; * if server was restarted and interpreter path mismatch then
+;;   *Anaconda* buffer and go backward command shouldn't work.
 
 
 ;;; Minor mode.
