@@ -266,7 +266,7 @@ tear" 3 4)
   (with-current-buffer (fixture "
 def f(a, b=1):
     '''Docstring for f.'''
-    pass" 2 5 "simple.py")
+    pass" 2 5 "/home/proofit404/simple.py")
     (anaconda-mode-show-doc)
     (wait)
     (sleep-for 1)
@@ -275,7 +275,7 @@ def f(a, b=1):
 
 (ert-integration test-anaconda-mode-show-doc-not-found ()
   "Don't show documentation buffer in the case of missing docs."
-  (with-current-buffer (fixture "" 1 0 "simple.py")
+  (with-current-buffer (fixture "" 1 0 "/home/proofit404/simple.py")
     (anaconda-mode-show-doc)
     (wait)
     (sleep-for 1)
@@ -287,7 +287,7 @@ def f(a, b=1):
   (with-current-buffer (fixture "
 def f(a, b=1):
     '''Docstring for f.'''
-    pass" 2 5 "simple.py")
+    pass" 2 5 "/home/proofit404/simple.py")
     (anaconda-mode-show-doc)
     (wait)
     (sleep-for 1)
@@ -311,7 +311,7 @@ def test(one, other):
     '''Test if one is other'''
     return one is other
 
-test(" 6 5 "simple.py")
+test(" 6 5 "/home/proofit404/simple.py")
       (anaconda-mode-eldoc-function)
       (wait)
       (sleep-for 1)
@@ -320,7 +320,7 @@ test(" 6 5 "simple.py")
 (ert-integration test-anaconda-mode-eldoc-empty-response ()
   "Don't try to show eldoc on response with empty result."
   (let (eldoc-last-message)
-    (with-current-buffer (fixture "invalid(" 1 8 "simple.py")
+    (with-current-buffer (fixture "invalid(" 1 8 "/home/proofit404/simple.py")
       (anaconda-mode-eldoc-function)
       (wait)
       (sleep-for 1)
@@ -331,7 +331,7 @@ test(" 6 5 "simple.py")
   (let (eldoc-last-message)
     (with-current-buffer (fixture "
 def test(): pass
-test(" 3 5 "simple.py")
+test(" 3 5 "/home/proofit404/simple.py")
       (anaconda-mode-eldoc-function)
       (wait)
       (sleep-for 1)
@@ -344,7 +344,7 @@ test(" 3 5 "simple.py")
 data = set([
     1,
     2,
-])" 4 0 "simple.py")
+])" 4 0 "/home/proofit404/simple.py")
       (anaconda-mode-eldoc-function)
       (wait)
       (sleep-for 1)
@@ -357,7 +357,7 @@ data = set([
 data = set([
     1,
     2,
-])" 4 0 "simple.py")
+])" 4 0 "/home/proofit404/simple.py")
       (should-not (anaconda-mode-eldoc-function))
       (wait)
       (sleep-for 1))))
@@ -376,7 +376,7 @@ else:
     def test(a):
         return a
 
-test" 10 3 "simple.py")
+test" 10 3 "/home/proofit404/simple.py")
     (anaconda-mode-find-definitions)
     (wait)
     (sleep-for 1)
@@ -385,7 +385,7 @@ test" 10 3 "simple.py")
 
 (ert-integration test-anaconda-mode-find-definitions-not-found ()
   "Don't show definitions buffer in the case of missing definitions."
-  (with-current-buffer (fixture "" 1 0 "simple.py")
+  (with-current-buffer (fixture "" 1 0 "/home/proofit404/simple.py")
     (anaconda-mode-find-definitions)
     (wait)
     (sleep-for 1)
@@ -415,7 +415,7 @@ else:
     def test(a):
         return a
 
-test" 10 3 "simple.py")
+test" 10 3 "/home/proofit404/simple.py")
     (anaconda-mode-find-assignments)
     (wait)
     (sleep-for 1)
@@ -424,7 +424,7 @@ test" 10 3 "simple.py")
 
 (ert-integration test-anaconda-mode-find-assignments-not-found ()
   "Don't show assignments buffer in the case of missing assignments."
-  (with-current-buffer (fixture "" 1 0 "simple.py")
+  (with-current-buffer (fixture "" 1 0 "/home/proofit404/simple.py")
     (anaconda-mode-find-assignments)
     (wait)
     (sleep-for 1)
@@ -454,7 +454,7 @@ if one:
 elif two:
     test()
 else:
-    test()" 2 6 "simple.py")
+    test()" 2 6 "/home/proofit404/simple.py")
     (anaconda-mode-find-references)
     (wait)
     (sleep-for 1)
@@ -463,7 +463,7 @@ else:
 
 (ert-integration test-anaconda-mode-find-references-not-found ()
   "Don't show references buffer in the case of missing references."
-  (with-current-buffer (fixture "" 1 0 "simple.py")
+  (with-current-buffer (fixture "" 1 0 "/home/proofit404/simple.py")
     (anaconda-mode-find-references)
     (wait)
     (sleep-for 1)

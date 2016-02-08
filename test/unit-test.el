@@ -57,7 +57,7 @@ pythonic library with tramp connection add as necessary."
 
 (ert-deftest test-anaconda-mode-jsonrpc-request-data ()
   "Prepare data for remote procedure call."
-  (with-current-buffer (fixture "import datetime" 1 15 "simple.py")
+  (with-current-buffer (fixture "import datetime" 1 15 "/home/proofit404/simple.py")
     (should (equal (anaconda-mode-jsonrpc-request-data "echo")
                    `((jsonrpc . "2.0")
                      (id . 1)
@@ -72,7 +72,7 @@ pythonic library with tramp connection add as necessary."
 tabulation characters."
   (with-current-buffer (fixture "
 if True:
-	sys.api" 3 8 "simple.py")
+	sys.api" 3 8 "/home/proofit404/simple.py")
     (should (equal (anaconda-mode-jsonrpc-request-data "echo")
                    `((jsonrpc . "2.0")
                      (id . 1)
@@ -650,7 +650,7 @@ ends with a separator.
   (with-current-buffer (fixture "
 test
 
-one" 4 3 "initial.py")
+one" 4 3 "/home/proofit404/initial.py")
     (anaconda-mode-find-file '((module-path . "simple.py")
                                (line . 1)
                                (column . 0)))
@@ -672,7 +672,7 @@ definition if current buffer doesn't has file name."
 
 (ert-deftest test-anaconda-mode-find-file-builtins ()
   "Show description message if user try to open definition without module name."
-  (with-current-buffer (fixture "test" 1 4 "simple.py")
+  (with-current-buffer (fixture "test" 1 4 "/home/proofit404/simple.py")
     (anaconda-mode-find-file '((column)
                                (description . "class int")
                                (line)

@@ -58,7 +58,7 @@ name."
     (goto-char 0)
     (forward-line (1- line))
     (forward-char column)
-    (setq buffer-file-name (and path (f-full path)))
+    (setq buffer-file-name path)
     (switch-to-buffer (current-buffer))
     (current-buffer)))
 
