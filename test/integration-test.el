@@ -38,7 +38,11 @@
 `anaconda-mode-server-directory'."
   (run anaconda-mode-ensure-directory-command
        (anaconda-mode-server-directory))
-  (should (f-dir? (anaconda-mode-server-directory))))
+  (should (zerop (run "
+import sys, os
+if not os.path.isdir(sys.argv[-1]):
+    sys.exit(1)
+" (anaconda-mode-server-directory)))))
 
 (ert-integration test-anaconda-mode-install-server ()
   "`anaconda-mode-install-server-code' must install `anaconda-mode' server."
