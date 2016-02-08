@@ -65,7 +65,7 @@ pythonic library with tramp connection add as necessary."
                      (params . ((source . "import datetime")
                                 (line . 1)
                                 (column . 15)
-                                (path . ,(f-full "simple.py")))))))))
+                                (path . "/home/proofit404/simple.py"))))))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-request-data-with-tabulation ()
   "Prepare data for remote procedure call from buffer contained
@@ -82,11 +82,36 @@ if True:
 	sys.api")
                                 (line . 3)
                                 (column . 8)
-                                (path . ,(f-full "simple.py")))))))))
+                                (path . "/home/proofit404/simple.py"))))))))
 
-;; TODO:
-;; * trim tramp file name;
-;; * tramp interpreter and opened file mismatch;
+(ert-deftest test-anaconda-mode-jsonrpc-request-data-tramp-file ()
+  "Prepare data for remote procedure call from the tramp buffer."
+  (let ((python-shell-interpreter "/ssh:test@10.120.4.4:/usr/bin/python"))
+    (with-current-buffer
+        (fixture "imp" 1 3 "/ssh:test@10.120.4.4:/home/test/simple.py")
+      (should (equal (anaconda-mode-jsonrpc-request-data "echo")
+                     `((jsonrpc . "2.0")
+                       (id . 1)
+                       (method . "echo")
+                       (params . ((source . "imp")
+                                  (line . 1)
+                                  (column . 3)
+                                  (path . "/home/test/simple.py")))))))))
+
+(ert-deftest test-anaconda-mode-jsonrpc-request-data-tramp-file-mismatch-interpreter ()
+  "Prepare data for remote procedure call from the tramp buffer
+if interpreter doesn't match."
+  (let ((python-shell-interpreter "/ssh:test@10.120.4.5:/usr/bin/python"))
+    (with-current-buffer
+        (fixture "imp" 1 3 "/ssh:test@10.120.4.4:/home/test/simple.py")
+      (should (equal (anaconda-mode-jsonrpc-request-data "echo")
+                     `((jsonrpc . "2.0")
+                       (id . 1)
+                       (method . "echo")
+                       (params . ((source . "imp")
+                                  (line . 1)
+                                  (column . 3)
+                                  (path . nil)))))))))
 
 
 ;;; Completion.

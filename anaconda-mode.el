@@ -331,7 +331,17 @@ number position, column number position and file path."
                (line . ,(line-number-at-pos (point)))
                (column . ,(- (point) (line-beginning-position)))
                (path . ,(when (buffer-file-name)
-                          (pythonic-file-name (buffer-file-name))))))))
+                          (if (pythonic-remote-p)
+                              (and
+                               (tramp-tramp-file-p (buffer-file-name))
+                               (equal (tramp-file-name-host
+                                       (tramp-dissect-file-name
+                                        (pythonic-tramp-connection)))
+                                      (tramp-file-name-host
+                                       (tramp-dissect-file-name
+                                        (buffer-file-name))))
+                               (pythonic-file-name (buffer-file-name)))
+                            (buffer-file-name))))))))
 
 (defun anaconda-mode-create-response-handler (command callback)
   "Create server response handler based on COMMAND and CALLBACK function.
