@@ -403,8 +403,8 @@ views
 
 (ert-deftest test-anaconda-mode-view-definitions-presenter-next-error ()
   "Use `next-error' to navigate next definition."
-  (let* ((ntpath (run-to-string '("-c" "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')")))
-         (posixpath (run-to-string '("-c" "from __future__ import print_function; import posixpath; print(posixpath.__file__, end='')")))
+  (let* ((ntpath (run-to-string "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')"))
+         (posixpath (run-to-string "from __future__ import print_function; import posixpath; print(posixpath.__file__, end='')"))
          (result `(((description . "def join")
                     (full-name . "os.path.join")
                     (type . "function")
@@ -439,8 +439,8 @@ ends with a separator.")
 
 (ert-deftest test-anaconda-mode-view-definitions-presenter-next-error-no-select ()
   "Show definition at point in the no selected buffer."
-  (let* ((ntpath (run-to-string '("-c" "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')")))
-         (posixpath (run-to-string '("-c" "from __future__ import print_function; import posixpath; print(posixpath.__file__, end='')")))
+  (let* ((ntpath (run-to-string "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')"))
+         (posixpath (run-to-string "from __future__ import print_function; import posixpath; print(posixpath.__file__, end='')"))
          (result `(((description . "def join")
                     (full-name . "os.path.join")
                     (type . "function")
@@ -504,7 +504,7 @@ ends with a separator.")
 
 (ert-deftest test-anaconda-mode-view-insert-module-definition-click ()
   "Click on the definition must open desired file."
-  (let* ((ntpath (run-to-string '("-c" "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')")))
+  (let* ((ntpath (run-to-string "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')"))
          (definition `((description . "def join")
                        (full-name . "os.path.join")
                        (type . "function")
@@ -635,7 +635,7 @@ ends with a separator.
 
 (ert-deftest test-anaconda-mode-view-insert-button-click ()
   "Go to definition if click on button."
-  (let* ((ntpath (run-to-string '("-c" "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')")))
+  (let* ((ntpath (run-to-string "from __future__ import print_function; import ntpath; print(ntpath.__file__, end='')"))
          (definition `((description . "def join")
                        (full-name . "os.path.join")
                        (type . "function")

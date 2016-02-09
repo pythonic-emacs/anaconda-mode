@@ -40,11 +40,11 @@
   "Run python interpreter synchronously with ARGS passed directly to it."
   (call-pythonic :args `("-c" ,@args)))
 
-(defun run-to-string (args)
+(defun run-to-string (&rest args)
   "Run python interpreter synchronously with ARGS.
 Return process output."
   (let ((buffer (generate-new-buffer-name "*out*")))
-    (call-pythonic :buffer buffer :args args)
+    (call-pythonic :buffer buffer :args `("-c" ,@args))
     (with-current-buffer buffer
       (buffer-string))))
 
