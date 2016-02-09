@@ -80,7 +80,11 @@ installation directory."
       (wait)
       (setq id2 (process-id anaconda-mode-process)))
     (should-not (equal id1 id2))
-    (should (f-dir? "~/.emacs.d/anaconda_mode"))))
+    (should (zerop (run "
+import sys, os
+if not os.path.isdir(os.path.expanduser(sys.argv[-1])):
+    os._exit(1)  # IPython again.
+" "~/.emacs.d/anaconda_mode")))))
 
 (ert-integration test-anaconda-mode-not-restart-in-the-same-envinment ()
   "`anaconda-mode' server will not be restarted if pythonic
