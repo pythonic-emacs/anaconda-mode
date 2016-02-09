@@ -40,8 +40,8 @@
        (anaconda-mode-server-directory))
   (should (zerop (run "
 import sys, os
-if not os.path.isdir(sys.argv[-1]):
-    sys.exit(1)
+if not os.path.isdir(os.path.expanduser(sys.argv[-1])):
+    os._exit(1)  # IPython again.
 " (anaconda-mode-server-directory)))))
 
 (ert-integration test-anaconda-mode-install-server ()
