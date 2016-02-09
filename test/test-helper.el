@@ -87,6 +87,9 @@ name."
 
 (require 'eldoc)
 
+(defvar home-directory (f-full "~")
+  "User home directory.")
+
 (provide 'test-helper)
 
 ;;; test-helper.el ends here
