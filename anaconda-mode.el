@@ -374,10 +374,28 @@ submitted."
                 (if (assoc 'error response)
                     (error (cdr (assoc 'error response)))
                   (with-current-buffer anaconda-mode-request-buffer
-                    ;; Terminate `apply' call with empty list so response
-                    ;; will be treated as single argument.
-                    (apply callback (cdr (assoc 'result response)) nil)))))
+                    (let ((result (cdr (assoc 'result response))))
+                      (if (and (pythonic-remote-p)
+                               (member command anaconda-mode-definition-commands))
+                          (setq result (--map (--map (let ((key (car it))
+                                                           (value (cdr it)))
+                                                       (when (eq key 'module-path)
+                                                         (seq value (concat (pythonic-tramp-connection) value)))
+                                                       (cons key value))
+                                                     it)
+                                              result)))
+                      ;; Terminate `apply' call with empty list so response
+                      ;; will be treated as single argument.
+                      (apply callback result nil))))))
           (kill-buffer http-buffer))))))
+
+(defvar anaconda-mode-definition-commands
+  '("complete" "goto_definitions" "goto_assignments" "usages")
+  "List of `anaconda-mode' rpc commands returning definitions as result.
+
+This is used to prefix `module-path' field with
+`pythonic-tramp-connection' in the case of remote interpreter or
+virtual environment.")
 
 (defvar anaconda-mode-response-buffer "*anaconda-response*"
   "Buffer name for error report when `anaconda-mode' fail to read server response.")

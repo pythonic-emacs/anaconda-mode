@@ -719,12 +719,6 @@ definition if current buffer doesn't has file name."
          (insert "b")))
     (kill-buffer "*Anaconda*")))
 
-;; TODO:
-;; * if `pythonic-remote-p' is true then prefix file path with
-;;   `pythonic-tramp-connection' inside `anaconda-mode-find-file-generic'.
-;; * if server was restarted and interpreter path mismatch then
-;;   *Anaconda* buffer and go backward command shouldn't work.
-
 
 ;;; Minor mode.
 

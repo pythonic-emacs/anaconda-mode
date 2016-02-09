@@ -227,6 +227,23 @@ even if an error occurs in response callback."
       (sleep-for 1)
       (should-not result))))
 
+(ert-integration test-anaconda-mode-jsonrpc-add-path-prefix ()
+  "The `module-path' fields should point to the same host as python interpreter."
+  (let (module-path)
+    (with-current-buffer (fixture "from os import getenv" 1 21)
+      (anaconda-mode-start)
+      (wait)
+      (anaconda-mode-jsonrpc
+       "complete"
+       (lambda (res)
+         (setq module-path (cdr (assoc 'module-path (car res))))))
+      (sleep-for 1)
+      (if (pythonic-remote-p)
+          (should (s-starts-with-p
+                   (pythonic-tramp-connection)
+                   module-path))
+        (should-not (tramp-tramp-file-p module-path))))))
+
 
 ;;; Completion.
 
