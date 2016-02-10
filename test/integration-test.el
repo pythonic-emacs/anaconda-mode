@@ -7,33 +7,33 @@
 
 ;;; Server.
 
-(ert-integration test-anaconda-mode-start ()
+(ert-defintegration test-anaconda-mode-start ()
   "`anaconda-mode' server starts successfully."
   (anaconda-mode-start)
   (wait)
   (should (anaconda-mode-running-p)))
 
-(ert-integration test-anaconda-mode-start-bind-port ()
+(ert-defintegration test-anaconda-mode-start-bind-port ()
   "`anaconda-mode' server bind port successfully."
   (anaconda-mode-start)
   (wait)
   (should (anaconda-mode-bound-p)))
 
-(ert-integration test-anaconda-mode-stop ()
+(ert-defintegration test-anaconda-mode-stop ()
   "`anaconda-mode' server stops successfully."
   (anaconda-mode-start)
   (wait)
   (anaconda-mode-stop)
   (should-not (anaconda-mode-running-p)))
 
-(ert-integration test-anaconda-mode-stop-release-port ()
+(ert-defintegration test-anaconda-mode-stop-release-port ()
   "`anaconda-mode' server release port successfully on teardown."
   (anaconda-mode-start)
   (wait)
   (anaconda-mode-stop)
   (should-not (anaconda-mode-bound-p)))
 
-(ert-integration test-anaconda-mode-create-server-directory ()
+(ert-defintegration test-anaconda-mode-create-server-directory ()
   "`anaconda-mode-ensure-directory-code' must create
 `anaconda-mode-server-directory'."
   (run anaconda-mode-ensure-directory-command
@@ -44,7 +44,7 @@ if not os.path.isdir(os.path.expanduser(sys.argv[-1])):
     os._exit(1)  # IPython again.
 " (anaconda-mode-server-directory)))))
 
-(ert-integration test-anaconda-mode-install-server ()
+(ert-defintegration test-anaconda-mode-install-server ()
   "`anaconda-mode-install-server-code' must install `anaconda-mode' server."
   (run anaconda-mode-ensure-directory-command
        (anaconda-mode-server-directory))
@@ -54,7 +54,7 @@ if not os.path.isdir(os.path.expanduser(sys.argv[-1])):
   (should (zerop (run anaconda-mode-check-installation-command
                       (anaconda-mode-server-directory)))))
 
-(ert-integration test-anaconda-mode-restart-on-environment-change ()
+(ert-defintegration test-anaconda-mode-restart-on-environment-change ()
   "`anaconda-mode' server will be restarted if any variable of
 the pythonic environment (for example `python-shell-interpreter')
 was changed."
@@ -68,7 +68,7 @@ was changed."
       (setq id2 (process-id anaconda-mode-process)))
     (should-not (equal id1 id2))))
 
-(ert-integration test-anaconda-mode-restart-on-installation-directory-change ()
+(ert-defintegration test-anaconda-mode-restart-on-installation-directory-change ()
   "`anaconda-mode' server will be restarted if user change server
 installation directory."
   (let (id1 id2)
@@ -86,7 +86,7 @@ if not os.path.isdir(os.path.expanduser(sys.argv[-1])):
     os._exit(1)  # IPython again.
 " "~/.emacs.d/anaconda_mode")))))
 
-(ert-integration test-anaconda-mode-not-restart-in-the-same-envinment ()
+(ert-defintegration test-anaconda-mode-not-restart-in-the-same-envinment ()
   "`anaconda-mode' server will not be restarted if pythonic
 environment keeps the same."
   (let (id1 id2)
@@ -98,14 +98,14 @@ environment keeps the same."
     (setq id2 (process-id anaconda-mode-process))
     (should (equal id1 id2))))
 
-(ert-integration test-anaconda-mode-on-start-callback ()
+(ert-defintegration test-anaconda-mode-on-start-callback ()
   "Run callback passed on server start."
   (let (var)
     (anaconda-mode-start (lambda () (setq var t)))
     (wait)
     (should var)))
 
-(ert-integration test-anaconda-mode-after-start-callback ()
+(ert-defintegration test-anaconda-mode-after-start-callback ()
   "Run callback passed after server start."
   (let (var)
     (anaconda-mode-start)
@@ -116,7 +116,7 @@ environment keeps the same."
 
 ;;; JSONRPC implementation.
 
-(ert-integration test-anaconda-mode-call ()
+(ert-defintegration test-anaconda-mode-call ()
   "Perform remote procedure call without already started server.
 We make request knowingly so response shouldn't be null."
   (let (result)
@@ -126,7 +126,7 @@ We make request knowingly so response shouldn't be null."
       (sleep-for 1)
       (should (< 0 (length result))))))
 
-(ert-integration test-anaconda-mode-call-callback-current-buffer ()
+(ert-defintegration test-anaconda-mode-call-callback-current-buffer ()
   "Run response callback in the request buffer."
   (with-current-buffer (fixture "import sys" 1 10)
     (let ((request-buffer (current-buffer))
@@ -136,7 +136,7 @@ We make request knowingly so response shouldn't be null."
       (sleep-for 1)
       (should (equal request-buffer response-buffer)))))
 
-(ert-integration test-anaconda-mode-jsonrpc ()
+(ert-defintegration test-anaconda-mode-jsonrpc ()
   "Perform remote procedure call.
 We make request knowingly so response shouldn't be null."
   (let (result)
@@ -147,7 +147,7 @@ We make request knowingly so response shouldn't be null."
       (sleep-for 1)
       (should (< 0 (length result))))))
 
-(ert-integration test-anaconda-mode-jsonrpc-error-response ()
+(ert-defintegration test-anaconda-mode-jsonrpc-error-response ()
   "Raise error if rpc call return error response."
   (with-current-buffer (fixture "import sys" 1 10)
     (anaconda-mode-start)
@@ -155,7 +155,7 @@ We make request knowingly so response shouldn't be null."
     (anaconda-mode-jsonrpc "wrong_method" (lambda (res)))
     (should-error (sleep-for 1))))
 
-(ert-integration test-anaconda-mode-jsonrpc-remove-http-buffer ()
+(ert-defintegration test-anaconda-mode-jsonrpc-remove-http-buffer ()
   "Remove *http* buffer leaved after `url-retrieve' function call."
   (with-current-buffer (fixture "import sys" 1 10)
     (anaconda-mode-start)
@@ -166,7 +166,7 @@ We make request knowingly so response shouldn't be null."
      (--filter (s-starts-with? " *http" (buffer-name it))
                (buffer-list)))))
 
-(ert-integration test-anaconda-mode-jsonrpc-remove-http-buffer-on-callback-error ()
+(ert-defintegration test-anaconda-mode-jsonrpc-remove-http-buffer-on-callback-error ()
   "Remove *http* buffer leaved after `url-retrieve' function call
 even if an error occurs in response callback."
   (with-current-buffer (fixture "import sys" 1 10)
@@ -178,7 +178,7 @@ even if an error occurs in response callback."
      (--filter (s-starts-with? " *http" (buffer-name it))
                (buffer-list)))))
 
-(ert-integration test-anaconda-mode-jsonrpc-skip-response-on-point-movement ()
+(ert-defintegration test-anaconda-mode-jsonrpc-skip-response-on-point-movement ()
   "Don't run response callback if point position was changed."
   (let (result)
     (with-current-buffer (fixture "import s " 1 8)
@@ -189,7 +189,7 @@ even if an error occurs in response callback."
       (sleep-for 1)
       (should-not result))))
 
-(ert-integration test-anaconda-mode-jsonrpc-skip-response-on-buffer-switch ()
+(ert-defintegration test-anaconda-mode-jsonrpc-skip-response-on-buffer-switch ()
   "Don't run response callback if user switch the buffer."
   (let (result)
     (with-current-buffer (fixture "import s" 1 8)
@@ -204,7 +204,7 @@ even if an error occurs in response callback."
       (sleep-for 1)
       (should-not result))))
 
-(ert-integration test-anaconda-mode-jsonrpc-skip-response-on-window-switch ()
+(ert-defintegration test-anaconda-mode-jsonrpc-skip-response-on-window-switch ()
   "Don't run response callback if user switch the window."
   (let (result)
     (with-current-buffer (fixture "import s" 1 8)
@@ -215,7 +215,7 @@ even if an error occurs in response callback."
       (sleep-for 1)
       (should-not result))))
 
-(ert-integration test-anaconda-mode-jsonrpc-skip-response-on-modified-tick-change ()
+(ert-defintegration test-anaconda-mode-jsonrpc-skip-response-on-modified-tick-change ()
   "Don't run response callback if the `buffer-chars-modified-tick' was changed."
   (let (result)
     (with-current-buffer (fixture "import s" 1 8)
@@ -227,7 +227,7 @@ even if an error occurs in response callback."
       (sleep-for 1)
       (should-not result))))
 
-(ert-integration test-anaconda-mode-jsonrpc-add-path-prefix ()
+(ert-defintegration test-anaconda-mode-jsonrpc-add-path-prefix ()
   "The `module-path' fields should point to the same host as python interpreter."
   (let (module-path)
     (with-current-buffer (fixture "from os import getenv" 1 21)
@@ -247,7 +247,7 @@ even if an error occurs in response callback."
 
 ;;; Completion.
 
-(ert-integration test-anaconda-mode-complete ()
+(ert-defintegration test-anaconda-mode-complete ()
   "Test completion at point."
   (with-current-buffer (fixture "t" 1 1)
     (anaconda-mode-complete)
@@ -255,7 +255,7 @@ even if an error occurs in response callback."
     (sleep-for 1)
     (should (get-buffer "*Completions*"))))
 
-(ert-integration test-anaconda-mode-complete-unicode ()
+(ert-defintegration test-anaconda-mode-complete-unicode ()
   "Test completion at point works fine with unicode."
   (with-current-buffer (fixture "'你好 世界!'." 1 9)
     (anaconda-mode-complete)
@@ -263,7 +263,7 @@ even if an error occurs in response callback."
     (sleep-for 1)
     (should (get-buffer "*Completions*"))))
 
-(ert-integration test-anaconda-mode-complete-insert-candidates-base ()
+(ert-defintegration test-anaconda-mode-complete-insert-candidates-base ()
   "Completion must insert common candidates base."
   (with-current-buffer (fixture "
 def teardown(): pass
@@ -273,7 +273,7 @@ tear" 3 4)
     (sleep-for 1)
     (should (looking-back "teardown"))))
 
-(ert-integration test-anaconda-mode-does-not-complete-in-comments ()
+(ert-defintegration test-anaconda-mode-does-not-complete-in-comments ()
   "Don't run interactive completion inside comment block."
   (with-current-buffer (fixture "#im" 1 3)
     (anaconda-mode-complete)
@@ -282,7 +282,7 @@ tear" 3 4)
 
 ;;; Documentation.
 
-(ert-integration test-anaconda-mode-show-doc ()
+(ert-defintegration test-anaconda-mode-show-doc ()
   "Show documentation buffer on documentation lookup."
   (with-current-buffer (fixture "
 def f(a, b=1):
@@ -294,7 +294,7 @@ def f(a, b=1):
     (should (equal "*Anaconda*"
                    (buffer-name (window-buffer (selected-window)))))))
 
-(ert-integration test-anaconda-mode-show-doc-not-found ()
+(ert-defintegration test-anaconda-mode-show-doc-not-found ()
   "Don't show documentation buffer in the case of missing docs."
   (with-current-buffer (fixture "" 1 0 (concat home-directory "simple.py"))
     (anaconda-mode-show-doc)
@@ -303,7 +303,7 @@ def f(a, b=1):
     (should (equal "simple.py"
                    (f-filename (buffer-file-name (window-buffer (selected-window))))))))
 
-(ert-integration test-anaconda-mode-show-doc-content ()
+(ert-defintegration test-anaconda-mode-show-doc-content ()
   "Format documentation buffer from rpc response."
   (with-current-buffer (fixture "
 def f(a, b=1):
@@ -324,7 +324,7 @@ Docstring for f.
 
 ;;; ElDoc.
 
-(ert-integration test-anaconda-mode-eldoc ()
+(ert-defintegration test-anaconda-mode-eldoc ()
   "`anaconda-mode-eldoc-function' will run `anaconda-mode' server."
   (let (eldoc-last-message)
     (with-current-buffer (fixture "
@@ -338,7 +338,7 @@ test(" 6 5 (concat home-directory "simple.py"))
       (sleep-for 1)
       (should (equal "test(one, other)" eldoc-last-message)))))
 
-(ert-integration test-anaconda-mode-eldoc-empty-response ()
+(ert-defintegration test-anaconda-mode-eldoc-empty-response ()
   "Don't try to show eldoc on response with empty result."
   (let (eldoc-last-message)
     (with-current-buffer (fixture "invalid(" 1 8 (concat home-directory "simple.py"))
@@ -347,7 +347,7 @@ test(" 6 5 (concat home-directory "simple.py"))
       (sleep-for 1)
       (should-not eldoc-last-message))))
 
-(ert-integration test-anaconda-mode-eldoc-no-params ()
+(ert-defintegration test-anaconda-mode-eldoc-no-params ()
   "Show eldoc message for function without arguments."
   (let (eldoc-last-message)
     (with-current-buffer (fixture "
@@ -358,7 +358,7 @@ test(" 3 5 (concat home-directory "simple.py"))
       (sleep-for 1)
       (should (equal "test()" eldoc-last-message)))))
 
-(ert-integration test-anaconda-mode-eldoc-no-index-on-set-spec ()
+(ert-defintegration test-anaconda-mode-eldoc-no-index-on-set-spec ()
   "Call signatures on `set' builtin some time return result without index field."
   (let (eldoc-last-message)
     (with-current-buffer (fixture "
@@ -371,7 +371,7 @@ data = set([
       (sleep-for 1)
       (should (equal "set()" eldoc-last-message)))))
 
-(ert-integration test-anaconda-mode-eldoc-sigrature ()
+(ert-defintegration test-anaconda-mode-eldoc-sigrature ()
   "Asynchronous eldoc function must return `nil'."
   (let (eldoc-last-message)
     (with-current-buffer (fixture "
@@ -386,7 +386,7 @@ data = set([
 
 ;;; Definitions.
 
-(ert-integration test-anaconda-mode-find-definitions ()
+(ert-defintegration test-anaconda-mode-find-definitions ()
   "Show definitions buffer on documentation lookup."
   (with-current-buffer (fixture "
 import random
@@ -404,7 +404,7 @@ test" 10 3 (concat home-directory "simple.py"))
     (should (equal "*Anaconda*"
                    (buffer-name (window-buffer (selected-window)))))))
 
-(ert-integration test-anaconda-mode-find-definitions-not-found ()
+(ert-defintegration test-anaconda-mode-find-definitions-not-found ()
   "Don't show definitions buffer in the case of missing definitions."
   (with-current-buffer (fixture "" 1 0 (concat home-directory "simple.py"))
     (anaconda-mode-find-definitions)
@@ -413,7 +413,7 @@ test" 10 3 (concat home-directory "simple.py"))
     (should (equal "simple.py"
                    (f-filename (buffer-file-name (window-buffer (selected-window))))))))
 
-(ert-integration test-anaconda-mode-find-definitions-single-definition ()
+(ert-defintegration test-anaconda-mode-find-definitions-single-definition ()
   "Jump to definition immediately in the case of single definition."
   (with-current-buffer (fixture "from os import getenv" 1 21)
     (anaconda-mode-find-definitions)
@@ -425,7 +425,7 @@ test" 10 3 (concat home-directory "simple.py"))
 
 ;;; Assignments.
 
-(ert-integration test-anaconda-mode-find-assignments ()
+(ert-defintegration test-anaconda-mode-find-assignments ()
   "Show assignments buffer on documentation lookup."
   (with-current-buffer (fixture "
 import random
@@ -443,7 +443,7 @@ test" 10 3 (concat home-directory "simple.py"))
     (should (equal "*Anaconda*"
                    (buffer-name (window-buffer (selected-window)))))))
 
-(ert-integration test-anaconda-mode-find-assignments-not-found ()
+(ert-defintegration test-anaconda-mode-find-assignments-not-found ()
   "Don't show assignments buffer in the case of missing assignments."
   (with-current-buffer (fixture "" 1 0 (concat home-directory "simple.py"))
     (anaconda-mode-find-assignments)
@@ -452,7 +452,7 @@ test" 10 3 (concat home-directory "simple.py"))
     (should (equal "simple.py"
                    (f-filename (buffer-file-name (window-buffer (selected-window))))))))
 
-(ert-integration test-anaconda-mode-find-assignments-single-assignment ()
+(ert-defintegration test-anaconda-mode-find-assignments-single-assignment ()
   "Jump to assignment immediately in the case of single assignment."
   (with-current-buffer (fixture "from os import getenv" 1 21)
     (anaconda-mode-find-assignments)
@@ -464,7 +464,7 @@ test" 10 3 (concat home-directory "simple.py"))
 
 ;;; References.
 
-(ert-integration test-anaconda-mode-find-references ()
+(ert-defintegration test-anaconda-mode-find-references ()
   "Show references buffer on documentation lookup."
   (with-current-buffer (fixture "
 def test():
@@ -482,7 +482,7 @@ else:
     (should (equal "*Anaconda*"
                    (buffer-name (window-buffer (selected-window)))))))
 
-(ert-integration test-anaconda-mode-find-references-not-found ()
+(ert-defintegration test-anaconda-mode-find-references-not-found ()
   "Don't show references buffer in the case of missing references."
   (with-current-buffer (fixture "" 1 0 (concat home-directory "simple.py"))
     (anaconda-mode-find-references)

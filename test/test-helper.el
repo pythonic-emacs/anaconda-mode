@@ -64,7 +64,7 @@ name."
     (switch-to-buffer (current-buffer))
     (current-buffer)))
 
-(defmacro ert-integration (testname args doc &rest body)
+(defmacro ert-defintegration (testname args doc &rest body)
   "Generate `ert' test with proper setup and teardown machinery."
   (declare (indent 2))
   `(ert-deftest ,testname ,args
