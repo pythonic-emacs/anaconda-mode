@@ -12,13 +12,12 @@
 
 (undercover "anaconda-mode.el" (:report-file "emacs-coveralls.json") (:send-report nil))
 
-(require 'python)
+(require 'anaconda-mode)
+(require 'eldoc)
 
 (setq python-indent-guess-indent-offset nil)
 
 (setq tramp-verbose 2)
-
-(require 'anaconda-mode)
 
 (defun ert-anaconda-mode-message-fail-process-message ()
   "Print failed process output."
@@ -48,6 +47,9 @@ Return process output."
     (with-current-buffer buffer
       (buffer-string))))
 
+(defvar home-directory (f-full "~")
+  "User home directory.")
+
 (defun fixture (source line column &optional path)
   "Open SOURCE fixture.
 Put point on LINE at COLUMN position.  Set PATH as current file
@@ -63,7 +65,7 @@ name."
     (current-buffer)))
 
 (defmacro ert-integration (testname args doc &rest body)
-  "Generate `ert-deftest' with proper teardown."
+  "Generate `ert' test with proper setup and teardown machinery."
   (declare (indent 2))
   `(ert-deftest ,testname ,args
      ,doc
@@ -71,24 +73,19 @@ name."
          (progn
            ,@body)
        (anaconda-mode-stop)
-       (run "import sys, os; os.remove(sys.argv[-1])" anaconda-mode-installation-directory)
-       (when (get-buffer "*Completions*")
-         (kill-buffer "*Completions*"))
-       (when (get-buffer anaconda-mode-process-buffer)
-         (kill-buffer anaconda-mode-process-buffer))
-       (when (get-buffer anaconda-mode-response-buffer)
-         (kill-buffer anaconda-mode-response-buffer))
-       (when (get-buffer "*Anaconda*")
-         (kill-buffer "*Anaconda*"))
-       (when (get-buffer "*tramp/ssh test@localhost*")
-         (kill-buffer "*tramp/ssh test@localhost*")
+       (mapc 'kill-buffer
+             (cl-remove-if
+              (lambda (buffer)
+                (member (buffer-name buffer)
+                        '("*scratch*" "*Messages*" "*ert-runner outout*" " *temp*")))
+              (buffer-list)))
+       (shell-command "rm -rf $HOME/.emacs.d/anaconda-mode/")
+       (shell-command "rm -rf $HOME/.emacs.d/anaconda_mode/")
+       (shell-command "ssh test@localhost 'rm -rf $HOME/.emacs.d/anaconda-mode/'")
+       (shell-command "ssh test@localhost 'rm -rf $HOME/.emacs.d/anaconda_mode/'")
+       (when tramp-current-connection
          (setq tramp-current-connection)
          (sleep-for 0.5)))))
-
-(require 'eldoc)
-
-(defvar home-directory (f-full "~")
-  "User home directory.")
 
 (provide 'test-helper)
 
