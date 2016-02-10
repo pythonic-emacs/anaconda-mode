@@ -380,7 +380,7 @@ submitted."
                           (setq result (--map (--map (let ((key (car it))
                                                            (value (cdr it)))
                                                        (when (eq key 'module-path)
-                                                         (seq value (concat (pythonic-tramp-connection) value)))
+                                                         (setq value (concat (pythonic-tramp-connection) value)))
                                                        (cons key value))
                                                      it)
                                               result)))
