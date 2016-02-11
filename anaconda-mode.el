@@ -632,7 +632,7 @@ PRESENTER is the function used to format buffer content."
     (--if-let (cdr (assoc 'module-path definition))
         (progn
           (funcall find-function it)
-          (goto-char 0)
+          (goto-char (point-min))
           (forward-line (1- (cdr (assoc 'line definition))))
           (forward-char (cdr (assoc 'column definition)))
           (setq anaconda-mode-go-back-definition backward-navigation))
