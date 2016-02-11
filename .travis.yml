@@ -1,12 +1,25 @@
-language: emacs-lisp
+language: python
+python:
+  - 2.6
+  - 2.7
+  - 3.3
+  - 3.4
 sudo: required
 env:
   global:
-    - PATH=$HOME/.emacs/emacs-24.3/bin:$HOME/.emacs/emacs-24.4/bin:$HOME/.emacs/emacs-24.5/bin:$HOME/.emacs/emacs-25.0/bin:$HOME/.pyenv/bin:$HOME/.pyenv/shims:$HOME/.cask/bin:$PATH
+    - PATH=$HOME/emacs/emacs-24.3/bin:$HOME/emacs/emacs-24.4/bin:$HOME/emacs/emacs-24.5/bin:$HOME/emacs/emacs-25.0/bin:$HOME/.cask/bin:$PATH
+cache:
+  directories:
+  - $HOME/.cache/pip
+before_cache:
+  - rm -f $HOME/.cache/pip/log/debug.log
 install:
-  - ./script/deploy.sh
+  - pip install -U pip wheel
+  - pip install -r requirements/ci.txt
+  - ./script/install_tramp.sh
+  - ./script/install_emacs.sh
 script:
   - tox
   - ./script/ert.sh
 after_success:
-  - coveralls-merge emacs-coveralls.json
+  - coveralls --merge=emacs-coveralls.json
