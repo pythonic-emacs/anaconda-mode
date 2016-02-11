@@ -902,6 +902,17 @@ module_path = ntpath.__file__
 if module_path.endswith('.pyc'):
     module_path = module_path[:-1]
 print(module_path, end='')"))
+         (line (string-to-number (run-to-string "
+from __future__ import print_function
+import re
+import sys
+filename = sys.argv[-1]
+with open(filename) as f:
+    text = f.read()
+match = re.search(r'^def join\\(', text, re.M)
+point = match.start()
+line_number = len(text[:point].split('\\n'))
+print(line_number, end='')" ntpath)))
          (definition `((description . "def join")
                        (full-name . "os.path.join")
                        (type . "function")
@@ -910,7 +921,7 @@ print(module_path, end='')"))
 ")
                        (module-path . ,ntpath)
                        (column . 4)
-                       (line . 104)
+                       (line . ,line)
                        (name . "join")
                        (module-name . "ntpath"))))
     (anaconda-mode-view-insert-module-definition
@@ -918,7 +929,7 @@ print(module_path, end='')"))
        ,definition))
     (push-button 18)
     (should (equal ntpath (buffer-file-name)))
-    (should (equal 104 (line-number-at-pos (point))))
+    (should (equal line (line-number-at-pos (point))))
     (should (equal 4 (- (point) (line-beginning-position))))))
 
 (ert-deftest test-anaconda-mode-view-documentation-presenter ()
@@ -1039,6 +1050,17 @@ module_path = ntpath.__file__
 if module_path.endswith('.pyc'):
     module_path = module_path[:-1]
 print(module_path, end='')"))
+         (line (string-to-number (run-to-string "
+from __future__ import print_function
+import re
+import sys
+filename = sys.argv[-1]
+with open(filename) as f:
+    text = f.read()
+match = re.search(r'^def join\\(', text, re.M)
+point = match.start()
+line_number = len(text[:point].split('\\n'))
+print(line_number, end='')" ntpath)))
          (definition `((description . "def join")
                        (full-name . "os.path.join")
                        (type . "function")
@@ -1047,14 +1069,14 @@ print(module_path, end='')"))
 ")
                        (module-path . ,ntpath)
                        (column . 4)
-                       (line . 104)
+                       (line . ,line)
                        (name . "join")
                        (module-name . "ntpath"))))
     (anaconda-mode-view-insert-button "text" definition)
     (goto-char (point-min))
     (push-button (point))
     (should (equal ntpath (buffer-file-name)))
-    (should (equal 104 (line-number-at-pos (point))))
+    (should (equal line (line-number-at-pos (point))))
     (should (equal 4 (- (point) (line-beginning-position))))))
 
 (ert-deftest test-anaconda-mode-view-insert-button-face ()
