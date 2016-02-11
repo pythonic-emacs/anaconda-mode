@@ -2,19 +2,54 @@ language: python
 sudo: required
 env:
   global:
-    - PATH=$HOME/emacs/emacs-24.3/bin:$HOME/emacs/emacs-24.4/bin:$HOME/emacs/emacs-24.5/bin:$HOME/emacs/emacs-25.0/bin:$HOME/.cask/bin:$PATH
+    - PATH=$HOME/.evm/bin:$HOME/.cask/bin:$PATH
+  matrix:
+    - EVM_EMACS=emacs-24.3-travis  INTERPRETER=ipython
+    - EVM_EMACS=emacs-24.4-travis  INTERPRETER=ipython
+    - EVM_EMACS=emacs-24.5-travis  INTERPRETER=ipython
+    - EVM_EMACS=emacs-git-snapshot INTERPRETER=ipython
+
+    - EVM_EMACS=emacs-24.3-travis  INTERPRETER=py26
+    - EVM_EMACS=emacs-24.4-travis  INTERPRETER=py26
+    - EVM_EMACS=emacs-24.5-travis  INTERPRETER=py26
+    - EVM_EMACS=emacs-git-snapshot INTERPRETER=py26
+
+    - EVM_EMACS=emacs-24.3-travis  INTERPRETER=py27
+    - EVM_EMACS=emacs-24.4-travis  INTERPRETER=py27
+    - EVM_EMACS=emacs-24.5-travis  INTERPRETER=py27
+    - EVM_EMACS=emacs-git-snapshot INTERPRETER=py27
+
+    - EVM_EMACS=emacs-24.3-travis  INTERPRETER=py33
+    - EVM_EMACS=emacs-24.4-travis  INTERPRETER=py33
+    - EVM_EMACS=emacs-24.5-travis  INTERPRETER=py33
+    - EVM_EMACS=emacs-git-snapshot INTERPRETER=py33
+
+    - EVM_EMACS=emacs-24.3-travis  INTERPRETER=py34
+    - EVM_EMACS=emacs-24.4-travis  INTERPRETER=py34
+    - EVM_EMACS=emacs-24.5-travis  INTERPRETER=py34
+    - EVM_EMACS=emacs-git-snapshot INTERPRETER=py34
+
+    - EVM_EMACS=emacs-24.3-travis  INTERPRETER=tramp
+    - EVM_EMACS=emacs-24.4-travis  INTERPRETER=tramp
+    - EVM_EMACS=emacs-24.5-travis  INTERPRETER=tramp
+    - EVM_EMACS=emacs-git-snapshot INTERPRETER=tramp
 cache:
   directories:
   - $HOME/.cache/pip
 before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
+before_install:
+  - git clone https://github.com/rejeep/evm $HOME/.evm
+  - git clone https://github.com/cask/cask $HOME/.cask
+  - evm config path /tmp
 install:
   - pip install -U pip wheel
   - pip install -r requirements/ci.txt
+  - evm install $EVM_EMACS --use --skip
+  - cask install
   - ./script/install_tramp.sh
-  - ./script/install_emacs.sh
 script:
   - tox
-  - ./script/ert.sh
+  - cask exec ert-runner -l test/interpreters/$INTERPRETER.el
 after_success:
   - coveralls --merge=emacs-coveralls.json
