@@ -12,7 +12,7 @@ fi
 
 # Register tramp host.
 
-rm $HOME/.ssh/id_rsa*
+rm -f $HOME/.ssh/id_rsa*
 ssh-keygen -t rsa -b 4096 -f $HOME/.ssh/id_rsa -N ''
 touch $HOME/.ssh/known_hosts
 ssh-keygen -R localhost
