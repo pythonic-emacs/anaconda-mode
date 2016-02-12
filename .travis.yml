@@ -39,6 +39,7 @@ cache:
 before_cache:
   - rm -f $HOME/.cache/pip/log/debug.log
 before_install:
+  - pip install -U pip wheel
   - git clone https://github.com/rejeep/evm $HOME/.evm
   - git clone https://github.com/cask/cask $HOME/.cask
   - evm config path /tmp
@@ -47,6 +48,7 @@ install:
     then
         ./script/install_tramp.sh;
     fi
+  - pip install -r requirements/ci.txt
   - if [ $INTERPRETER = ipython ];
     then
         pip install ipython;
@@ -55,8 +57,6 @@ install:
     then
         ./script/install_emacs_build_deps.sh;
     fi
-  - pip install -U pip wheel
-  - pip install -r requirements/ci.txt
   - evm install $EVM_EMACS --use --skip
   - cask install
 script:
