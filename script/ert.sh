@@ -11,13 +11,14 @@ function info_interpreter() {
 }
 
 function run() {
-    for emacs in emacs-24.3 emacs-24.4 emacs-24.5 emacs-25.0
+    for emacs in emacs-24.3 emacs-24.4 emacs-24.5 emacs-25.0 emacs-git-snapshot
     do
         for interpreter in test/interpreters/*.el
         do
             info_emacs
             info_interpreter
-            EMACS=$emacs cask exec ert-runner -l $interpreter
+            evm use $emacs
+            cask exec ert-runner -l $interpreter
         done
     done
 }
