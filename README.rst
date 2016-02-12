@@ -19,13 +19,13 @@
     :target: http://stable.melpa.org/#/anaconda-mode
     :alt: Melpa Stable
 
-.. |logo| image:: static/logo.png
+.. image:: static/logo.png
     :align: right
     :alt: Logo
 
-======================
- |logo| Anaconda mode
-======================
+===============
+ Anaconda mode
+===============
 
 |travis| |coveralls| |requires| |melpa| |melpa-stable|
 
