@@ -1,3 +1,3 @@
-export PATH=$HOME/emacs/emacs-24.3/bin:$HOME/emacs/emacs-24.4/bin:$HOME/emacs/emacs-24.5/bin:$HOME/emacs/emacs-25.0/bin:$HOME/.cask/bin:$PATH
+export PATH=$HOME/.evm/bin:$HOME/.cask/bin:$PATH
 
 cd /vagrant
