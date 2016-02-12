@@ -49,7 +49,7 @@ install:
   - cask install
   - ./script/install_tramp.sh
 script:
-  - tox
+  - tox -e $INTERPRETER
   - cask exec ert-runner -l test/interpreters/$INTERPRETER.el
 after_success:
   - coveralls --merge=emacs-coveralls.json
