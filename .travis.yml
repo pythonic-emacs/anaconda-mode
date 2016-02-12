@@ -43,15 +43,15 @@ before_install:
   - git clone https://github.com/cask/cask $HOME/.cask
   - evm config path /tmp
 install:
-  - if [ $INTERPRETER == tramp ];
+  - if [ $INTERPRETER = tramp ];
     then
         ./script/install_tramp.sh;
     fi
-  - if [ $INTERPRETER == ipython ];
+  - if [ $INTERPRETER = ipython ];
     then
         pip install ipython;
     fi
-  - if [ $EVM_EMACS == *snapshot ];
+  - if [ $EVM_EMACS = emacs-git-snapshot ];
     then
         ./script/install_emacs_build_deps.sh;
     fi
