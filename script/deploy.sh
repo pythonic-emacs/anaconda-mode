@@ -63,7 +63,13 @@ sudo apt-get install -y python2.6 python2.7 python3.3 python3.4
 # Install setuptools and pip.
 
 wget https://bootstrap.pypa.io/ez_setup.py -O /tmp/ez_setup.py
+sudo python2.6 /tmp/ez_setup.py
+sudo python2.7 /tmp/ez_setup.py
+sudo python3.3 /tmp/ez_setup.py
 sudo python3.4 /tmp/ez_setup.py
+sudo easy_install-2.6 pip
+sudo easy_install-2.7 pip
+sudo easy_install-3.3 pip
 sudo easy_install-3.4 pip
 
 # Install python packages.
