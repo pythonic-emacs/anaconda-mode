@@ -8,4 +8,4 @@ sudo apt-get update
 
 sudo apt-get install -y autoconf automake build-essential git      \
      libgif-dev libncurses5-dev libpng-dev libtiff4-dev libxpm-dev \
-     texinfo
+     libXaw7-dev texinfo
