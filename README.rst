@@ -1,12 +1,13 @@
-.. |travis| image:: https://travis-ci.org/proofit404/anaconda-mode.png
+
+.. |travis| image:: https://img.shields.io/travis/proofit404/anaconda-mode.svg?style=flat-square
     :target: https://travis-ci.org/proofit404/anaconda-mode
     :alt: Build Status
 
-.. |coveralls| image:: https://coveralls.io/repos/proofit404/anaconda-mode/badge.png
+.. |coveralls| image:: https://img.shields.io/coveralls/proofit404/anaconda-mode.svg?style=flat-square
     :target: https://coveralls.io/r/proofit404/anaconda-mode
     :alt: Coverage Status
 
-.. |requires| image:: https://requires.io/github/proofit404/anaconda-mode/requirements.svg
+.. |requires| image:: https://img.shields.io/requires/github/proofit404/anaconda-mode.svg?style=flat-square
     :target: https://requires.io/github/proofit404/anaconda-mode/requirements
     :alt: Requirements Status
 
