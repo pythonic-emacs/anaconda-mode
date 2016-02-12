@@ -22,16 +22,20 @@ evm install emacs-git-snapshot --skip
 git clone https://github.com/cask/cask $HOME/.cask
 
 evm use emacs-24.3
-cask install
+cask --path /vagrant/ install
+cask --path /vagrant/ update
 
 evm use emacs-24.4
-cask install
+cask --path /vagrant/ install
+cask --path /vagrant/ update
 
 evm use emacs-24.5
-cask install
+cask --path /vagrant/ install
+cask --path /vagrant/ update
 
 evm use emacs-git-snapshot
-cask install
+cask --path /vagrant/ install
+cask --path /vagrant/ update
 
 # Add deadsnakes mirror.
 
