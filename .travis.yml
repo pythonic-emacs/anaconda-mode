@@ -43,11 +43,22 @@ before_install:
   - git clone https://github.com/cask/cask $HOME/.cask
   - evm config path /tmp
 install:
+  - if [ $INTERPRETER == tramp ]
+    then
+        ./script/install_tramp.sh
+    fi
+  - if [ $INTERPRETER == ipython ]
+    then
+        pip install ipython
+    fi
+  - if [ $EVM_EMACS == *snapshot ]
+    then
+        ./script/install_emacs_build_deps.sh
+    fi
   - pip install -U pip wheel
   - pip install -r requirements/ci.txt
   - evm install $EVM_EMACS --use --skip
   - cask install
-  - ./script/install_tramp.sh
 script:
   - tox -e $INTERPRETER
   - cask exec ert-runner -l test/interpreters/$INTERPRETER.el
