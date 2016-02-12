@@ -5,10 +5,14 @@
 TRAMP_USER=test
 TRAMP_HOME=/home/$TRAMP_USER
 
-sudo useradd --home $TRAMP_HOME --create-home --user-group $TRAMP_USER
+if ! id -u $TRAMP_USER 1>/dev/null 2>&1
+then
+    sudo useradd --home $TRAMP_HOME --create-home --user-group $TRAMP_USER
+fi
 
 # Register tramp host.
 
+rm $HOME/.ssh/id_rsa*
 ssh-keygen -t rsa -b 4096 -f $HOME/.ssh/id_rsa -N ''
 touch $HOME/.ssh/known_hosts
 ssh-keygen -R localhost
