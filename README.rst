@@ -18,14 +18,15 @@
     :target: http://stable.melpa.org/#/anaconda-mode
     :alt: Melpa Stable
 
-=============
-Anaconda mode
-=============
+.. |logo| image:: static/logo.png
+    :align: right
+    :alt: Logo
+
+======================
+ |logo| Anaconda mode
+======================
 
 |travis| |coveralls| |requires| |melpa| |melpa-stable|
-
-.. image:: static/logo.png
-    :align: center
 
 Code navigation, documentation lookup and completion for Python.
 
