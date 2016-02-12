@@ -2,7 +2,12 @@
 
 # Install evm.
 
-git clone https://github.com/rejeep/evm $HOME/.evm
+if [ ! -d $HOME/.evm ]
+then
+    git clone https://github.com/rejeep/evm $HOME/.evm
+else
+    git -C $HOME/.evm pull
+fi
 
 EVM_DIR=$HOME/.evm/versions
 
@@ -19,7 +24,12 @@ evm install emacs-git-snapshot --skip
 
 # Install cask.
 
-git clone https://github.com/cask/cask $HOME/.cask
+if [ ! -d $HOME/.cask ]
+then
+    git clone https://github.com/cask/cask $HOME/.cask
+else
+    git -C $HOME/.cask pull
+fi
 
 evm use emacs-24.3
 cask --path /vagrant/ install
