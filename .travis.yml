@@ -1,5 +1,7 @@
 language: python
 sudo: required
+matrix:
+  fast_finish: true
 env:
   global:
     - PATH=$HOME/.evm/bin:$HOME/.cask/bin:$PATH
@@ -57,7 +59,7 @@ install:
     then
         ./script/install_emacs_build_deps.sh;
     fi
-  - evm install $EVM_EMACS --use --skip
+  - evm install $EVM_EMACS --use
   - cask install
 script:
   - tox -e $INTERPRETER
