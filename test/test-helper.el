@@ -72,7 +72,9 @@ name."
      (unwind-protect
          (progn
            ,@body)
-       (anaconda-mode-stop)
+       (when anaconda-mode-process
+         (anaconda-mode-stop)
+         (sleep-for 0.5))
        (mapc 'kill-buffer
              (cl-remove-if
               (lambda (buffer)
