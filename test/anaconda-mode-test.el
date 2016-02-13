@@ -457,74 +457,69 @@ if interpreter doesn't match."
 
 (ert-deftest test-anaconda-mode-complete-callback-completions-buffer ()
   "Completion must show *Completions* buffer if candidates doesn't have same base."
-  (unwind-protect
-      (let ((result '(((full-name . "bool")
-                       (line)
-                       (module-name . "builtins")
-                       (description . "instance: builtins.bool")
-                       (module-path)
-                       (name . "True")
-                       (docstring . "bool(x) -> bool
+  (let ((result '(((full-name . "bool")
+                   (line)
+                   (module-name . "builtins")
+                   (description . "instance: builtins.bool")
+                   (module-path)
+                   (name . "True")
+                   (docstring . "bool(x) -> bool
 
 Returns True when the argument x is true, False otherwise.
 The builtins True and False are the only two instances of the class bool.
 The class bool is a subclass of the class int, and cannot be subclassed.")
-                       (column)
-                       (type . "instance"))
-                      ((full-name . "try")
-                       (line)
-                       (module-name . "builtins")
-                       (description . "keyword: builtins.try")
-                       (module-path)
-                       (name . "Try")
-                       (docstring . "")
-                       (column)
-                       (type . "keyword")))))
-        (with-current-buffer (fixture "Tr" 1 2)
-          (anaconda-mode-complete-callback result)
-          (should (get-buffer "*Completions*"))))
-    (kill-buffer "*Completions*")))
+                   (column)
+                   (type . "instance"))
+                  ((full-name . "try")
+                   (line)
+                   (module-name . "builtins")
+                   (description . "keyword: builtins.try")
+                   (module-path)
+                   (name . "Try")
+                   (docstring . "")
+                   (column)
+                   (type . "keyword")))))
+    (with-current-buffer (fixture "Tr" 1 2)
+      (anaconda-mode-complete-callback result)
+      (should (get-buffer "*Completions*")))))
 
 (ert-deftest test-anaconda-mode-complete-callback-completions-annotations ()
   "Completion must show candidate description as annotations in the *Completions* buffer."
-  (unwind-protect
-      (let ((result '(((full-name . "bool")
-                       (line)
-                       (module-name . "builtins")
-                       (description . "instance: builtins.bool")
-                       (module-path)
-                       (name . "True")
-                       (docstring . "bool(x) -> bool
+  (let ((result '(((full-name . "bool")
+                   (line)
+                   (module-name . "builtins")
+                   (description . "instance: builtins.bool")
+                   (module-path)
+                   (name . "True")
+                   (docstring . "bool(x) -> bool
 
 Returns True when the argument x is true, False otherwise.
 The builtins True and False are the only two instances of the class bool.
 The class bool is a subclass of the class int, and cannot be subclassed.")
-                       (column)
-                       (type . "instance"))
-                      ((full-name . "try")
-                       (line)
-                       (module-name . "builtins")
-                       (description . "keyword: builtins.try")
-                       (module-path)
-                       (name . "Try")
-                       (docstring . "")
-                       (column)
-                       (type . "keyword")))))
-        (with-current-buffer (fixture "Tr" 1 2)
-          (anaconda-mode-complete-callback result)
-          (should (equal "In this buffer, type RET to select the completion near point.
+                   (column)
+                   (type . "instance"))
+                  ((full-name . "try")
+                   (line)
+                   (module-name . "builtins")
+                   (description . "keyword: builtins.try")
+                   (module-path)
+                   (name . "Try")
+                   (docstring . "")
+                   (column)
+                   (type . "keyword")))))
+    (with-current-buffer (fixture "Tr" 1 2)
+      (anaconda-mode-complete-callback result)
+      (should (equal "In this buffer, type RET to select the completion near point.
 
 Possible completions are:
 True <instance: builtins.bool>
 Try <keyword: builtins.try>"
-                         (with-current-buffer "*Completions*"
-                           (buffer-string))))))
-    (kill-buffer "*Completions*")))
+                     (with-current-buffer "*Completions*"
+                       (buffer-string)))))))
 
 (ert-deftest test-anaconda-mode-complete-callback-completions-annotations-statements ()
   "Don't show statements description in the annotations since it maybe really large."
-  (unwind-protect
-      (let ((result '(((description . "statement:
+  (let ((result '(((description . "statement:
 __all__ = [\"normcase\",\"isabs\",\"join\",\"splitdrive\",\"split\",\"splitext\",
            \"basename\",\"dirname\",\"commonprefix\",\"getsize\",\"getmtime\",
            \"getatime\",\"getctime\",\"islink\",\"exists\",\"lexists\",\"isdir\",\"isfile\",
@@ -532,31 +527,30 @@ __all__ = [\"normcase\",\"isabs\",\"join\",\"splitdrive\",\"split\",\"splitext\"
            \"samefile\",\"sameopenfile\",\"samestat\",
            \"curdir\",\"pardir\",\"sep\",\"pathsep\",\"defpath\",\"altsep\",\"extsep\",
            \"devnull\",\"realpath\",\"supports_unicode_filenames\",\"relpath\"]")
-                       (type . "statement")
-                       (line . 19)
-                       (full-name . "os.path")
-                       (column . 0)
-                       (module-name . "posixpath")
-                       (name . "__all__")
-                       (module-path . "/home/vagrant/.pyenv/versions/3.4.4/lib/python3.4/posixpath.py"))
-                      ((description . "function: ntpath._get_altsep")
-                       (type . "function")
-                       (line . 47)
-                       (full-name . "os.path._get_altsep")
-                       (column . 4)
-                       (module-name . "ntpath")
-                       (name . "_get_altsep")
-                       (module-path . "/home/vagrant/.pyenv/versions/3.4.4/lib/python3.4/ntpath.py")))))
-        (with-current-buffer (fixture "from os.path import _" 1 21)
-          (anaconda-mode-complete-callback result)
-          (should (equal "In this buffer, type RET to select the completion near point.
+                   (type . "statement")
+                   (line . 19)
+                   (full-name . "os.path")
+                   (column . 0)
+                   (module-name . "posixpath")
+                   (name . "__all__")
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.4/lib/python3.4/posixpath.py"))
+                  ((description . "function: ntpath._get_altsep")
+                   (type . "function")
+                   (line . 47)
+                   (full-name . "os.path._get_altsep")
+                   (column . 4)
+                   (module-name . "ntpath")
+                   (name . "_get_altsep")
+                   (module-path . "/home/vagrant/.pyenv/versions/3.4.4/lib/python3.4/ntpath.py")))))
+    (with-current-buffer (fixture "from os.path import _" 1 21)
+      (anaconda-mode-complete-callback result)
+      (should (equal "In this buffer, type RET to select the completion near point.
 
 Possible completions are:
 __all__ <statement>
 _get_altsep <function: ntpath._get_altsep>"
-                         (with-current-buffer "*Completions*"
-                           (buffer-string))))))
-    (kill-buffer "*Completions*")))
+                     (with-current-buffer "*Completions*"
+                       (buffer-string)))))))
 
 (ert-defintegration test-anaconda-mode-complete ()
   "Test completion at point."
@@ -718,13 +712,10 @@ data = set([
   "Create view buffer filled with content."
   (let ((result "we are here")
         (presenter (lambda (result) (insert result))))
-    (unwind-protect
-        (progn
-          (anaconda-mode-view result presenter)
-          (should (equal "we are here"
-                         (with-current-buffer (window-buffer (selected-window))
-                           (buffer-string)))))
-      (kill-buffer "*Anaconda*"))))
+    (anaconda-mode-view result presenter)
+    (should (equal "we are here"
+                   (with-current-buffer (window-buffer (selected-window))
+                     (buffer-string))))))
 
 (ert-deftest test-anaconda-mode-view-definitions-presenter ()
   "Format definitions buffer from rpc call result."
@@ -755,18 +746,15 @@ data = set([
                    (module-path . "/vagrant/app/views.py")
                    (description . "@views.route('/')")
                    (line . 7)))))
-    (unwind-protect
-        (progn
-          (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)
-          (should (equal "app
+    (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)
+    (should (equal "app
     from .views import views
 views
     views = Blueprint('views', __name__)
     @views.route('/')
 "
-                         (with-current-buffer (window-buffer (selected-window))
-                           (buffer-string)))))
-      (kill-buffer "*Anaconda*"))))
+                   (with-current-buffer (window-buffer (selected-window))
+                     (buffer-string))))))
 
 (ert-deftest test-anaconda-mode-view-definitions-presenter-next-error ()
   "Use `next-error' to navigate next definition."
@@ -809,12 +797,9 @@ ends with a separator.")
                     (line . 70)
                     (name . "join")
                     (module-name . "posixpath")))))
-    (unwind-protect
-        (progn
-          (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)
-          (next-error-no-select)
-          (should (equal 12 (point))))
-      (kill-buffer "*Anaconda*"))))
+    (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)
+    (next-error-no-select)
+    (should (equal 12 (point)))))
 
 (ert-deftest test-anaconda-mode-view-definitions-presenter-next-error-no-select ()
   "Show definition at point in the no selected buffer."
@@ -857,14 +842,11 @@ ends with a separator.")
                     (line . 70)
                     (name . "join")
                     (module-name . "posixpath")))))
-    (unwind-protect
-        (progn
-          (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)
-          (next-error-no-select)
-          (should (equal ntpath
-                         (with-current-buffer (window-buffer (previous-window))
-                           (buffer-file-name)))))
-      (kill-buffer "*Anaconda*"))))
+    (anaconda-mode-view result 'anaconda-mode-view-definitions-presenter)
+    (next-error-no-select)
+    (should (equal ntpath
+                   (with-current-buffer (window-buffer (previous-window))
+                     (buffer-file-name))))))
 
 (ert-deftest test-anaconda-mode-view-insert-module-definition ()
   "Insert definition of single module."
@@ -945,18 +927,15 @@ I'm documentation string.")
                    (full-name . "simple.f")
                    (description . "def f")
                    (line . 1)))))
-    (unwind-protect
-        (progn
-          (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter)
-          (should (equal "simple
+    (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter)
+    (should (equal "simple
 f(a, b)
 
 I'm documentation string.
 
 "
-                         (with-current-buffer (window-buffer (selected-window))
-                           (buffer-string)))))
-      (kill-buffer "*Anaconda*"))))
+                   (with-current-buffer (window-buffer (selected-window))
+                     (buffer-string))))))
 
 (ert-deftest test-anaconda-mode-view-documentation-presenter-bold-module-name ()
   "Insert module name with bold font in the documentation view."
@@ -971,11 +950,8 @@ I'm documentation string.
                    (line . 104)
                    (name . "join")
                    (module-name . "ntpath")))))
-    (unwind-protect
-        (progn
-          (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter)
-          (should (equal 'bold (get-char-property (point-min) 'face))))
-      (kill-buffer "*Anaconda*"))))
+    (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter)
+    (should (equal 'bold (get-char-property (point-min) 'face)))))
 
 (ert-deftest test-anaconda-mode-view-documentation-presenter-multiple-modules ()
   "Format doc buffer for multiple modules."
@@ -1004,10 +980,8 @@ ends with a separator.")
                    (line . 70)
                    (name . "join")
                    (module-name . "posixpath")))))
-    (unwind-protect
-        (progn
-          (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter)
-          (should (equal "ntpath
+    (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter)
+    (should (equal "ntpath
 join(path, *paths)
 
 posixpath
@@ -1019,9 +993,8 @@ will be discarded.  An empty last part will result in a path that
 ends with a separator.
 
 "
-                         (with-current-buffer (window-buffer (selected-window))
-                           (buffer-string)))))
-      (kill-buffer "*Anaconda*"))))
+                   (with-current-buffer (window-buffer (selected-window))
+                     (buffer-string))))))
 
 (ert-deftest test-anaconda-mode-view-make-bold ()
   "Make bold string."
@@ -1136,13 +1109,10 @@ definition if current buffer doesn't has file name."
 
 (ert-deftest test-anaconda-mode-with-view-buffer-multiple-times ()
   "It is possible to reuse *Anaconda* buffer multiple times without errors."
-  (unwind-protect
-      (progn
-        (anaconda-mode-with-view-buffer
-         (insert "a"))
-        (anaconda-mode-with-view-buffer
-         (insert "b")))
-    (kill-buffer "*Anaconda*")))
+  (anaconda-mode-with-view-buffer
+   (insert "a"))
+  (anaconda-mode-with-view-buffer
+   (insert "b")))
 
 
 ;;; Definitions.

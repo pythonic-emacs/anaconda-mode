@@ -76,11 +76,8 @@ name."
          (anaconda-mode-stop)
          (sleep-for 0.5))
        (mapc 'kill-buffer
-             (cl-remove-if
-              (lambda (buffer)
-                (member (buffer-name buffer)
-                        '("*scratch*" "*Messages*" "*ert-runner outout*" " *temp*")))
-              (buffer-list)))
+             (cl-remove-if-not 'get-buffer
+                               '("*anaconda-mode*" "*anaconda-response*" "*Anaconda*" "*Completions*")))
        (shell-command "rm -rf $HOME/.emacs.d/anaconda-mode/")
        (shell-command "rm -rf $HOME/.emacs.d/anaconda_mode/")
        (shell-command "ssh test@localhost 'rm -rf $HOME/.emacs.d/anaconda-mode/'")
