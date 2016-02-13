@@ -269,7 +269,10 @@ be bound."
                         :filter (lambda (process output) (anaconda-mode-bootstrap-filter process output callback))
                         :sentinel 'anaconda-mode-bootstrap-sentinel
                         :query-on-exit nil
-                        :args (list anaconda-mode-server-script)))
+                        :args (delq nil
+                                    (list anaconda-mode-server-script
+                                          (when (pythonic-remote-p)
+                                            "0.0.0.0")))))
   (process-put anaconda-mode-process 'server-directory (anaconda-mode-server-directory)))
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
