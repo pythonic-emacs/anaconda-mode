@@ -83,12 +83,12 @@ with following code in your configuration:
 ElDoc
 `````
 
-``anaconda-mode`` provide document function to ``eldoc-mode``.  All
-you need is enable ``eldoc-mode`` in addition to previous setup.
+``anaconda-eldoc-mode`` provide document function to ``eldoc-mode``.  All
+you need is enable ``anaconda-eldoc-mode`` in addition to previous setup.
 
 .. code:: lisp
 
-    (add-hook 'python-mode-hook 'eldoc-mode)
+    (add-hook 'python-mode-hook 'anaconda-eldoc-mode)
 
 Usage
 -----

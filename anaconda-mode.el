@@ -719,19 +719,26 @@ to the beginning of buffer before definitions navigation."
 
 \\{anaconda-mode-map}"
   :lighter " Anaconda"
-  :keymap anaconda-mode-map
-  (if anaconda-mode
-      (turn-on-anaconda-mode)
-    (turn-off-anaconda-mode)))
+  :keymap anaconda-mode-map)
 
-(defun turn-on-anaconda-mode ()
-  "Turn on `anaconda-mode'."
+;;;###autoload
+(define-minor-mode anaconda-eldoc-mode
+  "Toggle echo area display of Python objects at point."
+  :lighter ""
+  (if anaconda-eldoc-mode
+      (turn-on-anaconda-eldoc-mode)
+    (turn-off-anaconda-eldoc-mode)))
+
+(defun turn-on-anaconda-eldoc-mode ()
+  "Turn on `anaconda-eldoc-mode'."
   (make-local-variable 'eldoc-documentation-function)
-  (setq-local eldoc-documentation-function 'anaconda-mode-eldoc-function))
+  (setq-local eldoc-documentation-function 'anaconda-mode-eldoc-function)
+  (eldoc-mode +1))
 
-(defun turn-off-anaconda-mode ()
-  "Turn off `anaconda-mode'."
-  (kill-local-variable 'eldoc-documentation-function))
+(defun turn-off-anaconda-eldoc-mode ()
+  "Turn off `anaconda-eldoc-mode'."
+  (kill-local-variable 'eldoc-documentation-function)
+  (eldoc-mode -1))
 
 (provide 'anaconda-mode)
 

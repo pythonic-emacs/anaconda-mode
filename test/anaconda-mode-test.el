@@ -1229,14 +1229,29 @@ else:
   "Enable `anaconda-mode'."
   (with-temp-buffer
     (anaconda-mode 1)
-    (should (eq eldoc-documentation-function 'anaconda-mode-eldoc-function))))
+    (should anaconda-mode)))
 
 (ert-deftest test-anaconda-mode-disable ()
   "Disable `anaconda-mode'."
   (with-temp-buffer
     (anaconda-mode 1)
     (anaconda-mode -1)
-    (should-not (eq eldoc-documentation-function 'anaconda-mode-eldoc-function))))
+    (should-not anaconda-mode)))
+
+(ert-deftest test-anaconda-eldoc-mode-enable ()
+  "Enable `anaconda-eldoc-mode'."
+  (with-temp-buffer
+    (anaconda-eldoc-mode 1)
+    (should (eq eldoc-documentation-function 'anaconda-mode-eldoc-function))
+    (should eldoc-mode)))
+
+(ert-deftest test-anaconda-eldoc-mode-disable ()
+  "Disable `anaconda-eldoc-mode'."
+  (with-temp-buffer
+    (anaconda-eldoc-mode 1)
+    (anaconda-eldoc-mode -1)
+    (should-not (eq eldoc-documentation-function 'anaconda-mode-eldoc-function))
+    (should-not eldoc-mode)))
 
 (provide 'integration-test)
 
