@@ -122,7 +122,8 @@ pythonic library with tramp connection add as necessary."
 
 (ert-deftest test-anaconda-mode-host ()
   "Get server address from `python-shell-interpreter' value."
-  (should (equal "127.0.0.1" (anaconda-mode-host))))
+  (let ((python-shell-interpreter "python"))
+    (should (equal "127.0.0.1" (anaconda-mode-host)))))
 
 (ert-deftest test-anaconda-mode-host-remote ()
   "Get server address from tramp `python-shell-interpreter' value."
