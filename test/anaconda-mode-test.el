@@ -165,12 +165,14 @@ We make request knowingly so response shouldn't be null."
       (should (< 0 (length result))))))
 
 (ert-defintegration test-anaconda-mode-jsonrpc-error-response ()
-  "Raise error if rpc call return error response."
-  (with-current-buffer (fixture "import sys" 1 10)
-    (anaconda-mode-start)
-    (wait)
-    (anaconda-mode-jsonrpc "wrong_method" (lambda (res)))
-    (should-error (sleep-for 1))))
+  "Skip callback execution if rpc call return error response."
+  (let (result)
+    (with-current-buffer (fixture "import sys" 1 10)
+      (anaconda-mode-start)
+      (wait)
+      (anaconda-mode-jsonrpc "wrong_method" (lambda (res) (setq result res)))
+      (sleep-for 1)
+      (should-not result))))
 
 (ert-defintegration test-anaconda-mode-jsonrpc-remove-http-buffer ()
   "Remove *http* buffer leaved after `url-retrieve' function call."
@@ -230,7 +232,7 @@ Content-Length: 85
 
 {\"id\": 1, \"error\": {\"code\": -32601, \"message\": \"Method not found\"}, \"jsonrpc\": \"2.0\"}")
         (goto-char (point-min))
-        (should-error (funcall handler nil))))))
+        (should (equal "Method not found" (funcall handler nil)))))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-error-message-with-data-field ()
   "JSONRPC specification allow to pass additional structure within error filed."
@@ -244,7 +246,7 @@ Content-Length: 113
 
 {\"id\": 1, \"error\": {\"code\": -32601, \"message\": \"Method not found\", \"data\": \"Nice try, but no\"}, \"jsonrpc\": \"2.0\"}")
         (goto-char (point-min))
-        (should-error (funcall handler nil))))))
+        (should (equal "Method not found: Nice try, but no" (funcall handler nil)))))))
 
 (ert-defintegration test-anaconda-mode-jsonrpc-skip-response-on-point-movement ()
   "Don't run response callback if point position was changed."
