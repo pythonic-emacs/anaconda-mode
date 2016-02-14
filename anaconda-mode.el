@@ -375,7 +375,11 @@ submitted."
                                       (run-hook-with-args 'anaconda-mode-response-read-fail-hook response))
                                     (error "Can't read anaconda-mode server response"))))))
                 (if (assoc 'error response)
-                    (error (cdr (assoc 'error response)))
+                    (let* ((error-structure (cdr (assoc 'error response)))
+                           (error-message (cdr (assoc 'message error-structure)))
+                           (error-data (cdr (assoc 'data error-structure)))
+                           (error-template (if error-data "%s: %s" "%s")))
+                      (apply 'error error-template (delq nil (list error-message error-data))))
                   (with-current-buffer anaconda-mode-request-buffer
                     (let ((result (cdr (assoc 'result response))))
                       (if (and (pythonic-remote-p)

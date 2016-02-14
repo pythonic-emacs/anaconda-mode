@@ -218,6 +218,34 @@ even if an error occurs in response callback."
                        (buffer-name (window-buffer (selected-window)))))
         (should (equal "# status: nil\n# point: 15\nI'm not a JSON" (buffer-string)))))))
 
+(ert-deftest test-anaconda-mode-jsonrpc-common-error-message ()
+  "JSONRPC specification allow to pass common structure within error filed."
+  (with-current-buffer (fixture "" 1 0)
+    (let ((handler (anaconda-mode-create-response-handler nil nil)))
+      (with-temp-buffer
+        (insert "HTTP/1.1 400 Bad Request
+Server: BaseHTTP/0.6 Python/3.4.3
+Date: Sun, 14 Feb 2016 11:15:38 GMT
+Content-Length: 85
+
+{\"id\": 1, \"error\": {\"code\": -32601, \"message\": \"Method not found\"}, \"jsonrpc\": \"2.0\"}")
+        (goto-char (point-min))
+        (should-error (funcall handler nil))))))
+
+(ert-deftest test-anaconda-mode-jsonrpc-error-message-with-data-field ()
+  "JSONRPC specification allow to pass additional structure within error filed."
+  (with-current-buffer (fixture "" 1 0)
+    (let ((handler (anaconda-mode-create-response-handler nil nil)))
+      (with-temp-buffer
+        (insert "HTTP/1.1 400 Bad Request
+Server: BaseHTTP/0.6 Python/3.4.3
+Date: Sun, 14 Feb 2016 11:15:38 GMT
+Content-Length: 113
+
+{\"id\": 1, \"error\": {\"code\": -32601, \"message\": \"Method not found\", \"data\": \"Nice try, but no\"}, \"jsonrpc\": \"2.0\"}")
+        (goto-char (point-min))
+        (should-error (funcall handler nil))))))
+
 (ert-defintegration test-anaconda-mode-jsonrpc-skip-response-on-point-movement ()
   "Don't run response callback if point position was changed."
   (let (result)
