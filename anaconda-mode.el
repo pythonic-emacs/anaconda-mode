@@ -161,8 +161,9 @@ be bound."
   (when (anaconda-mode-need-restart)
     (anaconda-mode-stop))
   (if (anaconda-mode-running-p)
-      (when callback
-        (funcall callback))
+      (and callback
+           (anaconda-mode-bound-p)
+           (funcall callback))
     (anaconda-mode-ensure-directory callback)))
 
 (defun anaconda-mode-stop ()

@@ -105,6 +105,16 @@ environment keeps the same."
     (wait)
     (should var)))
 
+(ert-defintegration test-anaconda-mode-on-start-concurrent-callback ()
+  "Ignore any callback started during anaconda-mode installation
+process before anaconda-mode successfully bound its port."
+  (let (foo bar)
+    (anaconda-mode-start (lambda () (setq foo t)))
+    (anaconda-mode-start (lambda () (setq bar t)))
+    (wait)
+    (should foo)
+    (should-not bar)))
+
 (ert-defintegration test-anaconda-mode-after-start-callback ()
   "Run callback passed after server start."
   (let (var)
