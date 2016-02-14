@@ -205,14 +205,14 @@ be bound."
 
 (defun anaconda-mode-ensure-directory-sentinel (process _event &optional callback)
   "Run `anaconda-mode-check' if `anaconda-mode-server-directory' exists.
-Raise error otherwise.  PROCESS and EVENT are basic sentinel
+Print error message otherwise.  PROCESS and EVENT are basic sentinel
 parameters.  CALLBACK function will be called when
 `anaconda-mode-port' will be bound."
   (if (eq 0 (process-exit-status process))
       (anaconda-mode-check callback)
     (run-hooks 'anaconda-mode-process-fail-hook)
-    (error "Can't create %s directory"
-           (anaconda-mode-server-directory))))
+    (message "Can not create %s directory"
+             (anaconda-mode-server-directory))))
 
 (defun anaconda-mode-check (&optional callback)
   "Check `anaconda-mode' server installation.
@@ -250,13 +250,13 @@ be bound."
 
 (defun anaconda-mode-install-sentinel (process _event &optional callback)
   "Run `anaconda-mode-bootstrap' if server installation complete successfully.
-Raise error otherwise.  PROCESS and EVENT are basic sentinel
+Print error message otherwise.  PROCESS and EVENT are basic sentinel
 parameters.  CALLBACK function will be called when
 `anaconda-mode-port' will be bound."
   (if (eq 0 (process-exit-status process))
       (anaconda-mode-bootstrap callback)
     (run-hooks 'anaconda-mode-process-fail-hook)
-    (error "Can't install `anaconda-mode' server")))
+    (message "Can not install `anaconda-mode' server")))
 
 (defun anaconda-mode-bootstrap (&optional callback)
   "Run `anaconda-mode' server.
@@ -293,11 +293,11 @@ called when `anaconda-mode-port' will be bound."
       (funcall callback))))
 
 (defun anaconda-mode-bootstrap-sentinel (process _event)
-  "Raise error if `anaconda-mode' server exit abnormally.
+  "Print error message if `anaconda-mode' server exit abnormally.
 PROCESS and EVENT are basic sentinel parameters."
   (unless (eq 0 (process-exit-status process))
     (run-hooks 'anaconda-mode-process-fail-hook)
-    (error "Can't start `anaconda-mode' server")))
+    (message "Can not start `anaconda-mode' server")))
 
 
 ;;; Interaction.
