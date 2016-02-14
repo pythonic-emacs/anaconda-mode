@@ -705,7 +705,7 @@ to the beginning of buffer before definitions navigation."
   (interactive)
   (if anaconda-mode-go-back-definition
       (anaconda-mode-find-file anaconda-mode-go-back-definition)
-    (error "No previous buffer")))
+    (message "No previous buffer")))
 
 
 ;;; Anaconda minor mode.

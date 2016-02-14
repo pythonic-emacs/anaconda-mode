@@ -1117,7 +1117,7 @@ one" 4 3 (concat home-directory "initial.py"))
 
 (ert-deftest test-anaconda-mode-go-back-no-backward-file ()
   "Show error if there is no previous navigation buffer."
-  (should-error (anaconda-mode-go-back)))
+  (should (equal "No previous buffer" (anaconda-mode-go-back))))
 
 (ert-deftest test-anaconda-mode-find-file-not-set-go-back-definition ()
   "`anaconda-mode-find-file-generic' doesn't set go back
