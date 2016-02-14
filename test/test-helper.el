@@ -80,8 +80,9 @@ name."
                                '("*anaconda-mode*" "*anaconda-response*" "*Anaconda*" "*Completions*")))
        (shell-command "rm -rf $HOME/.emacs.d/anaconda-mode/")
        (shell-command "rm -rf $HOME/.emacs.d/anaconda_mode/")
-       (shell-command "ssh test@localhost 'rm -rf $HOME/.emacs.d/anaconda-mode/'")
-       (shell-command "ssh test@localhost 'rm -rf $HOME/.emacs.d/anaconda_mode/'")
+       (when (pythonic-remote-p)
+         (shell-command "ssh test@localhost 'rm -rf $HOME/.emacs.d/anaconda-mode/'")
+         (shell-command "ssh test@localhost 'rm -rf $HOME/.emacs.d/anaconda_mode/'"))
        (when tramp-current-connection
          (setq tramp-current-connection nil)
          (sleep-for 0.5)))))
