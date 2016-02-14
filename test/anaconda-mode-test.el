@@ -204,10 +204,12 @@ even if an error occurs in response callback."
       (with-temp-buffer
         (insert "I'm not a JSON")
         (goto-char (point-min))
-        (should-error (funcall handler nil))
+        (should (equal "Can not read anaconda-mode server response"
+                       (funcall handler nil)))
         (should (equal anaconda-mode-response-buffer
                        (buffer-name (window-buffer (selected-window)))))
-        (should (equal "# status: nil\n# point: 1\nI'm not a JSON" (buffer-string)))))))
+        (should (equal "# status: nil\n# point: 1\nI'm not a JSON"
+                       (buffer-string)))))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-show-server-response-on-json-end-of-file ()
   "Show server HTTP response if parser meat end of file."
@@ -215,10 +217,12 @@ even if an error occurs in response callback."
     (let ((handler (anaconda-mode-create-response-handler nil nil)))
       (with-temp-buffer
         (insert "I'm not a JSON")
-        (should-error (funcall handler nil))
+        (should (equal "Can not read anaconda-mode server response"
+                       (funcall handler nil)))
         (should (equal anaconda-mode-response-buffer
                        (buffer-name (window-buffer (selected-window)))))
-        (should (equal "# status: nil\n# point: 15\nI'm not a JSON" (buffer-string)))))))
+        (should (equal "# status: nil\n# point: 15\nI'm not a JSON"
+                       (buffer-string)))))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-common-error-message ()
   "JSONRPC specification allow to pass common structure within error filed."

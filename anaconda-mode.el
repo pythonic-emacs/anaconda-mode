@@ -369,21 +369,22 @@ submitted."
                      (response (condition-case nil
                                    (json-read)
                                  ((json-readtable-error json-end-of-file end-of-file)
-                                  (progn
-                                    (let ((response (concat (format "# status: %s\n# point: %s\n" status (point))
-                                                            (buffer-string))))
-                                      (run-hook-with-args 'anaconda-mode-response-read-fail-hook response))
-                                    (error "Can't read anaconda-mode server response"))))))
-                (if (assoc 'error response)
-                    (let* ((error-structure (cdr (assoc 'error response)))
-                           (error-message (cdr (assoc 'message error-structure)))
-                           (error-data (cdr (assoc 'data error-structure)))
-                           (error-template (if error-data "%s: %s" "%s")))
-                      (apply 'message error-template (delq nil (list error-message error-data))))
-                  (with-current-buffer anaconda-mode-request-buffer
-                    (let ((result (cdr (assoc 'result response))))
-                      (if (and (pythonic-remote-p)
-                               (member command anaconda-mode-definition-commands))
+                                  (let ((response (concat (format "# status: %s\n# point: %s\n" status (point))
+                                                          (buffer-string))))
+                                    (run-hook-with-args 'anaconda-mode-response-read-fail-hook response)
+                                    nil)))))
+                (if (null response)
+                    (message "Can not read anaconda-mode server response")
+                  (if (assoc 'error response)
+                      (let* ((error-structure (cdr (assoc 'error response)))
+                             (error-message (cdr (assoc 'message error-structure)))
+                             (error-data (cdr (assoc 'data error-structure)))
+                             (error-template (if error-data "%s: %s" "%s")))
+                        (apply 'message error-template (delq nil (list error-message error-data))))
+                    (with-current-buffer anaconda-mode-request-buffer
+                      (let ((result (cdr (assoc 'result response))))
+                        (when (and (pythonic-remote-p)
+                                   (member command anaconda-mode-definition-commands))
                           (setq result (--map (--map (let ((key (car it))
                                                            (value (cdr it)))
                                                        (when (eq key 'module-path)
@@ -391,9 +392,9 @@ submitted."
                                                        (cons key value))
                                                      it)
                                               result)))
-                      ;; Terminate `apply' call with empty list so response
-                      ;; will be treated as single argument.
-                      (apply callback result nil))))))
+                        ;; Terminate `apply' call with empty list so response
+                        ;; will be treated as single argument.
+                        (apply callback result nil)))))))
           (kill-buffer http-buffer))))))
 
 (defvar anaconda-mode-definition-commands
