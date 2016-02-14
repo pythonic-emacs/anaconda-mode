@@ -355,7 +355,7 @@ submitted."
         (anaconda-mode-request-buffer (current-buffer))
         (anaconda-mode-request-window (selected-window))
         (anaconda-mode-request-tick (buffer-chars-modified-tick)))
-    (lambda (_status)
+    (lambda (status)
       (let ((http-buffer (current-buffer)))
         (unwind-protect
             (if (or (not (equal anaconda-mode-request-window (selected-window)))
@@ -370,7 +370,7 @@ submitted."
                                    (json-read)
                                  ((json-readtable-error json-end-of-file end-of-file)
                                   (progn
-                                    (let ((response (concat (format "# point: %s\n" (point))
+                                    (let ((response (concat (format "# status: %s\n# point: %s\n" status (point))
                                                             (buffer-string))))
                                       (run-hook-with-args 'anaconda-mode-response-read-fail-hook response))
                                     (error "Can't read anaconda-mode server response"))))))
