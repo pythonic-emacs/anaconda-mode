@@ -327,7 +327,7 @@ Content-Length: 113
                      (params . ((source . "import datetime")
                                 (line . 1)
                                 (column . 15)
-                                (path . ,(concat home-directory "simple.py")))))))))
+                                (path . ,(pythonic-file-name (concat home-directory "simple.py"))))))))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-request-data-with-tabulation ()
   "Prepare data for remote procedure call from buffer contained
@@ -344,7 +344,7 @@ if True:
 	sys.api")
                                 (line . 3)
                                 (column . 8)
-                                (path . ,(concat home-directory "simple.py")))))))))
+                                (path . ,(pythonic-file-name (concat home-directory "simple.py"))))))))))
 
 (ert-deftest test-anaconda-mode-jsonrpc-request-data-tramp-file ()
   "Prepare data for remote procedure call from the tramp buffer."
