@@ -149,9 +149,11 @@ pip.main(['install', '-t', directory, 'anaconda_mode==' + version])
 (defun anaconda-mode-host ()
   "Target host with anaconda-mode server."
   (if (pythonic-remote-p)
-      (tramp-file-name-host
-       (tramp-dissect-file-name
-        (pythonic-tramp-connection)))
+      (replace-regexp-in-string
+       "#.*\\'" ""                      ;; Cleanup tramp port specification.
+       (tramp-file-name-host
+        (tramp-dissect-file-name
+         (pythonic-tramp-connection))))
     "127.0.0.1"))
 
 (defun anaconda-mode-start (&optional callback)
