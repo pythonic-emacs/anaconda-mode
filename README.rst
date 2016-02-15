@@ -31,7 +31,9 @@
 
 Code navigation, documentation lookup and completion for Python.
 
-.. figure:: static/goto-definitions.png
+.. figure:: static/completion.png
+
+.. figure:: static/reference.png
 
 This package support 2.6, 2.7, 3.3 and 3.4 Python versions and provide
 following features
@@ -42,6 +44,7 @@ following features
 * view documentation
 * virtual environment
 * eldoc mode
+* all this staff inside vagrant and remote hosts
 
 Installation
 ------------
@@ -72,7 +75,7 @@ spacemacs
 `````````
 
 ``anaconda-mode`` included into Spacemacs_ distribution.  You can use
-it as well.  Look at ``python`` language contrib to see more details.
+it as well.  Look at ``python`` language layer to see more details.
 
 Configuration
 -------------
@@ -105,7 +108,7 @@ auto-complete-mode_ with ac-anaconda_ as last try.
 Interactive commands
 ````````````````````
 
-Here are interactive commands available with anaconda-mode
+There is a list of interactive commands available with anaconda-mode
 
 ==========  ==============================
 Keybinding  Description
@@ -121,54 +124,121 @@ M-?         anaconda-mode-show-doc
 If goto definitions, assignments or usages cause multiple candidates
 you'll see advanced anaconda navigator buffer.
 
-Tramp
-`````
-
-**Not properly implemented yet**
-
-It's possible to use anaconda-mode on remote server when you connect
-to it using tramp.  In case of vagrant you need to use ``127.0.0.1``
-as tramp address.
-
-Implementation details
-----------------------
-
-Anaconda mode comes with ``anaconda_mode.py`` server.  This server
-allow you to use jedi_ python library over jsonrpc api.  Server choice
-first available port starting from 24970.  Anaconda mode will run this
-server automatically on first call of any anaconda-mode command.
-
-This mean that completion results and reference search depends on your
-project installation.  To make it available for ``anaconda-mode`` you
-have few options.
-
 PYTHONPATH
 ``````````
 
-Add your project to Emacs ``PYTHONPATH``.  If you store project
+You can add your project to Emacs ``PYTHONPATH``.  If you store project
 dependencies somewhere on you machine add its too.
-::
 
-    M-x setenv RET PYTHONPATH RET /path/to/project:/path/to/dependency
+.. code:: lisp
 
-VIRTUALENV
-``````````
+    (add-to-list 'python-shell-extra-pythonpaths "/path/to/the/project")
+    (add-to-list 'python-shell-extra-pythonpaths "/path/to/the/dependency")
+
+Virtual environment
+```````````````````
 
 Use virtual environment to isolate your project dependencies form
 other system.  You can additionally install you project in editable
 mode into virtual environment.  This will improve usage references
 search.  Then activate this virtual environment inside Emacs.
 
+::
+
+    M-x pythonic-activate RET /path/to/virtualenv RET
+
+Also you can use `pyenv-mode`_ or similar package to hold virtual
+environment in actual state.
+
+Each action above applies to ``anaconda-mode`` immediately.  Next
+``anaconda-mode`` command you call will use this environment for
+completion candidates search.
+
+Tramp
+`````
+
+It's possible to use anaconda-mode on remote server when you connect
+to it using tramp.  Anaconda-mode can search for completion candidates
+and all other stuff on remote server while you running Emacs locally.
+First of all open interesting remote file.
+
+::
+
+    C-x C-f /ssh:remote_host:project/__init__.py RET
+
+After tramp connection successfully applies and your see actual buffer
+content activate remote virtual environment.
+
+::
+
+    M-x pythoninc-activate RET /ssh:remote_host:/home/user/venv RET
+
+Now any anaconda-mode command will use ``/home/user/venv/bin/python``
+interpreter running on ``remote_host`` over ssh.  If you don't use
+virtual environment remotely then you have an option to specify remote
+interpreter directly.
+
 .. code:: lisp
 
-    (setq python-shell-virtualenv-path "/path/to/virtualenv")
+    (setq python-shell-interpreter "/ssh:remote_host:/usr/bin/python")
 
-I strongly recommended you to use `pyenv-mode`_ or similar package to
-hold ``python-shell-virtualenv-path`` in actual state.
+It is important to remember that ``remote_host`` must be a real host
+name or an IP address.  SSH aliases not allowed to be used with
+anaconda-mode.  Also 9000 port on remote host should be open to
+incoming connections from your local machine.  The final not I want to
+say here is about project scope.  All kind of search inside the
+virtual environment available from any buffer.  But search inside your
+project is available only if you open it on the same machine as
+interpreter.
 
-Each action above applies to ``anaconda-mode`` server immediately.
-Next ``anaconda-mode`` command you call will use this environment for
-completion candidates search.
+Vagrant
+```````
+
+You can get all intelligent features of anaconda-mode with virtual
+environment deployed on your vagrant box.  Add port forwarding line to
+your Vagrantfile.
+
+::
+
+   config.vm.network "forwarded_port", guest: 9000, host: 9000
+
+Fire up vagrant machine as usual and open your project inside vagrant
+box.
+
+::
+
+    C-x C-f /ssh:vagrant@localhost#2222:/vagrant/polls/views.py
+
+Then activate your project environment installed inside vagrant.
+
+::
+
+    M-x pythonic-activate RET /ssh:vagrant@localhost#2222:/vagrant/polls/venv RET
+
+Remember that standard password for vagrant user is ``vagrant``. It is
+too annoying to type this password each time you want to connect.  I
+use ``ssh-copy-id`` to upload my public ssh key the box.
+
+::
+
+    ssh-copy-id vagrant@localhost -p 2222
+
+If you have random connection errors during interaction with running
+server - try to replace host name with IP address.  For example
+``localhost`` with ``127.0.0.1``.
+
+Now you are ready to go.
+
+Implementation details
+----------------------
+
+Anaconda mode comes with ``anaconda_mode.py`` server.  This server
+allow you to use jedi_ python library over jsonrpc api.  Server choice
+first available port starting from 9000.  Anaconda mode will run this
+server automatically on first call of any anaconda-mode command.
+
+This mean that completion results and reference search depends on your
+project installation.
 
 Bug Reports
 -----------
