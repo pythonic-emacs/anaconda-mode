@@ -1,3 +1,0 @@
-- name: install tox package
-  pip: name=tox
-  environment: pyenv_env

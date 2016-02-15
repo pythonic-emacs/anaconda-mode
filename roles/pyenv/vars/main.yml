@@ -1,9 +1,0 @@
-pyenv_env:
-  PATH: "{{ ansible_env.HOME }}/.pyenv/bin:{{ ansible_env.HOME }}/.pyenv/shims:{{ ansible_env.PATH }}"
-ipython_env:
-  PYENV_VERSION: ipython
-python_versions:
-  - 2.6.9
-  - 2.7.10
-  - 3.3.6
-  - 3.4.3

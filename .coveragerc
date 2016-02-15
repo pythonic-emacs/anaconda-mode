@@ -1,2 +1,2 @@
 [run]
-include = anaconda_*.py
+source = anaconda_mode

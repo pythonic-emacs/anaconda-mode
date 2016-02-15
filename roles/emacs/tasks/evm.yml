@@ -1,9 +1,0 @@
-- name: install evm
-  git: repo=https://github.com/rejeep/evm dest=~/.evm
-- name: create evm directory
-  file: dest=/usr/local/evm state=directory mode=0777
-  become: yes
-- name: install emacs
-  command: evm install --use {{ item }} creates=/usr/local/evm/{{ item }}
-  with_items: "{{emacs_versions}}"
-  environment: emacs_env

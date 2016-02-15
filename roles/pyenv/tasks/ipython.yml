@@ -1,8 +1,0 @@
-- name: create ipython virtualenv
-  command: pyenv virtualenv {{ item }} creates=~/.pyenv/versions/{{ item }}
-  with_items:
-    - ipython
-  environment: pyenv_env
-- name: install ipython package
-  pip: name=ipython state=latest
-  environment: "{{ pyenv_env|combine(ipython_env) }}"

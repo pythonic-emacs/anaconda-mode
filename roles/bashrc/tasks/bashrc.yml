@@ -1,2 +1,0 @@
-- name: copy developer bashrc
-  copy: src=roles/bashrc/files/bashrc dest={{ ansible_env.HOME }}/.bashrc

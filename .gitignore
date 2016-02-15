@@ -3,6 +3,7 @@
 *.pyc
 *~
 .cask/
+.cache/
 .coverage
 .tox/
 .vagrant/

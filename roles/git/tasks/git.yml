@@ -1,3 +1,0 @@
-- name: ensure git is installed
-  apt: name=git
-  become: yes
