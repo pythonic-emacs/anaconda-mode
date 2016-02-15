@@ -19,9 +19,13 @@
     :target: http://stable.melpa.org/#/anaconda-mode
     :alt: Melpa Stable
 
-.. raw:: html
+.. image:: static/logo.png
+    :align: right
+    :alt: Logo
 
-    <h1><img align="right" src="static/logo.png">Anaconda mode</h1>
+===============
+ Anaconda mode
+===============
 
 |travis| |coveralls| |requires| |melpa| |melpa-stable|
 
