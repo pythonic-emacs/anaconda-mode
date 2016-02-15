@@ -397,6 +397,20 @@ if interpreter doesn't match."
                    module-path))
         (should-not (tramp-tramp-file-p module-path))))))
 
+(ert-defintegration test-anaconda-mode-jsonrpc-skip-path-prefix-on-builtins ()
+  "The `module-path' of builtins equals `nil'.  We shouldn't add
+tramp prefix for this situation."
+  (let (module-path)
+    (with-current-buffer (fixture "None" 1 4)
+      (anaconda-mode-start)
+      (wait)
+      (anaconda-mode-jsonrpc
+       "goto_definitions"
+       (lambda (res)
+         (setq module-path (cdr (assoc 'module-path (car res))))))
+      (sleep-for 1)
+      (should-not module-path))))
+
 
 ;;; Completion.
 

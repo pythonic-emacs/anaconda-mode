@@ -390,7 +390,7 @@ submitted."
                                    (member command anaconda-mode-definition-commands))
                           (setq result (--map (--map (let ((key (car it))
                                                            (value (cdr it)))
-                                                       (when (eq key 'module-path)
+                                                       (when (and (eq key 'module-path) value)
                                                          (setq value (concat (pythonic-tramp-connection) value)))
                                                        (cons key value))
                                                      it)
