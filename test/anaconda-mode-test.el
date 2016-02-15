@@ -1317,6 +1317,6 @@ else:
     (should-not (eq eldoc-documentation-function 'anaconda-mode-eldoc-function))
     (should-not eldoc-mode)))
 
-(provide 'integration-test)
+(provide 'anaconda-mode-test)
 
 ;;; anaconda-mode-test.el ends here
