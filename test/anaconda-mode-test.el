@@ -140,6 +140,11 @@ pythonic library with tramp connection add as necessary."
   (let ((python-shell-interpreter "/ssh:test@10.120.4.4:/usr/bin/python"))
     (should (equal "10.120.4.4" (anaconda-mode-host)))))
 
+(ert-deftest test-anaconda-mode-host-remote-with-port ()
+  "Get server address from tramp `python-shell-interpreter' with port specified."
+  (let ((python-shell-interpreter "/ssh:test@10.120.4.4#2222:/usr/bin/python"))
+    (should (equal "10.120.4.4" (anaconda-mode-host)))))
+
 
 ;;; JSONRPC implementation.
 
