@@ -86,7 +86,7 @@ if not os.path.isdir(os.path.expanduser(sys.argv[-1])):
     os._exit(1)  # IPython again.
 " "~/.emacs.d/anaconda_mode")))))
 
-(ert-defintegration test-anaconda-mode-not-restart-in-the-same-envinment ()
+(ert-defintegration test-anaconda-mode-not-restart-in-the-same-environment ()
   "`anaconda-mode' server will not be restarted if pythonic
 environment keeps the same."
   (let (id1 id2)
