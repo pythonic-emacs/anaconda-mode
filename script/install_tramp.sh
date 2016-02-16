@@ -15,8 +15,8 @@ fi
 rm -f $HOME/.ssh/id_rsa*
 ssh-keygen -t rsa -b 4096 -f $HOME/.ssh/id_rsa -N ''
 touch $HOME/.ssh/known_hosts
-ssh-keygen -R localhost
-ssh-keyscan -H localhost > $HOME/.ssh/known_hosts
+ssh-keygen -R 127.0.0.1
+ssh-keyscan -H 127.0.0.1 > $HOME/.ssh/known_hosts
 
 # Authorize localhost for tramp user.
 
