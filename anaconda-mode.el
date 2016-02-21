@@ -1,6 +1,6 @@
 ;;; anaconda-mode.el --- Code navigation, documentation lookup and completion for Python  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013-2015 by Artem Malyshev
+;; Copyright (C) 2013-2016 by Artem Malyshev
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode

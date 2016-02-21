@@ -4,7 +4,7 @@
 
     This is anaconda_mode autocompletion server.
 
-    :copyright: (c) 2013-2015 by Artem Malyshev.
+    :copyright: (c) 2013-2016 by Artem Malyshev.
     :license: GPL3, see LICENSE for more details.
 """
 
