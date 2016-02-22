@@ -825,16 +825,12 @@ views
   (let* ((ntpath (run-to-string "
 from __future__ import print_function
 import ntpath
-module_path = ntpath.__file__
-if module_path.endswith('.pyc'):
-    module_path = module_path[:-1]
+module_path = ntpath.__file__.replace('.pyc', '.py')
 print(module_path, end='')"))
          (posixpath (run-to-string "
 from __future__ import print_function
 import posixpath
-module_path = posixpath.__file__
-if module_path.endswith('.pyc'):
-    module_path = module_path[:-1]
+module_path = posixpath.__file__.replace('.pyc', '.py')
 print(module_path, end='')"))
          (result `(((description . "def join")
                     (full-name . "os.path.join")
@@ -870,16 +866,12 @@ ends with a separator.")
   (let* ((ntpath (run-to-string "
 from __future__ import print_function
 import ntpath
-module_path = ntpath.__file__
-if module_path.endswith('.pyc'):
-    module_path = module_path[:-1]
+module_path = ntpath.__file__.replace('.pyc', '.py')
 print(module_path, end='')"))
          (posixpath (run-to-string "
 from __future__ import print_function
 import posixpath
-module_path = posixpath.__file__
-if module_path.endswith('.pyc'):
-    module_path = module_path[:-1]
+module_path = posixpath.__file__.replace('.pyc', '.py')
 print(module_path, end='')"))
          (result `(((description . "def join")
                     (full-name . "os.path.join")
@@ -944,9 +936,7 @@ ends with a separator.")
   (let* ((ntpath (run-to-string "
 from __future__ import print_function
 import ntpath
-module_path = ntpath.__file__
-if module_path.endswith('.pyc'):
-    module_path = module_path[:-1]
+module_path = ntpath.__file__.replace('.pyc', '.py')
 print(module_path, end='')"))
          (line (string-to-number (run-to-string "
 from __future__ import print_function
@@ -1083,9 +1073,7 @@ ends with a separator.
   (let* ((ntpath (run-to-string "
 from __future__ import print_function
 import ntpath
-module_path = ntpath.__file__
-if module_path.endswith('.pyc'):
-    module_path = module_path[:-1]
+module_path = ntpath.__file__.replace('.pyc', '.py')
 print(module_path, end='')"))
          (line (string-to-number (run-to-string "
 from __future__ import print_function
