@@ -35,8 +35,10 @@ Code navigation, documentation lookup and completion for Python.
 
 .. figure:: static/reference.png
 
-This package support 2.6, 2.7, 3.3 and 3.4 Python versions and provide
-following features
+
+Features
+--------
+Anaconda mode provides the following features
 
 * context-sensitive code completion
 * jump to definitions
@@ -44,7 +46,11 @@ following features
 * view documentation
 * virtual environment
 * eldoc mode
-* all this staff inside vagrant and remote hosts
+* all this stuff inside vagrant and remote hosts
+
+Supported Python Versions
+-------------------------
+2.6, 2.7, 3.3, 3.4
 
 Installation
 ------------
@@ -54,28 +60,28 @@ To use this package you need to install ``pip``.
 package.el
 ``````````
 
-All you need is install the package from Melpa_::
+All you need to do is install the package from Melpa_::
 
     M-x package-install RET anaconda-mode RET
 
-manual
+Manual
 ``````
 
-Clone this repository somewhere and add this directory to you
+Clone this repository somewhere and add this directory to your
 ``load-path``.
 
-prelude
+Prelude
 ```````
 
-``anaconda-mode`` included into `Emacs Prelude`_ distribution.  You
-can use it as well.  Look at ``prelude-python`` module to see more
+``anaconda-mode`` is included in the `Emacs Prelude`_ distribution.  You
+can use it as well.  Look at the ``prelude-python`` module to see more
 details.
 
-spacemacs
+Spacemacs
 `````````
 
-``anaconda-mode`` included into Spacemacs_ distribution.  You can use
-it as well.  Look at ``python`` language layer to see more details.
+``anaconda-mode`` is included in the Spacemacs_ distribution.  You can use
+it as well.  Look at the ``python`` language layer to see more details.
 
 Configuration
 -------------
@@ -91,7 +97,7 @@ ElDoc
 `````
 
 ``anaconda-eldoc-mode`` provide document function to ``eldoc-mode``.  All
-you need is enable ``anaconda-eldoc-mode`` in addition to previous setup.
+you need is to enable ``anaconda-eldoc-mode`` in addition to the previous setup.
 
 .. code:: lisp
 
@@ -100,15 +106,15 @@ you need is enable ``anaconda-eldoc-mode`` in addition to previous setup.
 Usage
 -----
 
-To start completion press ``C-M-i``.  This is standard emacs binding
+To start a completion press ``C-M-i``.  This is the standard emacs binding
 for ``complete-at-point`` function.  You can use company-mode_ with
 company-anaconda_ backend to get more intelligent ui.  Or
-auto-complete-mode_ with ac-anaconda_ as last try.
+auto-complete-mode_ with ac-anaconda_ as a last try.
 
 Interactive commands
 ````````````````````
 
-There is a list of interactive commands available with anaconda-mode
+Here is a list of interactive commands available with anaconda-mode
 
 ==========  ==============================
 Keybinding  Description
@@ -121,14 +127,14 @@ M-*         anaconda-mode-go-back
 M-?         anaconda-mode-show-doc
 ==========  ==============================
 
-If goto definitions, assignments or usages cause multiple candidates
-you'll see advanced anaconda navigator buffer.
+If multiple candidates are found for definitions, assignments or usages, 
+you'll see an advanced anaconda navigator buffer.
 
 PYTHONPATH
 ``````````
 
-You can add your project to Emacs ``PYTHONPATH``.  If you store project
-dependencies somewhere on you machine add its too.
+You can add your project to the Emacs ``PYTHONPATH``.  If you store project
+dependencies somewhere on your machine, you can add them as well.
 
 .. code:: lisp
 
@@ -138,10 +144,10 @@ dependencies somewhere on you machine add its too.
 Virtual environment
 ```````````````````
 
-Use virtual environment to isolate your project dependencies form
-other system.  You can additionally install you project in editable
-mode into virtual environment.  This will improve usage references
-search.  Then activate this virtual environment inside Emacs.
+Use a virtual environment to isolate your project dependencies from
+others on the system.  You can additionally install your project in an editable
+mode in the virtual environment.  This will improve search functionality.
+Then activate this virtual environment inside Emacs.
 
 ::
 
@@ -150,14 +156,14 @@ search.  Then activate this virtual environment inside Emacs.
 Also you can use `pyenv-mode`_ or similar package to hold virtual
 environment in actual state.
 
-Each action above applies to ``anaconda-mode`` immediately.  Next
+Each action above applies to ``anaconda-mode`` immediately.  The next
 ``anaconda-mode`` command you call will use this environment for
-completion candidates search.
+search completion candidates.
 
 Tramp
 `````
 
-It's possible to use anaconda-mode on remote server when you connect
+It's possible to use anaconda-mode on a remote server when you connect
 to it using tramp.  Anaconda-mode can search for completion candidates
 and all other stuff on remote server while you running Emacs locally.
 First of all open interesting remote file.
@@ -166,16 +172,16 @@ First of all open interesting remote file.
 
     C-x C-f /ssh:remote_host:project/__init__.py RET
 
-After tramp connection successfully applies and your see actual buffer
-content activate remote virtual environment.
+After tramp successfully connects and you see actual buffer
+content, activate the remote virtual environment.
 
 ::
 
     M-x pythoninc-activate RET /ssh:remote_host:/home/user/venv RET
 
 Now any anaconda-mode command will use ``/home/user/venv/bin/python``
-interpreter running on ``remote_host`` over ssh.  If you don't use
-virtual environment remotely then you have an option to specify remote
+interpreter running on ``remote_host`` over ssh.  If you don't use the
+virtual environment remotely then you have an option to specify the remote
 interpreter directly.
 
 .. code:: lisp
@@ -184,18 +190,18 @@ interpreter directly.
 
 It is important to remember that ``remote_host`` must be a real host
 name or an IP address.  SSH aliases not allowed to be used with
-anaconda-mode.  Also 9000 port on remote host should be open to
-incoming connections from your local machine.  The final not I want to
-say here is about project scope.  All kind of search inside the
-virtual environment available from any buffer.  But search inside your
-project is available only if you open it on the same machine as
+anaconda-mode.  Also port 9000 on the remote host should be open to
+incoming connections from your local machine.  A final note about project scope: 
+all kinds of searching from inside the
+virtual environment are available from any buffer.  However searching inside your
+project is available only if you open it on the same machine as the
 interpreter.
 
 Vagrant
 ```````
 
-You can get all intelligent features of anaconda-mode with virtual
-environment deployed on your vagrant box.  Add port forwarding line to
+You can get all the intelligent features of anaconda-mode with virtual
+environments deployed on your vagrant box.  Add a port forwarding line to
 your Vagrantfile.
 
 ::
@@ -215,7 +221,7 @@ Then activate your project environment installed inside vagrant.
 
     M-x pythonic-activate RET /ssh:vagrant@localhost#2222:/vagrant/polls/venv RET
 
-Remember that standard password for vagrant user is ``vagrant``. It is
+Remember that the standard password for vagrant user is ``vagrant``. It is
 too annoying to type this password each time you want to connect.  I
 use ``ssh-copy-id`` to upload my public ssh key the box.
 
@@ -233,11 +239,11 @@ Implementation details
 ----------------------
 
 Anaconda mode comes with ``anaconda_mode.py`` server.  This server
-allow you to use jedi_ python library over jsonrpc api.  Server choice
+allows you to use the jedi_ python library over jsonrpc api.  The server chooses
 first available port starting from 9000.  Anaconda mode will run this
 server automatically on first call of any anaconda-mode command.
 
-This mean that completion results and reference search depends on your
+This means that completion results and reference searches depend on your
 project installation.
 
 Bug Reports
@@ -270,7 +276,7 @@ issue.
 AttributeError and KeyError randomly happens
 ````````````````````````````````````````````
 
-This kind of problems were reported with jedi 0.9 version.  You can
+These kinds of problems were reported with jedi 0.9 version.  You can
 try to downgrade jedi version down to 0.8.
 
 ::
