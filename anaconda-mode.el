@@ -490,7 +490,7 @@ virtual environment.")
 (defun anaconda-mode-find-definitions-callback (result)
   "Process find definitions RESULT."
   (if result
-      (anaconda-mode-definitions-view result)
+      (anaconda-mode-definitions-view-record-position result)
     (message "No definitions found")))
 
 
@@ -504,7 +504,7 @@ virtual environment.")
 (defun anaconda-mode-find-assignments-callback (result)
   "Process find assignments RESULT."
   (if result
-      (anaconda-mode-definitions-view result)
+      (anaconda-mode-definitions-view-record-position result)
     (message "No assignments found")))
 
 
@@ -566,6 +566,17 @@ virtual environment.")
 
 
 ;;; Result view.
+
+(defun anaconda-mode-definitions-view-record-position (result)
+  "Record current position in the recall stack and show definitions view for rpc RESULT"
+  (let ((backward-navigation (when (buffer-file-name)
+                         `((module-path . ,(buffer-file-name))
+                           (line . ,(line-number-at-pos (point)))
+                           (column . ,(- (point) (line-beginning-position)))))))
+    (anaconda-mode-definitions-view result)
+    (push backward-navigation anaconda-mode-go-back-records)
+    )
+  )
 
 (defmacro anaconda-mode-with-view-buffer (&rest body)
   "Create view buffer and execute BODY in it."
@@ -632,23 +643,18 @@ PRESENTER is the function used to format buffer content."
   "Find DEFINITION file other window, go to DEFINITION point."
   (anaconda-mode-find-file-generic definition 'find-file-other-window))
 
-(defvar-local anaconda-mode-go-back-definition nil
+(defvar-local anaconda-mode-go-back-records nil
   "Previous definition from which current buffer was navigated.")
 
 (defun anaconda-mode-find-file-generic (definition find-function)
   "Find DEFINITION with FIND-FUNCTION."
-  (let ((backward-navigation (when (buffer-file-name)
-                               `((module-path . ,(buffer-file-name))
-                                 (line . ,(line-number-at-pos (point)))
-                                 (column . ,(- (point) (line-beginning-position)))))))
-    (--if-let (cdr (assoc 'module-path definition))
-        (progn
-          (funcall find-function it)
-          (goto-char (point-min))
-          (forward-line (1- (cdr (assoc 'line definition))))
-          (forward-char (cdr (assoc 'column definition)))
-          (setq anaconda-mode-go-back-definition backward-navigation))
-      (message "Can't open %s module" (cdr (assoc 'module-name definition))))))
+  (--if-let (cdr (assoc 'module-path definition))
+      (progn
+        (funcall find-function it)
+        (goto-char (point-min))
+        (forward-line (1- (cdr (assoc 'line definition))))
+        (forward-char (cdr (assoc 'column definition))))
+    (message "Can't open %s module" (cdr (assoc 'module-name definition)))))
 
 (defun anaconda-mode-view-insert-button (name definition)
   "Insert text button with NAME opening the DEFINITION."
@@ -707,8 +713,8 @@ to the beginning of buffer before definitions navigation."
 (defun anaconda-mode-go-back ()
   "Jump backward if buffer was navigated from `anaconda-mode' command."
   (interactive)
-  (if anaconda-mode-go-back-definition
-      (anaconda-mode-find-file anaconda-mode-go-back-definition)
+  (if anaconda-mode-go-back-records
+      (anaconda-mode-find-file (pop anaconda-mode-go-back-records))
     (message "No previous buffer")))
 
 
