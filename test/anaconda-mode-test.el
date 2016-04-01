@@ -1136,14 +1136,14 @@ one" 4 3 (concat home-directory "initial.py"))
   "Show error if there is no previous navigation buffer."
   (should (equal "No previous buffer" (anaconda-mode-go-back))))
 
-(ert-deftest test-anaconda-mode-find-file-not-set-go-back-definition ()
+(ert-deftest test-anaconda-mode-find-file-not-set-go-back-definitions ()
   "`anaconda-mode-find-file-generic' doesn't set go back
 definition if current buffer doesn't has file name."
   (with-current-buffer (fixture "test" 1 3)
     (anaconda-mode-find-file '((module-path . "simple.py")
                                (line . 1)
                                (column . 0)))
-    (should-not anaconda-mode-go-back-definition)))
+    (should-not anaconda-mode-go-back-definitions)))
 
 (ert-deftest test-anaconda-mode-find-file-builtins ()
   "Show description message if user try to open definition without module name."
@@ -1158,6 +1158,21 @@ definition if current buffer doesn't has file name."
                                (type . "instance")))
     (should (equal "simple.py"
                    (f-filename (buffer-file-name (window-buffer (selected-window))))))))
+
+(ert-deftest test-anaconda-mode-go-back-twice-no-loop ()
+  "Going back twice won't put in a loop"
+  (with-current-buffer (fixture "test" 1 4 (concat home-directory "initial.py"))
+    (anaconda-mode-find-file '((module-path . "step1.py")
+                               (line . 1)
+                               (column . 0)
+                               ))
+    (anaconda-mode-find-file '((module-path . "step2.py")
+                               (line . 1)
+                               (column . 0)
+                               ))
+    (anaconda-mode-go-back)
+    (anaconda-mode-go-back)
+    (should (equal "initial.py" (f-filename (buffer-file-name))))))
 
 (ert-deftest test-anaconda-mode-with-view-buffer-multiple-times ()
   "It is possible to reuse *Anaconda* buffer multiple times without errors."
