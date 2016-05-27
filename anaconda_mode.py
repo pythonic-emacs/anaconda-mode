@@ -44,7 +44,9 @@ def process_definitions(f):
                  'line': definition.line,
                  'column': definition.column,
                  'docstring': definition.docstring(),
-                 'description': definition.description,
+                 'description': definition.description.replace('\n', '')
+                                if definition.type == 'import'
+                                else definition.description,
                  'full-name': definition.full_name}
                 for definition in f(script)]
 
