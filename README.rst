@@ -127,7 +127,7 @@ M-*         anaconda-mode-go-back
 M-?         anaconda-mode-show-doc
 ==========  ==============================
 
-If multiple candidates are found for definitions, assignments or usages, 
+If multiple candidates are found for definitions, assignments or usages,
 you'll see an advanced anaconda navigator buffer.
 
 PYTHONPATH
@@ -191,7 +191,7 @@ interpreter directly.
 It is important to remember that ``remote_host`` must be a real host
 name or an IP address.  SSH aliases not allowed to be used with
 anaconda-mode.  Also port 9000 on the remote host should be open to
-incoming connections from your local machine.  A final note about project scope: 
+incoming connections from your local machine.  A final note about project scope:
 all kinds of searching from inside the
 virtual environment are available from any buffer.  However searching inside your
 project is available only if you open it on the same machine as the
@@ -276,7 +276,9 @@ issue.
 AttributeError and KeyError randomly happens
 ````````````````````````````````````````````
 
-These kinds of problems were reported with jedi 0.9 version.(This error may occur in Spacemacs or any other usage.) You can try to downgrade jedi version down to 0.8.
+These kinds of problems were reported with jedi 0.9 version.  (This
+error may occur in Spacemacs or any other usage).  You can try to
+downgrade jedi version down to 0.8.
 
 ::
 
@@ -284,7 +286,9 @@ These kinds of problems were reported with jedi 0.9 version.(This error may occu
    M-! rm -rf jedi* RET
    M-! pip install "jedi<0.9" -t . RET
 
-After you saw the jedi version changed to 0.8 in the dired window, you have to refresh Emacs to make it work right away. You can either restart Emacs or kill the ``*anaconda-mode buffer*``.
+After you saw the jedi version changed to 0.8 in the dired window, you
+have to refresh Emacs to make it work right away. You can either
+restart Emacs or kill the ``*anaconda-mode*`` buffer.
 
 Contributions
 -------------
