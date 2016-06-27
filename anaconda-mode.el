@@ -138,7 +138,7 @@ else:
 import os, sys, pip
 directory = os.path.expanduser(sys.argv[-2])
 version = sys.argv[-1]
-pip.main(['install', '-t', directory, 'anaconda_mode==' + version])
+pip.main(['install', '--system', '-t', directory, 'anaconda_mode==' + version])
 " "Install `anaconda_mode' server.")
 
 (defun anaconda-mode-server-directory ()
