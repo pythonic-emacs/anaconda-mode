@@ -138,7 +138,14 @@ else:
 import os, sys, pip
 directory = os.path.expanduser(sys.argv[-2])
 version = sys.argv[-1]
-pip.main(['install', '-t', directory, 'anaconda_mode==' + version])
+pip_args = ['install']
+# Ensure older pips do not try to use user scheme when installing.
+# This was default behaviour outside virtualenv before pip 6
+pip_major_version = int(pip.__version__.split('.')[0])
+if pip_major_version < 6:
+    pip_args.append('--system')
+pip_args.extend(['-t', directory, 'anaconda_mode==' + version])
+pip.main(pip_args)
 " "Install `anaconda_mode' server.")
 
 (defun anaconda-mode-server-directory ()
