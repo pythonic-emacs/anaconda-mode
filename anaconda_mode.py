@@ -101,7 +101,9 @@ def eldoc(script):
 
 app = [complete, goto_definitions, goto_assignments, usages, eldoc]
 
+def main(args):
+    host = args[0] if len(args) == 1 else '127.0.0.1'
+    service_factory(app, host, 'auto', 'anaconda_mode port {port}')
 
 if __name__ == '__main__':
-    host = sys.argv[1] if len(sys.argv) == 2 else '127.0.0.1'
-    service_factory(app, host, 'auto', 'anaconda_mode port {port}')
+    main(sys.argv[1:])
