@@ -93,15 +93,9 @@
 
 (defvar anaconda-mode-server-command "
 import sys, site
-site.addsitedir('.')  # Adds eggs installed by easy_install
+site.addsitedir('.')
 import anaconda_mode
-try:
-    anaconda_mode.main(sys.argv[1:])
-except AttributeError:
-    # Compatibility layer.
-    host = sys.argv[1] if len(sys.argv) == 2 else '127.0.0.1'
-    anaconda_mode.service_factory(anaconda_mode.app, host, 'auto',
-                                  'anaconda_mode port {port}')
+anaconda_mode.main(sys.argv[1:])
 " "Run `anaconda-mode' server.")
 
 (defvar anaconda-mode-process-name "anaconda-mode"
