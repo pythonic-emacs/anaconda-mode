@@ -17,7 +17,7 @@ setup(name='anaconda_mode',
       py_modules=['anaconda_mode'],
       install_requires=[
           'jedi>=0.9.0',
-          'service_factory>=0.1.3',
+          'service_factory>=0.1.4',
       ],
       classifiers=[
           'Development Status :: 4 - Beta',
