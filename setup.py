@@ -15,9 +15,10 @@ setup(name='anaconda_mode',
       maintainer='Artem Malyshev',
       maintainer_email='proofit404@gmail.com',
       py_modules=['anaconda_mode'],
+      zip_safe=False,
       install_requires=[
           'jedi>=0.9.0',
-          'service_factory>=0.1.4',
+          'service_factory>=0.1.5',
       ],
       classifiers=[
           'Development Status :: 4 - Beta',
