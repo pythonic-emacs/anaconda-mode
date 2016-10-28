@@ -727,7 +727,7 @@ PRESENTER is the function used to format buffer content."
   (setq next-error-function #'anaconda-mode-next-definition))
 
 (defun anaconda-mode-next-definition (num _reset)
-  "Navigate tot the next definition in the view buffer.
+  "Navigate to the next definition in the view buffer.
 NUM is the number of definitions to move forward.  RESET mean go
 to the beginning of buffer before definitions navigation."
   (forward-button num)
