@@ -20,7 +20,7 @@ evm config path $EVM_DIR
 evm install emacs-24.3 --skip
 evm install emacs-24.4 --skip
 evm install emacs-24.5 --skip
-evm install emacs-git-snapshot --skip
+evm install emacs-25.1 --skip
 
 # Install cask.
 
@@ -43,7 +43,7 @@ evm use emacs-24.5
 cask --path /vagrant/ install
 cask --path /vagrant/ update
 
-evm use emacs-git-snapshot
+evm use emacs-25.1
 cask --path /vagrant/ install
 cask --path /vagrant/ update
 

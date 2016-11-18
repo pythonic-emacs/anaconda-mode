@@ -11,7 +11,7 @@ function info_interpreter() {
 }
 
 function run() {
-    for emacs in emacs-24.3 emacs-24.4 emacs-24.5 emacs-git-snapshot
+    for emacs in emacs-24.3 emacs-24.4 emacs-24.5 emacs-25.1
     do
         for interpreter in test/interpreters/*.el
         do

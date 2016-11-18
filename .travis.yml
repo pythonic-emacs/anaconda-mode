@@ -9,32 +9,32 @@ env:
     - EVM_EMACS=emacs-24.3-travis  INTERPRETER=ipython
     - EVM_EMACS=emacs-24.4-travis  INTERPRETER=ipython
     - EVM_EMACS=emacs-24.5-travis  INTERPRETER=ipython
-    - EVM_EMACS=emacs-git-snapshot INTERPRETER=ipython
+    - EVM_EMACS=emacs-25.1-travis  INTERPRETER=ipython
 
     - EVM_EMACS=emacs-24.3-travis  INTERPRETER=py26
     - EVM_EMACS=emacs-24.4-travis  INTERPRETER=py26
     - EVM_EMACS=emacs-24.5-travis  INTERPRETER=py26
-    - EVM_EMACS=emacs-git-snapshot INTERPRETER=py26
+    - EVM_EMACS=emacs-25.1-travis  INTERPRETER=py26
 
     - EVM_EMACS=emacs-24.3-travis  INTERPRETER=py27
     - EVM_EMACS=emacs-24.4-travis  INTERPRETER=py27
     - EVM_EMACS=emacs-24.5-travis  INTERPRETER=py27
-    - EVM_EMACS=emacs-git-snapshot INTERPRETER=py27
+    - EVM_EMACS=emacs-25.1-travis  INTERPRETER=py27
 
     - EVM_EMACS=emacs-24.3-travis  INTERPRETER=py33
     - EVM_EMACS=emacs-24.4-travis  INTERPRETER=py33
     - EVM_EMACS=emacs-24.5-travis  INTERPRETER=py33
-    - EVM_EMACS=emacs-git-snapshot INTERPRETER=py33
+    - EVM_EMACS=emacs-25.1-travis  INTERPRETER=py33
 
     - EVM_EMACS=emacs-24.3-travis  INTERPRETER=py34
     - EVM_EMACS=emacs-24.4-travis  INTERPRETER=py34
     - EVM_EMACS=emacs-24.5-travis  INTERPRETER=py34
-    - EVM_EMACS=emacs-git-snapshot INTERPRETER=py34
+    - EVM_EMACS=emacs-25.1-travis  INTERPRETER=py34
 
     - EVM_EMACS=emacs-24.3-travis  INTERPRETER=tramp
     - EVM_EMACS=emacs-24.4-travis  INTERPRETER=tramp
     - EVM_EMACS=emacs-24.5-travis  INTERPRETER=tramp
-    - EVM_EMACS=emacs-git-snapshot INTERPRETER=tramp
+    - EVM_EMACS=emacs-25.1-travis  INTERPRETER=tramp
 cache:
   directories:
   - $HOME/.cache/pip
@@ -54,10 +54,6 @@ install:
   - if [ $INTERPRETER = ipython ];
     then
         pip install ipython;
-    fi
-  - if [ $EVM_EMACS = emacs-git-snapshot ];
-    then
-        ./script/install_emacs_build_deps.sh;
     fi
   - evm install $EVM_EMACS --use
   - cask install
