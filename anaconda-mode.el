@@ -85,6 +85,11 @@
   :group 'anaconda-mode
   :type 'boolean)
 
+(defcustom anaconda-mode-lighter " Anaconda"
+  "Text displayed in the mode line when `anaconda-mode’ is active."
+  :group 'anaconda-mode
+  :type 'sexp)
+
 
 ;;; Server.
 
@@ -759,7 +764,7 @@ to the beginning of buffer before definitions navigation."
   "Code navigation, documentation lookup and completion for Python.
 
 \\{anaconda-mode-map}"
-  :lighter " Anaconda"
+  :lighter anaconda-mode-lighter
   :keymap anaconda-mode-map)
 
 ;;;###autoload
