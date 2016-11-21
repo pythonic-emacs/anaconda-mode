@@ -165,7 +165,7 @@ from setuptools.command import easy_install
 directory = os.path.expanduser(sys.argv[-2])
 version = sys.argv[-1]
 sys.path.append(directory)
-easy_install.main(['-d', directory, '-S', directory, '-a',
+easy_install.main(['-d', directory, '-S', directory, '-a', '-Z',
                    'anaconda_mode==' + version])
 " "Install `anaconda_mode' server.")
 
