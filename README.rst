@@ -223,7 +223,7 @@ Then activate your project environment installed inside vagrant.
 
 Remember that the standard password for vagrant user is ``vagrant``. It is
 too annoying to type this password each time you want to connect.  I
-use ``ssh-copy-id`` to upload my public ssh key the box.
+use ``ssh-copy-id`` to upload my public ssh key to the box.
 
 ::
 
