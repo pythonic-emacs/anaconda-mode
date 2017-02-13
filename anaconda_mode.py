@@ -95,7 +95,8 @@ def eldoc(script):
         return {
             'name': signature.name,
             'index': signature.index,
-            'params': [param.description for param in signature.params]
+            # NOTE: Remove 'param ' prefix from each description.
+            'params': [param.description[6:] for param in signature.params]
         }
 
 
