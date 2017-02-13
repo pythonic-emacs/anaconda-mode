@@ -37,9 +37,7 @@ env:
     - EVM_EMACS=emacs-25.1-travis  INTERPRETER=tramp
 cache:
   directories:
-  - $HOME/.cache/pip
-before_cache:
-  - rm -f $HOME/.cache/pip/log/debug.log
+  - $HOME/.cache/pip/wheels
 before_install:
   - pip install -U pip wheel
   - git clone https://github.com/rejeep/evm $HOME/.evm
