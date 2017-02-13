@@ -31,6 +31,11 @@ env:
     - EVM_EMACS=emacs-24.5-travis  INTERPRETER=py34
     - EVM_EMACS=emacs-25.1-travis  INTERPRETER=py34
 
+    - EVM_EMACS=emacs-24.3-travis  INTERPRETER=py35
+    - EVM_EMACS=emacs-24.4-travis  INTERPRETER=py35
+    - EVM_EMACS=emacs-24.5-travis  INTERPRETER=py35
+    - EVM_EMACS=emacs-25.1-travis  INTERPRETER=py35
+
     - EVM_EMACS=emacs-24.3-travis  INTERPRETER=tramp
     - EVM_EMACS=emacs-24.4-travis  INTERPRETER=tramp
     - EVM_EMACS=emacs-24.5-travis  INTERPRETER=tramp

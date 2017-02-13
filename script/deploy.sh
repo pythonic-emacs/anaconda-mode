@@ -58,7 +58,7 @@ sudo apt-get update
 
 # Install python.
 
-sudo apt-get install -y python2.6 python2.7 python3.3 python3.4
+sudo apt-get install -y python2.6 python2.7 python3.3 python3.4 python3.5
 
 # Install setuptools and pip.
 
@@ -67,10 +67,12 @@ sudo python2.6 /tmp/ez_setup.py
 sudo python2.7 /tmp/ez_setup.py
 sudo python3.3 /tmp/ez_setup.py
 sudo python3.4 /tmp/ez_setup.py
+sudo python3.5 /tmp/ez_setup.py
 sudo easy_install-2.6 pip
 sudo easy_install-2.7 pip
 sudo easy_install-3.3 pip
 sudo easy_install-3.4 pip
+sudo easy_install-3.5 pip
 
 # Install python packages.
 
