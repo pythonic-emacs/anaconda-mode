@@ -54,9 +54,10 @@ install:
         ./script/install_tramp.sh;
     fi
   - pip install -r requirements/ci.txt
+  # FIXME: Tests under prompt_toolkit.
   - if [ $INTERPRETER = ipython ];
     then
-        pip install ipython;
+        pip install 'ipython<5';
     fi
   - evm install $EVM_EMACS --use
   - cask install
