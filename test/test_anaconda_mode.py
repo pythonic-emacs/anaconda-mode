@@ -29,18 +29,6 @@ test
     assert 'test2' == completions[1]['name']
 
 
-def test_completion_response_strip_newlines():
-    """Strip newline characters from import statements."""
-
-    path = abspath('test.py')
-    source = '''
-from sage.rings.all import Integer, PolynomialRing, QuadraticField
-Qu
-'''
-    completions = anaconda_mode.complete(source, 3, 2, path)
-    assert 'import: from sage.rings.all import Integer, PolynomialRing, QuadraticField' == completions[0]['description']
-
-
 # Definitions.
 
 
