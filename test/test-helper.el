@@ -87,6 +87,4 @@ name."
          (setq tramp-current-connection nil)
          (sleep-for 0.5)))))
 
-(provide 'test-helper)
-
 ;;; test-helper.el ends here
