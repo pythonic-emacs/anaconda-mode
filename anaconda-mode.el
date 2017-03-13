@@ -395,7 +395,7 @@ submitted."
                       (or (not (equal anaconda-mode-request-buffer (current-buffer)))
                           (not (equal anaconda-mode-request-point (point)))
                           (not (equal anaconda-mode-request-tick (buffer-chars-modified-tick))))))
-                (message "Skip anaconda-mode %s response" command)
+                (run-hook-with-args 'anaconda-mode-response-skip-hook command)
               (search-forward-regexp "\r?\n\r?\n" nil t)
               (let* ((json-array-type 'list)
                      (response (condition-case nil
@@ -439,6 +439,9 @@ virtual environment.")
 
 (defvar anaconda-mode-response-buffer "*anaconda-response*"
   "Buffer name for error report when `anaconda-mode' fail to read server response.")
+
+(defvar anaconda-mode-response-skip-hook nil
+  "Hook running when `anaconda-mode' decide to skip server response.")
 
 (defvar anaconda-mode-response-read-fail-hook nil
   "Hook running when `anaconda-mode' fail to read server response.")

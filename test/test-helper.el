@@ -30,6 +30,12 @@
 
 (add-hook 'anaconda-mode-response-read-fail-hook 'message)
 
+(defun ert-anaconda-mode-message-skip-response (command)
+  "Print skipped response for COMMAND."
+  (message "Skip anaconda-mode %s response" command))
+
+(add-hook 'anaconda-mode-response-skip-hook 'ert-anaconda-mode-message-skip-response)
+
 (defun wait ()
   "Wait for `anaconda-mode' server start."
   (while (not (anaconda-mode-bound-p))
