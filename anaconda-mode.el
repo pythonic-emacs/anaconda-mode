@@ -114,7 +114,7 @@ anaconda_mode.main(sys.argv[1:])
 
 (defun anaconda-mode-show-process-buffer ()
   "Display `anaconda-mode-process-buffer'."
-  (pop-to-buffer anaconda-mode-process-buffer))
+  (display-buffer anaconda-mode-process-buffer))
 
 (defvar anaconda-mode-process-fail-hook nil
   "Hook running when any of `anaconda-mode' fails by some reason.")
