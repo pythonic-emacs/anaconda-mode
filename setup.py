@@ -17,7 +17,7 @@ setup(name='anaconda_mode',
       py_modules=['anaconda_mode'],
       zip_safe=False,
       install_requires=[
-          'jedi>=0.10.0',
+          'jedi>=0.10.1',
           'service_factory>=0.1.5',
       ],
       classifiers=[
