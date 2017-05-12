@@ -165,7 +165,7 @@ Tramp
 
 It's possible to use anaconda-mode on a remote server when you connect
 to it using tramp.  Anaconda-mode can search for completion candidates
-and all other stuff on remote server while you running Emacs locally.
+and all other stuff on remote server while you're running Emacs locally.
 First of all open interesting remote file.
 
 ::
