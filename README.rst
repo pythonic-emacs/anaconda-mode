@@ -201,19 +201,26 @@ Vagrant
 ```````
 
 You can get all the intelligent features of anaconda-mode with virtual
-environments deployed on your vagrant box.  Add a port forwarding line to
-your Vagrantfile.
+environments deployed on your vagrant box. Fire up the vagrant machine as usual.
+The easiest way to handle authentication is to copy your public ssh key to the
+vagrant box.
 
 ::
 
-   config.vm.network "forwarded_port", guest: 9000, host: 9000
+    ssh-copy-id vagrant@localhost -p 2222
 
-Fire up vagrant machine as usual and open your project inside vagrant
-box.
+Now open your project inside the vagrant box.
 
 ::
 
     C-x C-f /ssh:vagrant@localhost#2222:/vagrant/polls/views.py
+
+Check the ``*anaconda-mode*`` buffer for the port number, and forward that port
+from vagrant.
+
+::
+
+    ssh -nNT vagrant@localhost -p 2222 -L <port number>:localhost:<port number>
 
 Then activate your project environment installed inside vagrant.
 
@@ -221,19 +228,9 @@ Then activate your project environment installed inside vagrant.
 
     M-x pythonic-activate RET /ssh:vagrant@localhost#2222:/vagrant/polls/venv RET
 
-Remember that the standard password for vagrant user is ``vagrant``. It is
-too annoying to type this password each time you want to connect.  I
-use ``ssh-copy-id`` to upload my public ssh key to the box.
-
-::
-
-    ssh-copy-id vagrant@localhost -p 2222
-
-If you have random connection errors during interaction with running
-server - try to replace host name with IP address.  For example
+Now you are ready to go. If you have random connection errors during interaction
+with running server, try replacing the host name with the IP address, for example,
 ``localhost`` with ``127.0.0.1``.
-
-Now you are ready to go.
 
 Implementation details
 ----------------------
