@@ -37,16 +37,27 @@ def process_definitions(f):
     @wraps(f)
     def wrapper(script):
 
-        return [{'name': definition.name,
-                 'type': definition.type,
-                 'module-name': definition.module_name,
-                 'module-path': definition.module_path,
-                 'line': definition.line,
-                 'column': definition.column,
-                 'docstring': definition.docstring(),
-                 'description': definition.description,
-                 'full-name': definition.full_name}
-                for definition in f(script)]
+        attrs_lookup = {'name': 'name',
+                        'type': 'type',
+                        'module_name': 'module-name',
+                        'module_path': 'module-path',
+                        'line': 'line',
+                        'column': 'column',
+                        'description': 'description',
+                        'full_name': 'full-name'}
+        var = []
+        for definition in f(script):
+
+            d = {}
+            for key in attrs_lookup:
+                try:
+                    d[attrs_lookup[key]] = getattr(definition, key)
+                except ValueError:
+                    d[attrs_lookup[key]] = ''
+
+                d['docstring'] = definition.docstring()
+            var.append(d)
+        return var
 
     return wrapper
 
