@@ -1,9 +1,13 @@
 from __future__ import (
-    absolute_import, unicode_literals, division, print_function)
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
+
 from os.path import abspath
 
 import anaconda_mode
-
 
 # Completion.
 

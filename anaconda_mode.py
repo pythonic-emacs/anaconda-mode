@@ -9,12 +9,16 @@
 """
 
 from __future__ import (
-    absolute_import, unicode_literals, division, print_function)
+    absolute_import,
+    division,
+    print_function,
+    unicode_literals,
+)
 
 import sys
 from functools import wraps
 
-from jedi import Script, NotFoundError
+from jedi import Script
 from service_factory import service_factory
 
 
@@ -23,10 +27,7 @@ def script_method(f):
 
     @wraps(f)
     def wrapper(source, line, column, path):
-        try:
-            return f(Script(source, line, column, path))
-        except NotFoundError:
-            return []
+        return f(Script(source, line, column, path))
 
     return wrapper
 
