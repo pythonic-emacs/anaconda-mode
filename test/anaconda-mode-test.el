@@ -127,7 +127,7 @@ process before anaconda-mode successfully bound its port."
   "Calculate server directory.
 File name expansion should not be done.  It must happens inside
 pythonic library with tramp connection add as necessary."
-  (should (equal "~/.emacs.d/anaconda-mode/0.1.8"
+  (should (equal "~/.emacs.d/anaconda-mode/0.1.9"
                  (anaconda-mode-server-directory))))
 
 (ert-deftest test-anaconda-mode-host ()
