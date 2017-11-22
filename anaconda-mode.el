@@ -243,7 +243,7 @@ parameters.  CALLBACK function will be called when
   (if (eq 0 (process-exit-status process))
       (anaconda-mode-check callback)
     (run-hooks 'anaconda-mode-process-fail-hook)
-    (message "Can not create %s directory"
+    (message "Cannot create %s directory"
              (anaconda-mode-server-directory))))
 
 (defun anaconda-mode-check (&optional callback)
@@ -288,7 +288,7 @@ parameters.  CALLBACK function will be called when
   (if (eq 0 (process-exit-status process))
       (anaconda-mode-bootstrap callback)
     (run-hooks 'anaconda-mode-process-fail-hook)
-    (message "Can not install `anaconda-mode' server")))
+    (message "Cannot install `anaconda-mode' server")))
 
 (defun anaconda-mode-bootstrap (&optional callback)
   "Run `anaconda-mode' server.
@@ -330,7 +330,7 @@ called when `anaconda-mode-port' will be bound."
 PROCESS and EVENT are basic sentinel parameters."
   (unless (eq 0 (process-exit-status process))
     (run-hooks 'anaconda-mode-process-fail-hook)
-    (message "Can not start `anaconda-mode' server")))
+    (message "Cannot start `anaconda-mode' server")))
 
 
 ;;; Interaction.
@@ -407,7 +407,7 @@ submitted."
                                     (run-hook-with-args 'anaconda-mode-response-read-fail-hook response)
                                     nil)))))
                 (if (null response)
-                    (message "Can not read anaconda-mode server response")
+                    (message "Cannot read anaconda-mode server response")
                   (if (assoc 'error response)
                       (let* ((error-structure (cdr (assoc 'error response)))
                              (error-message (cdr (assoc 'message error-structure)))
