@@ -1,3 +1,0 @@
-export PATH=$HOME/.evm/bin:$HOME/.cask/bin:$PATH
-
-cd /vagrant
