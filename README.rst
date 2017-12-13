@@ -15,7 +15,7 @@
  Anaconda mode
 ===============
 
-|travis| |coveralls| |requires| |melpa| |melpa-stable|
+|melpa| |melpa-stable|
 
 Code navigation, documentation lookup and completion for Python.
 
