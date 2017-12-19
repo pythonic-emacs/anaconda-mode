@@ -177,13 +177,17 @@ easy_install.main(['-d', directory, '-S', directory, '-a', '-Z',
 
 (defun anaconda-mode-host ()
   "Target host with anaconda-mode server."
-  (if (pythonic-remote-p)
-      (replace-regexp-in-string
-       "#.*\\'" ""                      ;; Cleanup tramp port specification.
-       (tramp-file-name-host
-        (tramp-dissect-file-name
-         (pythonic-tramp-connection))))
-    "127.0.0.1"))
+  (cond
+   ((pythonic-remote-docker-p)
+    "127.0.0.1")
+   ((pythonic-remote-p)
+    (replace-regexp-in-string
+     "#.*\\'" ""                      ;; Cleanup tramp port specification.
+     (tramp-file-name-host
+      (tramp-dissect-file-name
+       (pythonic-tramp-connection)))))
+   (t
+    "127.0.0.1")))
 
 (defun anaconda-mode-start (&optional callback)
   "Start anaconda-mode server.
@@ -204,12 +208,20 @@ be bound."
     (set-process-sentinel anaconda-mode-process nil)
     (kill-process anaconda-mode-process)
     (setq anaconda-mode-process nil
-          anaconda-mode-port nil)))
+          anaconda-mode-port nil))
+  (when (anaconda-mode-socat-running-p)
+    (kill-process anaconda-mode-socat-process)
+    (setq anaconda-mode-socat-process nil)))
 
 (defun anaconda-mode-running-p ()
   "Is `anaconda-mode' server running."
   (and anaconda-mode-process
        (process-live-p anaconda-mode-process)))
+
+(defun anaconda-mode-socat-running-p ()
+  "Is `anaconda-mode' socat companion process running."
+  (and anaconda-mode-socat-process
+       (process-live-p anaconda-mode-socat-process)))
 
 (defun anaconda-mode-bound-p ()
   "Is `anaconda-mode' port bound."
@@ -308,6 +320,15 @@ be bound."
                                             "0.0.0.0")))))
   (process-put anaconda-mode-process 'server-directory (anaconda-mode-server-directory)))
 
+(defvar anaconda-mode-socat-process-name "anaconda-socat"
+  "Process name for anaconda-mode socat companion process.")
+
+(defvar anaconda-mode-socat-process-buffer "*anaconda-socat*"
+  "Buffer name for anaconda-mode socat companion processes.")
+
+(defvar anaconda-mode-socat-process nil
+  "Currently running anaconda-mode socat companion process.")
+
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.
 Connect to the `anaconda-mode' server.  CALLBACK function will be
@@ -322,6 +343,26 @@ called when `anaconda-mode-port' will be bound."
   (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
     (setq anaconda-mode-port (string-to-number (cadr it)))
     (set-process-filter process nil)
+    (when (pythonic-remote-docker-p)
+      (let* ((container-name (tramp-file-name-host
+                              (tramp-dissect-file-name
+                               (pythonic-tramp-connection))))
+             (container-raw-description (with-output-to-string
+                                          (with-current-buffer
+                                              standard-output
+                                            (call-process "docker" nil t nil "inspect" container-name))))
+             (container-description (let ((json-array-type 'list))
+                                      (json-read-from-string container-raw-description)))
+             (container-ip (cdr (assoc 'IPAddress
+                                       (cdadr (assoc 'Networks
+                                                     (cdr (assoc 'NetworkSettings
+                                                                 (car container-description)))))))))
+        (setq anaconda-mode-socat-process
+              (start-process anaconda-mode-socat-process-name
+                             anaconda-mode-socat-process-buffer
+                             "socat"
+                             (format "TCP4-LISTEN:%d" anaconda-mode-port)
+                             (format "TCP4:%s:%d" container-ip anaconda-mode-port)))))
     (when callback
       (funcall callback))))
 
