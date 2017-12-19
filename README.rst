@@ -34,11 +34,11 @@ Anaconda mode provides the following features
 * view documentation
 * virtual environment
 * eldoc mode
-* all this stuff inside vagrant and remote hosts
+* all this stuff inside vagrant, docker and remote hosts
 
 Supported Python Versions
 -------------------------
-2.6, 2.7, 3.3, 3.4
+2.6, 2.7, 3.3, 3.4, 3.5, 3.6
 
 Installation
 ------------
@@ -178,12 +178,10 @@ interpreter directly.
 
 It is important to remember that ``remote_host`` must be a real host
 name or an IP address.  SSH aliases not allowed to be used with
-anaconda-mode.  Also port 9000 on the remote host should be open to
-incoming connections from your local machine.  A final note about project scope:
-all kinds of searching from inside the
-virtual environment are available from any buffer.  However searching inside your
-project is available only if you open it on the same machine as the
-interpreter.
+anaconda-mode.  All kinds of searching from inside the virtual
+environment are available from any buffer.  However searching inside
+your project is available only if you open it on the same machine as
+the interpreter.
 
 Vagrant
 ```````
@@ -220,6 +218,39 @@ Now you are ready to go. If you have random connection errors during interaction
 with running server, try replacing the host name with the IP address, for example,
 ``localhost`` with ``127.0.0.1``.
 
+Docker
+``````
+
+You can use definition, reference and auto-completion search for
+dependencies installed in the Docker container.  Let suppose your
+project layout is the same as in `Compose and Django`_ tutorial.  To
+use ``anaconda-mode`` together with Docker you need to install two
+additional external dependencies.  First of all, you need to install
+`docker-tramp`_ Emacs package.  The second step is to install Unix
+``socat`` utility.  You should have your containers up and running
+
+::
+
+    docker-compose up web
+
+After that, you can set Python interpreter to one installed inside
+container
+
+::
+
+    (setq python-shell-interpreter "/docker:root@django_web_1:/usr/local/bin/python")
+
+Now you can open some file inside the project running inside a
+container
+
+::
+
+    C-x C-f /docker:root@django_web_1:/code/manage.py
+
+If you try to find the definition of the Django module imported in
+this buffer, ``anaconda-mode`` will jump to the package installed
+inside this Docker container.
+
 Bug Reports
 -----------
 
@@ -246,3 +277,5 @@ Thanks
 .. _company-anaconda: https://github.com/proofit404/company-anaconda
 .. _auto-complete-mode: https://github.com/auto-complete/auto-complete
 .. _ac-anaconda: https://github.com/proofit404/ac-anaconda
+.. _compose and django: https://docs.docker.com/compose/django/
+.. _docker-tramp: https://github.com/emacs-pe/docker-tramp.el
