@@ -220,53 +220,11 @@ Now you are ready to go. If you have random connection errors during interaction
 with running server, try replacing the host name with the IP address, for example,
 ``localhost`` with ``127.0.0.1``.
 
-Implementation details
-----------------------
-
-Anaconda mode comes with ``anaconda_mode.py`` server.  This server
-allows you to use the jedi_ python library over jsonrpc api.  The server chooses
-first available port starting from 9000.  Anaconda mode will run this
-server automatically on first call of any anaconda-mode command.
-
-This means that completion results and reference searches depend on your
-project installation.
-
 Bug Reports
 -----------
 
-Please attach ``*anaconda-mode*`` buffer content to every created
-issue.
-
-Issues
-------
-
-AttributeError and KeyError randomly happens
-````````````````````````````````````````````
-
-These kinds of problems were reported with jedi 0.9 version.  (This
-error may occur in Spacemacs or any other usage).  You can try to
-downgrade jedi version down to 0.8.
-
-::
-
-   M-: (dired (anaconda-mode-server-directory)) RET
-   M-! rm -rf jedi* RET
-   M-! pip install "jedi<0.9" -t . RET
-
-After you saw the jedi version changed to 0.8 in the dired window, you
-have to refresh Emacs to make it work right away. You can either
-restart Emacs or kill the ``*anaconda-mode*`` buffer.
-
-Contributions
--------------
-
-Are very welcome.  But any significant change has to be accompanied
-with tests, both for Emacs Lisp and Python code.  To run the test
-suite, call:
-
-.. code:: shell
-
-    tox
+Please attach ``*anaconda-mode*``, ``*anaconda-response*`` and
+``*anaconda-socat*`` buffer content to every created issue.
 
 Thanks
 ------
@@ -282,7 +240,6 @@ Thanks
 
 .. _Melpa: http://melpa.milkbox.net/
 .. _pyenv-mode: https://github.com/proofit404/pyenv-mode
-.. _jedi: http://jedi.jedidjah.ch/en/latest/
 .. _emacs prelude: https://github.com/bbatsov/prelude
 .. _spacemacs: https://github.com/syl20bnr/spacemacs
 .. _company-mode: http://company-mode.github.io/
