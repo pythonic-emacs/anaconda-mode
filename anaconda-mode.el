@@ -692,7 +692,7 @@ PRESENTER is the function used to format buffer content."
     (let ((delay-mode-hooks t))
       (python-mode))
     (run-hooks 'font-lock-mode-hook)
-    (font-lock-fontify-buffer)
+    (font-lock-ensure)
     (buffer-string)))
 
 (define-button-type 'anaconda-mode-definition-button
