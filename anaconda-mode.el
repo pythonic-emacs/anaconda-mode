@@ -163,6 +163,29 @@ easy_install.main(['-d', directory, '-S', directory, '-a', '-Z',
                    'anaconda_mode==' + version])
 " "Install `anaconda_mode' server.")
 
+(defvar anaconda-mode-socat-process-name "anaconda-socat"
+  "Process name for anaconda-mode socat companion process.")
+
+(defvar anaconda-mode-socat-process-buffer "*anaconda-socat*"
+  "Buffer name for anaconda-mode socat companion processes.")
+
+(defvar anaconda-mode-socat-process nil
+  "Currently running anaconda-mode socat companion process.")
+
+(defvar anaconda-mode-definition-commands
+  '("complete" "goto_definitions" "goto_assignments" "usages")
+  "List of `anaconda-mode' rpc commands returning definitions as result.
+
+This is used to prefix `module-path' field with
+`pythonic-tramp-connection' in the case of remote interpreter or
+virtual environment.")
+
+(defvar anaconda-mode-response-buffer "*anaconda-response*"
+  "Buffer name for error report when `anaconda-mode' fail to read server response.")
+
+(defvar anaconda-mode-response-skip-hook nil
+  "Hook running when `anaconda-mode' decide to skip server response.")
+
 (defun anaconda-mode-server-directory ()
   "Anaconda mode installation directory."
   (f-short (f-join anaconda-mode-installation-directory
@@ -486,20 +509,6 @@ submitted."
                         ;; will be treated as single argument.
                         (apply callback result nil)))))))
           (kill-buffer http-buffer))))))
-
-(defvar anaconda-mode-definition-commands
-  '("complete" "goto_definitions" "goto_assignments" "usages")
-  "List of `anaconda-mode' rpc commands returning definitions as result.
-
-This is used to prefix `module-path' field with
-`pythonic-tramp-connection' in the case of remote interpreter or
-virtual environment.")
-
-(defvar anaconda-mode-response-buffer "*anaconda-response*"
-  "Buffer name for error report when `anaconda-mode' fail to read server response.")
-
-(defvar anaconda-mode-response-skip-hook nil
-  "Hook running when `anaconda-mode' decide to skip server response.")
 
 
 ;;; Code completion.
