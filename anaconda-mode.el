@@ -40,7 +40,7 @@
 
 (defcustom anaconda-mode-installation-directory
   "~/.emacs.d/anaconda-mode"
-  "Installation directory for anaconda-mode server."
+  "Installation directory for `anaconda-mode' server."
   :group 'anaconda-mode
   :type 'directory)
 
@@ -94,7 +94,7 @@
 ;;; Server.
 
 (defvar anaconda-mode-server-version "0.1.9"
-  "Server version needed to run anaconda-mode.")
+  "Server version needed to run `anaconda-mode'.")
 
 (defvar anaconda-mode-server-command "
 import sys, site
@@ -104,19 +104,19 @@ anaconda_mode.main(sys.argv[1:])
 " "Run `anaconda-mode' server.")
 
 (defvar anaconda-mode-process-name "anaconda-mode"
-  "Process name for anaconda-mode processes.")
+  "Process name for `anaconda-mode' processes.")
 
 (defvar anaconda-mode-process-buffer "*anaconda-mode*"
-  "Buffer name for anaconda-mode processes.")
+  "Buffer name for `anaconda-mode' process.")
 
 (defvar anaconda-mode-process nil
-  "Currently running anaconda-mode process.")
+  "Currently running `anaconda-mode' process.")
 
 (defvar anaconda-mode-process-fail-hook nil
   "Hook running when any of `anaconda-mode' fails by some reason.")
 
 (defvar anaconda-mode-port nil
-  "Port for anaconda-mode connection.")
+  "Port for `anaconda-mode' connection.")
 
 (defvar anaconda-mode-ensure-directory-command "
 import os, sys
@@ -163,13 +163,54 @@ easy_install.main(['-d', directory, '-S', directory, '-a', '-Z',
                    'anaconda_mode==' + version])
 " "Install `anaconda_mode' server.")
 
+(defvar anaconda-mode-socat-process-name "anaconda-socat"
+  "Process name for `anaconda-mode' socat companion process.")
+
+(defvar anaconda-mode-socat-process-buffer "*anaconda-socat*"
+  "Buffer name for `anaconda-mode' socat companion processes.")
+
+(defvar anaconda-mode-socat-process nil
+  "Currently running `anaconda-mode' socat companion process.")
+
+(defvar anaconda-mode-definition-commands
+  '("complete" "goto_definitions" "goto_assignments" "usages")
+  "List of `anaconda-mode' rpc commands returning definitions as result.
+
+This is used to prefix `module-path' field with
+`pythonic-tramp-connection' in the case of remote interpreter or
+virtual environment.")
+
+(defvar anaconda-mode-response-buffer "*anaconda-response*"
+  "Buffer name for error report when `anaconda-mode' fail to read server response.")
+
+(defvar anaconda-mode-response-skip-hook nil
+  "Hook running when `anaconda-mode' decide to skip server response.")
+
+(defvar anaconda-mode-socat-process-name "anaconda-socat"
+  "Process name for `anaconda-mode' socat companion process.")
+
+(defvar anaconda-mode-socat-process-buffer "*anaconda-socat*"
+  "Buffer name for `anaconda-mode' socat companion process.")
+
+(defvar anaconda-mode-socat-process nil
+  "Currently running `anaconda-mode' socat companion process.")
+
+(defvar anaconda-mode-ssh-process-name "anaconda-ssh"
+  "Process name for `anaconda-mode' ssh port forward companion process.")
+
+(defvar anaconda-mode-ssh-process-buffer "*anaconda-ssh*"
+  "Buffer name for `anaconda-mode' ssh port forward companion process.")
+
+(defvar anaconda-mode-ssh-process nil
+  "Currently running `anaconda-mode' ssh port forward companion process.")
+
 (defun anaconda-mode-server-directory ()
   "Anaconda mode installation directory."
   (f-short (f-join anaconda-mode-installation-directory
                    anaconda-mode-server-version)))
 
 (defun anaconda-mode-host ()
-  "Target host with anaconda-mode server."
+  "Target host with `anaconda-mode' server."
   (cond
    ((pythonic-remote-docker-p)
     "127.0.0.1")
@@ -179,7 +220,7 @@ easy_install.main(['-d', directory, '-S', directory, '-a', '-Z',
     "127.0.0.1")))
 
 (defun anaconda-mode-start (&optional callback)
-  "Start anaconda-mode server.
+  "Start `anaconda-mode' server.
 CALLBACK function will be called when `anaconda-mode-port' will
 be bound."
   (when (anaconda-mode-need-restart)
@@ -191,7 +232,7 @@ be bound."
     (anaconda-mode-ensure-directory callback)))
 
 (defun anaconda-mode-stop ()
-  "Stop anaconda-mode server."
+  "Stop `anaconda-mode' server."
   (when (anaconda-mode-running-p)
     (set-process-filter anaconda-mode-process nil)
     (set-process-sentinel anaconda-mode-process nil)
@@ -316,24 +357,6 @@ be bound."
                                           (when (pythonic-remote-p)
                                             "0.0.0.0")))))
   (process-put anaconda-mode-process 'server-directory (anaconda-mode-server-directory)))
-
-(defvar anaconda-mode-socat-process-name "anaconda-socat"
-  "Process name for anaconda-mode socat companion process.")
-
-(defvar anaconda-mode-socat-process-buffer "*anaconda-socat*"
-  "Buffer name for anaconda-mode socat companion process.")
-
-(defvar anaconda-mode-socat-process nil
-  "Currently running anaconda-mode socat companion process.")
-
-(defvar anaconda-mode-ssh-process-name "anaconda-ssh"
-  "Process name for anaconda-mode ssh port forward companion process.")
-
-(defvar anaconda-mode-ssh-process-buffer "*anaconda-ssh*"
-  "Buffer name for anaconda-mode ssh port forward companion process.")
-
-(defvar anaconda-mode-ssh-process nil
-  "Currently running anaconda-mode ssh port forward companion process.")
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.
@@ -487,20 +510,6 @@ submitted."
                         (apply callback result nil)))))))
           (kill-buffer http-buffer))))))
 
-(defvar anaconda-mode-definition-commands
-  '("complete" "goto_definitions" "goto_assignments" "usages")
-  "List of `anaconda-mode' rpc commands returning definitions as result.
-
-This is used to prefix `module-path' field with
-`pythonic-tramp-connection' in the case of remote interpreter or
-virtual environment.")
-
-(defvar anaconda-mode-response-buffer "*anaconda-response*"
-  "Buffer name for error report when `anaconda-mode' fail to read server response.")
-
-(defvar anaconda-mode-response-skip-hook nil
-  "Hook running when `anaconda-mode' decide to skip server response.")
-
 
 ;;; Code completion.
 
@@ -520,7 +529,7 @@ virtual environment.")
     (completion-in-region start stop collection)))
 
 (defun anaconda-mode-complete-extract-names (result)
-  "Extract completion names from anaconda-mode RESULT."
+  "Extract completion names from `anaconda-mode' RESULT."
   (--map (let* ((name (cdr (assoc 'name it)))
                 (type (cdr (assoc 'type it)))
                 (module-path (cdr (assoc 'module-path it)))
@@ -683,7 +692,7 @@ PRESENTER is the function used to format buffer content."
     (let ((delay-mode-hooks t))
       (python-mode))
     (run-hooks 'font-lock-mode-hook)
-    (font-lock-fontify-buffer)
+    (font-lock-ensure)
     (buffer-string)))
 
 (define-button-type 'anaconda-mode-definition-button
@@ -719,7 +728,7 @@ PRESENTER is the function used to format buffer content."
     (and buffer (display-buffer buffer))))
 
 (defun anaconda-mode-find-file-no-record-definition (definition)
-  "Find DEFINITION file, go to DEFINITION point (without recording in the go-back stack)"
+  "Find DEFINITION file, go to DEFINITION point (without recording in the go-back stack)."
   (anaconda-mode-find-file-generic definition 'find-file t))
 
 (defvar-local anaconda-mode-go-back-definitions nil
