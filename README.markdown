@@ -165,22 +165,13 @@ public ssh key to the vagrant box.
 
     ssh-copy-id vagrant@localhost -p 2222
 
-Now open your project inside the vagrant box.
-
-    C-x C-f /ssh:vagrant@localhost#2222:/vagrant/polls/views.py
-
-Check the `*anaconda-mode*` buffer for the port number, and forward
-that port from vagrant.
-
-    ssh -nNT vagrant@localhost -p 2222 -L <port number>:localhost:<port number>
-
 Then activate your project environment installed inside vagrant.
 
     M-x pythonic-activate RET /ssh:vagrant@localhost#2222:/vagrant/polls/venv RET
 
-Now you are ready to go. If you have random connection errors during
-interaction with running server, try replacing the host name with the
-IP address, for example, `localhost` with `127.0.0.1`.
+Now open your project inside the vagrant box.
+
+    C-x C-f /ssh:vagrant@localhost#2222:/vagrant/polls/views.py
 
 #### Docker
 
