@@ -186,6 +186,24 @@ virtual environment.")
 (defvar anaconda-mode-response-skip-hook nil
   "Hook running when `anaconda-mode' decide to skip server response.")
 
+(defvar anaconda-mode-socat-process-name "anaconda-socat"
+  "Process name for `anaconda-mode' socat companion process.")
+
+(defvar anaconda-mode-socat-process-buffer "*anaconda-socat*"
+  "Buffer name for `anaconda-mode' socat companion process.")
+
+(defvar anaconda-mode-socat-process nil
+  "Currently running `anaconda-mode' socat companion process.")
+
+(defvar anaconda-mode-ssh-process-name "anaconda-ssh"
+  "Process name for `anaconda-mode' ssh port forward companion process.")
+
+(defvar anaconda-mode-ssh-process-buffer "*anaconda-ssh*"
+  "Buffer name for `anaconda-mode' ssh port forward companion process.")
+
+(defvar anaconda-mode-ssh-process nil
+  "Currently running `anaconda-mode' ssh port forward companion process.")
+
 (defun anaconda-mode-server-directory ()
   "Anaconda mode installation directory."
   (f-short (f-join anaconda-mode-installation-directory
@@ -339,24 +357,6 @@ be bound."
                                           (when (pythonic-remote-p)
                                             "0.0.0.0")))))
   (process-put anaconda-mode-process 'server-directory (anaconda-mode-server-directory)))
-
-(defvar anaconda-mode-socat-process-name "anaconda-socat"
-  "Process name for anaconda-mode socat companion process.")
-
-(defvar anaconda-mode-socat-process-buffer "*anaconda-socat*"
-  "Buffer name for anaconda-mode socat companion process.")
-
-(defvar anaconda-mode-socat-process nil
-  "Currently running anaconda-mode socat companion process.")
-
-(defvar anaconda-mode-ssh-process-name "anaconda-ssh"
-  "Process name for anaconda-mode ssh port forward companion process.")
-
-(defvar anaconda-mode-ssh-process-buffer "*anaconda-ssh*"
-  "Buffer name for anaconda-mode ssh port forward companion process.")
-
-(defvar anaconda-mode-ssh-process nil
-  "Currently running anaconda-mode ssh port forward companion process.")
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.
