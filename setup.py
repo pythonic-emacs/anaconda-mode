@@ -1,6 +1,10 @@
-from setuptools import setup
+"""
+Autocompletion server for ``anaconda-mode`` Emacs plugin.
 
-readme = open('README.rst').read()
+See https://github.com/proofit404/anaconda-mode for more details.
+"""
+
+from setuptools import setup
 
 setup(
     name='anaconda_mode',
@@ -8,7 +12,7 @@ setup(
     url='https://github.com/proofit404/anaconda-mode',
     description='Code navigation, documentation lookup and '
     'completion for Python.',
-    long_description=readme,
+    long_description=__doc__,
     platforms='any',
     license='GPL3',
     author='Artem Malyshev',
@@ -34,6 +38,7 @@ setup(
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Topic :: Text Editors',
         'Topic :: Text Editors :: Emacs',
     ],
