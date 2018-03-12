@@ -77,10 +77,7 @@ To start a completion press `C-M-i`.  This is the standard emacs
 binding for `complete-at-point` function.  You can use
 [company-mode](http://company-mode.github.io/) with
 [company-anaconda](https://github.com/proofit404/company-anaconda)
-backend to get more intelligent ui.  Or
-[auto-complete-mode](https://github.com/auto-complete/auto-complete)
-with [ac-anaconda](https://github.com/proofit404/ac-anaconda) as a
-last try.
+backend to get more intelligent UI.
 
 #### Interactive commands
 
