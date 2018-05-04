@@ -22,7 +22,7 @@ setup(
     py_modules=['anaconda_mode'],
     zip_safe=False,
     install_requires=[
-        'jedi>=0.11',
+        'jedi>=0.12',
         'service_factory>=0.1.5',
     ],
     classifiers=[
