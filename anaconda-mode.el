@@ -1,6 +1,6 @@
 ;;; anaconda-mode.el --- Code navigation, documentation lookup and completion for Python  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2013-2016 by Artem Malyshev
+;; Copyright (C) 2013-2018 by Artem Malyshev
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
@@ -351,11 +351,11 @@ be bound."
                         :filter (lambda (process output) (anaconda-mode-bootstrap-filter process output callback))
                         :sentinel 'anaconda-mode-bootstrap-sentinel
                         :query-on-exit nil
-                        :args (delq nil
-                                    (list "-c"
-                                          anaconda-mode-server-command
-                                          (when (pythonic-remote-p)
-                                            "0.0.0.0")))))
+                        :args (list "-c"
+                                    anaconda-mode-server-command
+                                    (if (pythonic-remote-p)
+                                        "0.0.0.0" "127.0.0.1")
+                                    (or pythonic-environment ""))))
   (process-put anaconda-mode-process 'server-directory (anaconda-mode-server-directory)))
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)

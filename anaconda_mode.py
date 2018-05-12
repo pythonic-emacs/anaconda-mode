@@ -4,7 +4,7 @@
 
     This is anaconda_mode autocompletion server.
 
-    :copyright: (c) 2013-2016 by Artem Malyshev.
+    :copyright: (c) 2013-2018 by Artem Malyshev.
     :license: GPL3, see LICENSE for more details.
 """
 
@@ -18,8 +18,10 @@ from __future__ import (
 import sys
 from functools import wraps
 
-from jedi import Script
+from jedi import Script, create_environment
 from service_factory import service_factory
+
+script_env = None  # will correspond to a jedi virtualenv, if one is to be used
 
 
 def script_method(f):
@@ -27,7 +29,7 @@ def script_method(f):
 
     @wraps(f)
     def wrapper(source, line, column, path):
-        return f(Script(source, line, column, path))
+        return f(Script(source, line, column, path, environment=script_env))
 
     return wrapper
 
@@ -103,7 +105,11 @@ app = [complete, goto_definitions, goto_assignments, usages, eldoc]
 
 
 def main(args):
-    host = args[0] if len(args) == 1 else '127.0.0.1'
+    assert len(args) == 2, args
+    host = args[0]
+    if args[1] != "":
+        global script_env
+        script_env = create_environment(args[1], safe=False)
     service_factory(app, host, 0, 'anaconda_mode port {port}')
 
 if __name__ == '__main__':
