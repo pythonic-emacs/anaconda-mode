@@ -100,7 +100,7 @@
 import sys, site
 site.addsitedir('.')
 import anaconda_mode
-anaconda_mode.main(sys.argv[1:])
+anaconda_mode.main(sys.argv[-2:])
 " "Run `anaconda-mode' server.")
 
 (defvar anaconda-mode-process-name "anaconda-mode"
