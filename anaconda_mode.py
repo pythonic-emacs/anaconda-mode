@@ -40,19 +40,25 @@ def process_definitions(f):
     @wraps(f)
     def wrapper(script):
 
-        return [{'name': definition.name,
+        json_out = []
+        for definition in f(script):
+            try:
+                signature = definition.full_name
+            except AttributeError:
+                signature = definition.name
+            json_out.append(
+                {'name': definition.name,
                  'type': definition.type,
                  'module-name': definition.module_name,
                  'module-path': definition.module_path,
                  'line': definition.line,
                  'column': definition.column,
-                 'docstring': definition.docstring(),
+                 'docstring': definition.docstring(raw=True),
                  'description': definition.description,
-                 'full-name': definition.full_name}
-                for definition in f(script)]
+                 'full-name': signature})
+        return json_out
 
     return wrapper
-
 
 @script_method
 @process_definitions
