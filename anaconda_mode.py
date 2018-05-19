@@ -21,6 +21,7 @@ from functools import wraps
 from jedi import Script, create_environment
 from service_factory import service_factory
 
+
 script_env = None  # will correspond to a jedi virtualenv, if one is to be used
 
 
@@ -40,16 +41,20 @@ def process_definitions(f):
     @wraps(f)
     def wrapper(script):
 
-        return [{'name': definition.name,
-                 'type': definition.type,
-                 'module-name': definition.module_name,
-                 'module-path': definition.module_path,
-                 'line': definition.line,
-                 'column': definition.column,
-                 'docstring': definition.docstring(),
-                 'description': definition.description,
-                 'full-name': definition.full_name}
-                for definition in f(script)]
+        return [
+            {
+                "name": definition.name,
+                "type": definition.type,
+                "module-name": definition.module_name,
+                "module-path": definition.module_path,
+                "line": definition.line,
+                "column": definition.column,
+                "docstring": definition.docstring(),
+                "description": definition.description,
+                "full-name": getattr(definition, "full_name", definition.name),
+            }
+            for definition in f(script)
+        ]
 
     return wrapper
 
@@ -94,10 +99,10 @@ def eldoc(script):
     if len(signatures) == 1:
         signature = signatures[0]
         return {
-            'name': signature.name,
-            'index': signature.index,
+            "name": signature.name,
+            "index": signature.index,
             # NOTE: Remove 'param ' prefix from each description.
-            'params': [param.description[6:] for param in signature.params]
+            "params": [param.description[6:] for param in signature.params],
         }
 
 
@@ -110,7 +115,8 @@ def main(args):
     if args[1] != "":
         global script_env
         script_env = create_environment(args[1], safe=False)
-    service_factory(app, host, 0, 'anaconda_mode port {port}')
+    service_factory(app, host, 0, "anaconda_mode port {port}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main(sys.argv[1:])

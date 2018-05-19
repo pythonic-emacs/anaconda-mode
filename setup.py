@@ -6,6 +6,7 @@ See https://github.com/proofit404/anaconda-mode for more details.
 
 from setuptools import setup
 
+
 setup(
     name="anaconda_mode",
     version="0.1.10",
