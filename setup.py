@@ -9,7 +9,7 @@ from setuptools import setup
 
 setup(
     name="anaconda_mode",
-    version="0.1.10",
+    version="0.1.11",
     url="https://github.com/proofit404/anaconda-mode",
     description="Code navigation, documentation lookup and " "completion for Python.",
     long_description=__doc__,
