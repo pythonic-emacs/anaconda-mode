@@ -4,7 +4,7 @@
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
-;; Version: 0.1.11
+;; Version: 0.1.12
 ;; Package-Requires: ((emacs "24") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -26,11 +26,11 @@
 
 ;;; Code:
 
-(require 'tramp)
-(require 'url)
-(require 'json)
 (require 'pythonic)
+(require 'tramp)
+(require 'json)
 (require 'dash)
+(require 'url)
 (require 's)
 (require 'f)
 
@@ -93,16 +93,144 @@
 
 ;;; Server.
 
-(defvar anaconda-mode-server-version "0.1.11"
+(defvar anaconda-mode-server-version "0.1.12"
   "Server version needed to run `anaconda-mode'.")
 
 (defvar anaconda-mode-server-command "
-import sys, site
-sys.path, remainder = sys.path[:1], sys.path[1:]
-site.addsitedir('.')
-sys.path.extend(remainder)
-import anaconda_mode
-anaconda_mode.main(sys.argv[-2:])
+from __future__ import print_function
+
+# CLI arguments.
+
+import sys
+
+assert len(sys.argv) > 3, 'CLI arguments: %s' % sys.argv
+
+server_directory = sys.argv[-3]
+server_address = sys.argv[-2]
+virtual_environment = sys.argv[-1]
+
+# Ensure directory.
+
+import os
+
+server_directory = os.path.expanduser(server_directory)
+
+if not os.path.exists(server_directory):
+    os.makedirs(server_directory)
+
+# Installation check.
+
+def instrument_installation():
+    for path in os.listdir(server_directory):
+        path = os.path.join(server_directory, path)
+        if path.endswith('.egg') and os.path.isdir(path) and path not in sys.path:
+            sys.path.insert(0, path)
+
+missing_dependencies = []
+
+instrument_installation()
+
+try:
+    import jedi
+except ImportError:
+    missing_dependencies.append('jedi>=0.12')
+
+try:
+    import service_factory
+except ImportError:
+    missing_dependencies.append('service_factory>=0.1.5')
+
+# Installation.
+
+if missing_dependencies:
+    import site
+    import setuptools.command.easy_install
+    site.addsitedir(server_directory)
+    setuptools.command.easy_install.main([
+        '--install-dir', server_directory,
+        '--site-dirs', server_directory,
+        '--always-copy',
+        '--always-unzip',
+        *missing_dependencies
+    ])
+    instrument_installation()
+
+# Setup server.
+
+import jedi
+import service_factory
+
+assert jedi.__version__, 'Jedi version should be >= 0.12.0, current version: %s' % (
+    jedi.__version__,
+)
+
+if virtual_environment:
+    virtual_environment = jedi.create_environment(virtual_environment, safe=False)
+else:
+    virtual_environment = None
+
+# Define JSON-RPC application.
+
+import functools
+
+def script_method(f):
+    @functools.wraps(f)
+    def wrapper(source, line, column, path):
+        return f(jedi.Script(source, line, column, path, environment=virtual_environment))
+    return wrapper
+
+def process_definitions(f):
+    @functools.wraps(f)
+    def wrapper(script):
+        return [{
+            'name': definition.name,
+            'type': definition.type,
+            'module-name': definition.module_name,
+            'module-path': definition.module_path,
+            'line': definition.line,
+            'column': definition.column,
+            'docstring': definition.docstring(),
+            'description': definition.description,
+            'full-name': getattr(definition, 'full_name', definition.name),
+        } for definition in f(script)]
+    return wrapper
+
+@script_method
+@process_definitions
+def complete(script):
+    return script.completions()
+
+@script_method
+@process_definitions
+def goto_definitions(script):
+    return script.goto_definitions()
+
+@script_method
+@process_definitions
+def goto_assignments(script):
+    return script.goto_assignments()
+
+@script_method
+@process_definitions
+def usages(script):
+    return script.usages()
+
+@script_method
+def eldoc(script):
+    signatures = script.call_signatures()
+    if len(signatures) == 1:
+        signature = signatures[0]
+        return {
+            'name': signature.name,
+            'index': signature.index,
+            'params': [param.description[6:] for param in signature.params],
+        }
+
+# Run.
+
+app = [complete, goto_definitions, goto_assignments, usages, eldoc]
+
+service_factory.service_factory(app, server_address, 0, 'anaconda_mode port {port}')
 " "Run `anaconda-mode' server.")
 
 (defvar anaconda-mode-process-name "anaconda-mode"
@@ -114,65 +242,8 @@ anaconda_mode.main(sys.argv[-2:])
 (defvar anaconda-mode-process nil
   "Currently running `anaconda-mode' process.")
 
-(defvar anaconda-mode-process-fail-hook nil
-  "Hook running when any of `anaconda-mode' fails by some reason.")
-
 (defvar anaconda-mode-port nil
   "Port for `anaconda-mode' connection.")
-
-(defvar anaconda-mode-ensure-directory-command "
-import os, sys
-directory = os.path.expanduser(sys.argv[-1])
-if not os.path.exists(directory):
-    os.makedirs(directory)
-" "Create `anaconda-mode-server-directory' if necessary.")
-
-(defvar anaconda-mode-check-installation-command "
-import sys, os, site
-from pkg_resources import find_distributions
-directory = os.path.expanduser(sys.argv[-1])
-site.addsitedir(directory)
-candidates = [ directory ]
-candidates.extend(map(lambda subdir: os.path.join(directory, subdir),
-                      os.listdir(directory)))
-location = None
-for path_item in candidates:
-    for dist in find_distributions(path_item, only=True):
-        if dist.project_name == 'anaconda-mode':
-            location = path_item
-            break
-    if location:
-        break
-else:
-    # IPython patch sys.exit, so we can't use it.
-    os._exit(1)
-# Check if the detected location was added properly to sys.path.
-# This is required for egg-based installation to work correctly.
-for path_item in sys.path:
-    if os.path.abspath(path_item) == os.path.abspath(location):
-        break
-else:
-    os._exit(1)
-" "Check if `anaconda-mode' server is installed or not.")
-
-(defvar anaconda-mode-install-server-command "
-import os, sys
-from setuptools.command import easy_install
-directory = os.path.expanduser(sys.argv[-2])
-version = sys.argv[-1]
-sys.path.append(directory)
-easy_install.main(['-d', directory, '-S', directory, '-a', '-Z',
-                   'anaconda_mode==' + version])
-" "Install `anaconda_mode' server.")
-
-(defvar anaconda-mode-socat-process-name "anaconda-socat"
-  "Process name for `anaconda-mode' socat companion process.")
-
-(defvar anaconda-mode-socat-process-buffer "*anaconda-socat*"
-  "Buffer name for `anaconda-mode' socat companion processes.")
-
-(defvar anaconda-mode-socat-process nil
-  "Currently running `anaconda-mode' socat companion process.")
 
 (defvar anaconda-mode-definition-commands
   '("complete" "goto_definitions" "goto_assignments" "usages")
@@ -184,9 +255,6 @@ virtual environment.")
 
 (defvar anaconda-mode-response-buffer "*anaconda-response*"
   "Buffer name for error report when `anaconda-mode' fail to read server response.")
-
-(defvar anaconda-mode-response-skip-hook nil
-  "Hook running when `anaconda-mode' decide to skip server response.")
 
 (defvar anaconda-mode-socat-process-name "anaconda-socat"
   "Process name for `anaconda-mode' socat companion process.")
@@ -231,7 +299,7 @@ be bound."
       (and callback
            (anaconda-mode-bound-p)
            (funcall callback))
-    (anaconda-mode-ensure-directory callback)))
+    (anaconda-mode-bootstrap callback)))
 
 (defun anaconda-mode-stop ()
   "Stop `anaconda-mode' server."
@@ -275,73 +343,6 @@ be bound."
         (not (equal (process-get anaconda-mode-process 'server-directory)
                     (anaconda-mode-server-directory))))))
 
-(defun anaconda-mode-ensure-directory (&optional callback)
-  "Ensure if `anaconda-mode-server-directory' exists.
-CALLBACK function will be called when `anaconda-mode-port' will
-be bound."
-  (setq anaconda-mode-process
-        (start-pythonic :process anaconda-mode-process-name
-                        :buffer anaconda-mode-process-buffer
-                        :sentinel (lambda (process event) (anaconda-mode-ensure-directory-sentinel process event callback))
-                        :args (list "-c"
-                                    anaconda-mode-ensure-directory-command
-                                    (anaconda-mode-server-directory)))))
-
-(defun anaconda-mode-ensure-directory-sentinel (process _event &optional callback)
-  "Run `anaconda-mode-check' if `anaconda-mode-server-directory' exists.
-Print error message otherwise.  PROCESS and EVENT are basic sentinel
-parameters.  CALLBACK function will be called when
-`anaconda-mode-port' will be bound."
-  (if (eq 0 (process-exit-status process))
-      (anaconda-mode-check callback)
-    (run-hooks 'anaconda-mode-process-fail-hook)
-    (message "Cannot create %s directory"
-             (anaconda-mode-server-directory))))
-
-(defun anaconda-mode-check (&optional callback)
-  "Check `anaconda-mode' server installation.
-CALLBACK function will be called when `anaconda-mode-port' will
-be bound."
-  (setq anaconda-mode-process
-        (start-pythonic :process anaconda-mode-process-name
-                        :buffer anaconda-mode-process-buffer
-                        :sentinel (lambda (process event) (anaconda-mode-check-sentinel process event callback))
-                        :args (list "-c"
-                                    anaconda-mode-check-installation-command
-                                    (anaconda-mode-server-directory)))))
-
-(defun anaconda-mode-check-sentinel (process _event &optional callback)
-  "Run `anaconda-mode-bootstrap' if server installation check passed.
-Try to install `anaconda-mode' server otherwise.  PROCESS and
-EVENT are basic sentinel parameters.  CALLBACK function will be
-called when `anaconda-mode-port' will be bound."
-  (if (eq 0 (process-exit-status process))
-      (anaconda-mode-bootstrap callback)
-    (anaconda-mode-install callback)))
-
-(defun anaconda-mode-install (&optional callback)
-  "Try to install `anaconda-mode' server.
-CALLBACK function will be called when `anaconda-mode-port' will
-be bound."
-  (setq anaconda-mode-process
-        (start-pythonic :process anaconda-mode-process-name
-                        :buffer anaconda-mode-process-buffer
-                        :sentinel (lambda (process event) (anaconda-mode-install-sentinel process event callback))
-                        :args (list "-c"
-                                    anaconda-mode-install-server-command
-                                    (anaconda-mode-server-directory)
-                                    anaconda-mode-server-version))))
-
-(defun anaconda-mode-install-sentinel (process _event &optional callback)
-  "Run `anaconda-mode-bootstrap' if server installation complete successfully.
-Print error message otherwise.  PROCESS and EVENT are basic sentinel
-parameters.  CALLBACK function will be called when
-`anaconda-mode-port' will be bound."
-  (if (eq 0 (process-exit-status process))
-      (anaconda-mode-bootstrap callback)
-    (run-hooks 'anaconda-mode-process-fail-hook)
-    (message "Cannot install `anaconda-mode' server")))
-
 (defun anaconda-mode-bootstrap (&optional callback)
   "Run `anaconda-mode' server.
 CALLBACK function will be called when `anaconda-mode-port' will
@@ -349,14 +350,12 @@ be bound."
   (setq anaconda-mode-process
         (start-pythonic :process anaconda-mode-process-name
                         :buffer anaconda-mode-process-buffer
-                        :cwd (anaconda-mode-server-directory)
                         :filter (lambda (process output) (anaconda-mode-bootstrap-filter process output callback))
-                        :sentinel 'anaconda-mode-bootstrap-sentinel
                         :query-on-exit nil
                         :args (list "-c"
                                     anaconda-mode-server-command
-                                    (if (pythonic-remote-p)
-                                        "0.0.0.0" "127.0.0.1")
+                                    (anaconda-mode-server-directory)
+                                    (if (pythonic-remote-p) "0.0.0.0" "127.0.0.1")
                                     (or pythonic-environment ""))))
   (process-put anaconda-mode-process 'server-directory (anaconda-mode-server-directory)))
 
@@ -403,13 +402,6 @@ called when `anaconda-mode-port' will be bound."
            (set-process-query-on-exit-flag anaconda-mode-ssh-process nil)))
     (when callback
       (funcall callback))))
-
-(defun anaconda-mode-bootstrap-sentinel (process _event)
-  "Print error message if `anaconda-mode' server exit abnormally.
-PROCESS and EVENT are basic sentinel parameters."
-  (unless (eq 0 (process-exit-status process))
-    (run-hooks 'anaconda-mode-process-fail-hook)
-    (message "Cannot start `anaconda-mode' server")))
 
 
 ;;; Interaction.
@@ -475,7 +467,7 @@ submitted."
                       (or (not (equal anaconda-mode-request-buffer (current-buffer)))
                           (not (equal anaconda-mode-request-point (point)))
                           (not (equal anaconda-mode-request-tick (buffer-chars-modified-tick))))))
-                (run-hook-with-args 'anaconda-mode-response-skip-hook command)
+                nil
               (search-forward-regexp "\r?\n\r?\n" nil t)
               (let* ((json-array-type 'list)
                      (response (condition-case nil
