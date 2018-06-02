@@ -161,9 +161,9 @@ def process_definitions(f):
     return wrapper
 
 @script_method
-@process_definitions
 def complete(script):
-    return script.completions()
+    return [[definition.name, definition.type]
+            for definition in script.completions()]
 
 @script_method
 @process_definitions
@@ -488,8 +488,8 @@ submitted."
 
 (defun anaconda-mode-complete-extract-names (result)
   "Extract completion names from `anaconda-mode' RESULT."
-  (--map (let* ((name (cdr (assoc 'name it)))
-                (type (cdr (assoc 'type it))))
+  (--map (let ((name (elt it 0))
+               (type (elt it 1)))
            (put-text-property 0 1 'type type name)
            name)
          result))
