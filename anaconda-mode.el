@@ -155,7 +155,7 @@ def process_definitions(f):
             'line': definition.line,
             'column': definition.column,
             'docstring': definition.docstring(),
-            'description': definition.description,
+            'source': definition.get_line_code().strip(),
             'full-name': getattr(definition, 'full_name', definition.name),
         } for definition in f(script)]
     return wrapper
@@ -624,7 +624,7 @@ Show ERROR-MESSAGE if result is empty."
   "Return a list of x-reference candidates created from RESULT."
   (--map
    (xref-make
-    (cdr (assoc 'module-name it))
+    (cdr (assoc 'source it))
     (xref-make-file-location (cdr (assoc 'module-path it))
                              (cdr (assoc 'line it))
                              (cdr (assoc 'column it))))
