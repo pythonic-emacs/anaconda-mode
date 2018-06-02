@@ -525,40 +525,21 @@ submitted."
 
 (defun anaconda-mode-documentation-view (result)
   "Show documentation view for rpc RESULT."
-  (anaconda-mode-view result 'anaconda-mode-view-documentation-presenter))
-
-(defun anaconda-mode-view (result presenter)
-  "Show RESULT to user for future selection.
-RESULT must be an RESULT field from json-rpc response.
-PRESENTER is the function used to format buffer content."
   (pop-to-buffer
-   (anaconda-mode-with-view-buffer
-    (funcall presenter result))))
-
-(defmacro anaconda-mode-with-view-buffer (&rest body)
-  "Create view buffer and execute BODY in it."
-  `(let ((buf (get-buffer-create "*Anaconda*")))
+   (let ((buf (get-buffer-create "*Anaconda*")))
      (with-current-buffer buf
-       (setq buffer-read-only nil)
+       (view-mode -1)
        (erase-buffer)
-       ,@body
-       (setq buffer-read-only t)
+       (--map
+        (progn
+          (insert (propertize (cdr (assoc 'module-name it)) 'face 'bold))
+          (insert "\n")
+          (insert (s-trim-right (cdr (assoc 'docstring it))))
+          (insert "\n\n"))
+        result)
+       (view-mode 1)
        (goto-char (point-min))
-       buf)))
-
-(defun anaconda-mode-view-documentation-presenter (result)
-  "Insert documentation from RESULT."
-  (--map
-   (progn
-     (insert (anaconda-mode-view-make-bold (cdr (assoc 'module-name it))))
-     (insert "\n")
-     (insert (s-trim-right (cdr (assoc 'docstring it))))
-     (insert "\n\n"))
-   result))
-
-(defun anaconda-mode-view-make-bold (string)
-  "Make passed STRING look bold."
-  (propertize string 'face 'bold))
+       buf))))
 
 
 ;;; Find definitions.
@@ -621,22 +602,22 @@ PRESENTER is the function used to format buffer content."
   "Find references for thing at point."
   (interactive)
   (anaconda-mode-call "usages"
-   (lambda (result)
-     (anaconda-mode-show-xrefs result nil "No references found"))))
+                      (lambda (result)
+                        (anaconda-mode-show-xrefs result nil "No references found"))))
 
 (defun anaconda-mode-find-references-other-window ()
   "Find references for thing at point."
   (interactive)
   (anaconda-mode-call "usages"
-   (lambda (result)
-     (anaconda-mode-show-xrefs result 'window "No references found"))))
+                      (lambda (result)
+                        (anaconda-mode-show-xrefs result 'window "No references found"))))
 
 (defun anaconda-mode-find-references-other-frame ()
   "Find references for thing at point."
   (interactive)
   (anaconda-mode-call "usages"
-   (lambda (result)
-     (anaconda-mode-show-xrefs result 'frame "No references found"))))
+                      (lambda (result)
+                        (anaconda-mode-show-xrefs result 'frame "No references found"))))
 
 
 ;;; Xref.
