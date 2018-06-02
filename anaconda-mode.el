@@ -166,6 +166,11 @@ def complete(script):
             for definition in script.completions()]
 
 @script_method
+def show_doc(script):
+    return [[definition.module_name, definition.docstring()]
+            for definition in script.goto_definitions()]
+
+@script_method
 @process_definitions
 def goto_definitions(script):
     return script.goto_definitions()
@@ -193,7 +198,7 @@ def eldoc(script):
 
 # Run.
 
-app = [complete, goto_definitions, goto_assignments, usages, eldoc]
+app = [complete, show_doc, goto_definitions, goto_assignments, usages, eldoc]
 
 service_factory.service_factory(app, server_address, 0, 'anaconda_mode port {port}')
 " "Run `anaconda-mode' server.")
@@ -505,7 +510,7 @@ submitted."
 (defun anaconda-mode-show-doc ()
   "Show documentation for context at point."
   (interactive)
-  (anaconda-mode-call "goto_definitions" 'anaconda-mode-show-doc-callback))
+  (anaconda-mode-call "show_doc" 'anaconda-mode-show-doc-callback))
 
 (defun anaconda-mode-show-doc-callback (result)
   "Process view doc RESULT."
@@ -522,9 +527,9 @@ submitted."
        (erase-buffer)
        (--map
         (progn
-          (insert (propertize (cdr (assoc 'module-name it)) 'face 'bold))
+          (insert (propertize (elt it 0) 'face 'bold))
           (insert "\n")
-          (insert (s-trim-right (cdr (assoc 'docstring it))))
+          (insert (s-trim-right (elt it 1)))
           (insert "\n\n"))
         result)
        (view-mode 1)
