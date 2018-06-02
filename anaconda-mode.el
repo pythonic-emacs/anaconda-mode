@@ -147,17 +147,11 @@ def script_method(f):
 def process_definitions(f):
     @functools.wraps(f)
     def wrapper(script):
-        return [{
-            'name': definition.name,
-            'type': definition.type,
-            'module-name': definition.module_name,
-            'module-path': definition.module_path,
-            'line': definition.line,
-            'column': definition.column,
-            'docstring': definition.docstring(),
-            'source': definition.get_line_code().strip(),
-            'full-name': getattr(definition, 'full_name', definition.name),
-        } for definition in f(script)]
+        return [[definition.module_path,
+                 definition.line,
+                 definition.column,
+                 definition.get_line_code().strip()]
+                for definition in f(script)]
     return wrapper
 
 @script_method
@@ -628,10 +622,8 @@ Show ERROR-MESSAGE if result is empty."
   "Return a list of x-reference candidates created from RESULT."
   (--map
    (xref-make
-    (cdr (assoc 'source it))
-    (xref-make-file-location (cdr (assoc 'module-path it))
-                             (cdr (assoc 'line it))
-                             (cdr (assoc 'column it))))
+    (elt it 3)
+    (xref-make-file-location (elt it 0) (elt it 1) (elt it 2)))
    result))
 
 
