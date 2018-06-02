@@ -44,42 +44,6 @@
   :group 'anaconda-mode
   :type 'directory)
 
-(defcustom anaconda-mode-complete-callback
-  'anaconda-mode-complete-callback
-  "Callback function used to display `anaconda-mode-complete' result."
-  :group 'anaconda-mode
-  :type 'function)
-
-(defcustom anaconda-mode-show-doc-callback
-  'anaconda-mode-show-doc-callback
-  "Callback function used to display `anaconda-mode-show-doc' result."
-  :group 'anaconda-mode
-  :type 'function)
-
-(defcustom anaconda-mode-find-definitions-callback
-  'anaconda-mode-find-definitions-callback
-  "Callback function used to display `anaconda-mode-find-definitions' result."
-  :group 'anaconda-mode
-  :type 'function)
-
-(defcustom anaconda-mode-find-assignments-callback
-  'anaconda-mode-find-assignments-callback
-  "Callback function used to display `anaconda-mode-find-assignments' result."
-  :group 'anaconda-mode
-  :type 'function)
-
-(defcustom anaconda-mode-find-references-callback
-  'anaconda-mode-find-references-callback
-  "Callback function used to display `anaconda-mode-find-references' result."
-  :group 'anaconda-mode
-  :type 'function)
-
-(defcustom anaconda-mode-eldoc-callback
-  'anaconda-mode-eldoc-callback
-  "Callback function used to display `anaconda-mode-eldoc-function' result."
-  :group 'anaconda-mode
-  :type 'function)
-
 (defcustom anaconda-mode-eldoc-as-single-line nil
   "If not nil, trim eldoc string to frame width."
   :group 'anaconda-mode
@@ -511,7 +475,7 @@ submitted."
   "Request completion candidates."
   (interactive)
   (unless (python-syntax-comment-or-string-p)
-    (anaconda-mode-call "complete" anaconda-mode-complete-callback)))
+    (anaconda-mode-call "complete" 'anaconda-mode-complete-callback)))
 
 (defun anaconda-mode-complete-callback (result)
   "Start interactive completion on RESULT receiving."
@@ -550,7 +514,7 @@ submitted."
 (defun anaconda-mode-show-doc ()
   "Show documentation for context at point."
   (interactive)
-  (anaconda-mode-call "goto_definitions" anaconda-mode-show-doc-callback))
+  (anaconda-mode-call "goto_definitions" 'anaconda-mode-show-doc-callback))
 
 (defun anaconda-mode-show-doc-callback (result)
   "Process view doc RESULT."
@@ -564,7 +528,7 @@ submitted."
 (defun anaconda-mode-find-definitions ()
   "Find definitions for thing at point."
   (interactive)
-  (anaconda-mode-call "goto_definitions" anaconda-mode-find-definitions-callback))
+  (anaconda-mode-call "goto_definitions" 'anaconda-mode-find-definitions-callback))
 
 (defun anaconda-mode-find-definitions-callback (result)
   "Process find definitions RESULT."
@@ -578,7 +542,7 @@ submitted."
 (defun anaconda-mode-find-assignments ()
   "Find assignments for thing at point."
   (interactive)
-  (anaconda-mode-call "goto_assignments" anaconda-mode-find-assignments-callback))
+  (anaconda-mode-call "goto_assignments" 'anaconda-mode-find-assignments-callback))
 
 (defun anaconda-mode-find-assignments-callback (result)
   "Process find assignments RESULT."
@@ -592,7 +556,7 @@ submitted."
 (defun anaconda-mode-find-references ()
   "Find references for thing at point."
   (interactive)
-  (anaconda-mode-call "usages" anaconda-mode-find-references-callback))
+  (anaconda-mode-call "usages" 'anaconda-mode-find-references-callback))
 
 (defun anaconda-mode-find-references-callback (result)
   "Process find references RESULT."
@@ -605,7 +569,7 @@ submitted."
 
 (defun anaconda-mode-eldoc-function ()
   "Show eldoc for context at point."
-  (anaconda-mode-call "eldoc" anaconda-mode-eldoc-callback)
+  (anaconda-mode-call "eldoc" 'anaconda-mode-eldoc-callback)
   ;; Don't show response buffer name as ElDoc message.
   nil)
 
