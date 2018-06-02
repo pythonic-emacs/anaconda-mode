@@ -83,14 +83,20 @@ backend to get more intelligent UI.
 
 Here is a list of interactive commands available with anaconda-mode
 
-|Keybinding | Description                    |
-|-----------|--------------------------------|
-|C-M-i      | anaconda-mode-complete         |
-|M-.        | anaconda-mode-find-definitions |
-|M-,        | anaconda-mode-find-assignments |
-|M-r        | anaconda-mode-find-references  |
-|M-*        | anaconda-mode-go-back          |
-|M-?        | anaconda-mode-show-doc         |
+|Keybinding  | Description                                 |
+|------------|---------------------------------------------|
+| C-M-i      | anaconda-mode-complete                      |
+| M-.        | anaconda-mode-find-definitions              |
+| C-x 4 .    | anaconda-mode-find-definitions-other-window |
+| C-x 5 .    | anaconda-mode-find-definitions-other-frame  |
+| M-*        | anaconda-mode-find-assignments              |
+| C-x 4 *    | anaconda-mode-find-assignments-other-window |
+| C-x 5 *    | anaconda-mode-find-assignments-other-frame  |
+| M-r        | anaconda-mode-find-references               |
+| C-x 4 r    | anaconda-mode-find-references-other-window  |
+| C-x 5 r    | anaconda-mode-find-references-other-frame   |
+| M-,        | xref-pop-marker-stack                       |
+| M-?        | anaconda-mode-show-doc                      |
 
 If multiple candidates are found for definitions, assignments or
 usages, you'll see an advanced anaconda navigator buffer.

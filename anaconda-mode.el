@@ -571,6 +571,22 @@ PRESENTER is the function used to format buffer content."
    (lambda (result)
      (anaconda-mode-show-xrefs result nil "No definitions found"))))
 
+(defun anaconda-mode-find-definitions-other-window ()
+  "Find definitions for thing at point."
+  (interactive)
+  (anaconda-mode-call
+   "goto_definitions"
+   (lambda (result)
+     (anaconda-mode-show-xrefs result 'window "No definitions found"))))
+
+(defun anaconda-mode-find-definitions-other-frame ()
+  "Find definitions for thing at point."
+  (interactive)
+  (anaconda-mode-call
+   "goto_definitions"
+   (lambda (result)
+     (anaconda-mode-show-xrefs result 'frame "No definitions found"))))
+
 
 ;;; Find assignments.
 
@@ -582,6 +598,22 @@ PRESENTER is the function used to format buffer content."
    (lambda (result)
      (anaconda-mode-show-xrefs result nil "No assignments found"))))
 
+(defun anaconda-mode-find-assignments-other-window ()
+  "Find assignments for thing at point."
+  (interactive)
+  (anaconda-mode-call
+   "goto_assignments"
+   (lambda (result)
+     (anaconda-mode-show-xrefs result 'window "No assignments found"))))
+
+(defun anaconda-mode-find-assignments-other-frame ()
+  "Find assignments for thing at point."
+  (interactive)
+  (anaconda-mode-call
+   "goto_assignments"
+   (lambda (result)
+     (anaconda-mode-show-xrefs result 'frame "No assignments found"))))
+
 
 ;;; Find references.
 
@@ -591,6 +623,20 @@ PRESENTER is the function used to format buffer content."
   (anaconda-mode-call "usages"
    (lambda (result)
      (anaconda-mode-show-xrefs result nil "No references found"))))
+
+(defun anaconda-mode-find-references-other-window ()
+  "Find references for thing at point."
+  (interactive)
+  (anaconda-mode-call "usages"
+   (lambda (result)
+     (anaconda-mode-show-xrefs result 'window "No references found"))))
+
+(defun anaconda-mode-find-references-other-frame ()
+  "Find references for thing at point."
+  (interactive)
+  (anaconda-mode-call "usages"
+   (lambda (result)
+     (anaconda-mode-show-xrefs result 'frame "No references found"))))
 
 
 ;;; Xref.
@@ -662,9 +708,15 @@ Show ERROR-MESSAGE if result is empty."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-M-i") 'anaconda-mode-complete)
     (define-key map (kbd "M-.") 'anaconda-mode-find-definitions)
-    (define-key map (kbd "M-,") 'anaconda-mode-find-assignments)
+    (define-key map (kbd "C-x 4 .") 'anaconda-mode-find-definitions-other-window)
+    (define-key map (kbd "C-x 5 .") 'anaconda-mode-find-definitions-other-frame)
+    (define-key map (kbd "M-*") 'anaconda-mode-find-assignments)
+    (define-key map (kbd "C-x 4 *") 'anaconda-mode-find-assignments-other-window)
+    (define-key map (kbd "C-x 5 *") 'anaconda-mode-find-assignments-other-frame)
     (define-key map (kbd "M-r") 'anaconda-mode-find-references)
-    (define-key map (kbd "M-*") 'xref-pop-marker-stack)
+    (define-key map (kbd "C-x 4 r") 'anaconda-mode-find-references-other-window)
+    (define-key map (kbd "C-x 5 r") 'anaconda-mode-find-references-other-frame)
+    (define-key map (kbd "M-,") 'xref-pop-marker-stack)
     (define-key map (kbd "M-?") 'anaconda-mode-show-doc)
     map)
   "Keymap for `anaconda-mode'.")
