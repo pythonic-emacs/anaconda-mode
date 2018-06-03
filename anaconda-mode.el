@@ -214,14 +214,6 @@ service_factory.service_factory(app, server_address, 0, 'anaconda_mode port {por
 (defvar anaconda-mode-port nil
   "Port for `anaconda-mode' connection.")
 
-(defvar anaconda-mode-definition-commands
-  '("complete" "goto_definitions" "goto_assignments" "usages")
-  "List of `anaconda-mode' rpc commands returning definitions as result.
-
-This is used to prefix `module-path' field with
-`pythonic-tramp-connection' in the case of remote interpreter or
-virtual environment.")
-
 (defvar anaconda-mode-response-buffer "*anaconda-response*"
   "Buffer name for error report when `anaconda-mode' fail to read server response.")
 
@@ -458,15 +450,15 @@ submitted."
                         (apply 'message error-template (delq nil (list error-message error-data))))
                     (with-current-buffer anaconda-mode-request-buffer
                       (let ((result (cdr (assoc 'result response))))
-                        (when (and (pythonic-remote-p)
-                                   (member command anaconda-mode-definition-commands))
-                          (setq result (--map (--map (let ((key (car it))
-                                                           (value (cdr it)))
-                                                       (when (and (eq key 'module-path) value)
-                                                         (setq value (concat (pythonic-tramp-connection) value)))
-                                                       (cons key value))
-                                                     it)
-                                              result)))
+                        (when (pythonic-remote-p)
+                          (if (member command '("goto_definitions" "goto_assignments" "usages"))
+                              (mapc (lambda (x)
+                                      (aset x 0 (concat (pythonic-tramp-connection) (aref x 0))))
+                                    result)
+                            (when (string= command "company_complete")
+                              (mapc (lambda (x)
+                                      (aset x 3 (concat (pythonic-tramp-connection) (aref x 3))))
+                                    result))))
                         ;; Terminate `apply' call with empty list so response
                         ;; will be treated as single argument.
                         (apply callback result nil)))))))
