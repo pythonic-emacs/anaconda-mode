@@ -111,13 +111,11 @@ if missing_dependencies:
     import site
     import setuptools.command.easy_install
     site.addsitedir(server_directory)
-    setuptools.command.easy_install.main([
-        '--install-dir', server_directory,
-        '--site-dirs', server_directory,
-        '--always-copy',
-        '--always-unzip',
-        *missing_dependencies
-    ])
+    cmd = ['--install-dir', server_directory,
+           '--site-dirs', server_directory,
+           '--always-copy','--always-unzip']
+    cmd.extend(missing_dependencies)
+    setuptools.command.easy_install.main(cmd)
     instrument_installation()
 
 # Setup server.
