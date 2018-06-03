@@ -160,6 +160,15 @@ def complete(script):
             for definition in script.completions()]
 
 @script_method
+def company_complete(script):
+    return [[definition.name,
+             definition.type,
+             definition.docstring(),
+             definition.module_path,
+             definition.line]
+            for definition in script.completions()]
+
+@script_method
 def show_doc(script):
     return [[definition.module_name, definition.docstring()]
             for definition in script.goto_definitions()]
@@ -190,7 +199,7 @@ def eldoc(script):
 
 # Run.
 
-app = [complete, show_doc, goto_definitions, goto_assignments, usages, eldoc]
+app = [complete, company_complete, show_doc, goto_definitions, goto_assignments, usages, eldoc]
 
 service_factory.service_factory(app, server_address, 0, 'anaconda_mode port {port}')
 " "Run `anaconda-mode' server.")
