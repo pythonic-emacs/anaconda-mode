@@ -485,8 +485,8 @@ submitted."
 
 (defun anaconda-mode-complete-extract-names (result)
   "Extract completion names from `anaconda-mode' RESULT."
-  (--map (let ((name (elt it 0))
-               (type (elt it 1)))
+  (--map (let ((name (aref it 0))
+               (type (aref it 1)))
            (put-text-property 0 1 'type type name)
            name)
          result))
@@ -519,9 +519,9 @@ submitted."
        (erase-buffer)
        (--map
         (progn
-          (insert (propertize (elt it 0) 'face 'bold))
+          (insert (propertize (aref it 0) 'face 'bold))
           (insert "\n")
-          (insert (s-trim-right (elt it 1)))
+          (insert (s-trim-right (aref it 1)))
           (insert "\n\n"))
         result)
        (view-mode 1)
@@ -620,8 +620,8 @@ Show ERROR-MESSAGE if result is empty."
   "Return a list of x-reference candidates created from RESULT."
   (--map
    (xref-make
-    (elt it 3)
-    (xref-make-file-location (elt it 0) (elt it 1) (elt it 2)))
+    (aref it 3)
+    (xref-make-file-location (aref it 0) (aref it 1) (aref it 2)))
    result))
 
 
@@ -641,9 +641,9 @@ Show ERROR-MESSAGE if result is empty."
   "Format eldoc string from RESULT."
   (when result
     (let ((doc (anaconda-mode-eldoc-format-definition
-                (elt result 0)
-                (or (elt result 1) 0)
-                (elt result 2))))
+                (aref result 0)
+                (or (aref result 1) 0)
+                (aref result 2))))
       (if anaconda-mode-eldoc-as-single-line
           (substring doc 0 (min (frame-width) (length doc)))
         doc))))
