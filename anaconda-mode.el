@@ -184,11 +184,9 @@ def eldoc(script):
     signatures = script.call_signatures()
     if len(signatures) == 1:
         signature = signatures[0]
-        return {
-            'name': signature.name,
-            'index': signature.index,
-            'params': [param.description[6:] for param in signature.params],
-        }
+        return [signature.name,
+                signature.index,
+                [param.description[6:] for param in signature.params]]
 
 # Run.
 
@@ -642,32 +640,18 @@ Show ERROR-MESSAGE if result is empty."
 (defun anaconda-mode-eldoc-format (result)
   "Format eldoc string from RESULT."
   (when result
-    (let* ((name (cdr (assoc 'name result)))
-           (index (or (cdr (assoc 'index result)) 0))
-           (params (cdr (assoc 'params result)))
-           (doc (anaconda-mode-eldoc-format-definition name index params)))
+    (let ((doc (anaconda-mode-eldoc-format-definition
+                (elt result 0)
+                (or (elt result 1) 0)
+                (elt result 2))))
       (if anaconda-mode-eldoc-as-single-line
           (substring doc 0 (min (frame-width) (length doc)))
         doc))))
 
 (defun anaconda-mode-eldoc-format-definition (name index params)
   "Format function definition from NAME, INDEX and PARAMS."
-  (concat
-   (propertize name 'face 'font-lock-function-name-face)
-   "("
-   (anaconda-mode-eldoc-format-params params index)
-   ")"))
-
-(defun anaconda-mode-eldoc-format-params (args index)
-  "Build colorized ARGS string with current arg pointed to INDEX."
-  (->>
-   args
-   (--map-indexed
-    (if (= index it-index)
-        (propertize it 'face 'eldoc-highlight-function-argument)
-      it))
-   (-interpose ", ")
-   (apply 'concat)))
+  (aset params index (propertize (aref params index) 'face 'eldoc-highlight-function-argument))
+  (concat (propertize name 'face 'font-lock-function-name-face) "(" (mapconcat 'identity params ", ") ")"))
 
 
 ;;; Anaconda minor mode.
