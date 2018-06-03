@@ -507,26 +507,26 @@ submitted."
 (defun anaconda-mode-show-doc-callback (result)
   "Process view doc RESULT."
   (if result
-      (anaconda-mode-documentation-view result)
+      (pop-to-buffer
+       (anaconda-mode-documentation-view result))
     (message "No documentation available")))
 
 (defun anaconda-mode-documentation-view (result)
   "Show documentation view for rpc RESULT."
-  (pop-to-buffer
-   (let ((buf (get-buffer-create "*Anaconda*")))
-     (with-current-buffer buf
-       (view-mode -1)
-       (erase-buffer)
-       (--map
-        (progn
-          (insert (propertize (aref it 0) 'face 'bold))
-          (insert "\n")
-          (insert (s-trim-right (aref it 1)))
-          (insert "\n\n"))
-        result)
-       (view-mode 1)
-       (goto-char (point-min))
-       buf))))
+  (let ((buf (get-buffer-create "*Anaconda*")))
+    (with-current-buffer buf
+      (view-mode -1)
+      (erase-buffer)
+      (--map
+       (progn
+         (insert (propertize (aref it 0) 'face 'bold))
+         (insert "\n")
+         (insert (s-trim-right (aref it 1)))
+         (insert "\n\n"))
+       result)
+      (view-mode 1)
+      (goto-char (point-min))
+      buf)))
 
 
 ;;; Find definitions.
