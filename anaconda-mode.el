@@ -300,25 +300,31 @@ be bound."
   "Check if we need to restart `anaconda-mode-server'."
   (when (and (anaconda-mode-running-p)
              (anaconda-mode-bound-p))
-    (or (not (pythonic-proper-environment-p anaconda-mode-process))
-        (not (equal (process-get anaconda-mode-process 'server-directory)
-                    (anaconda-mode-server-directory))))))
+    (not (and (equal (process-get anaconda-mode-process 'interpreter)
+                     python-shell-interpreter)
+              (equal (process-get anaconda-mode-process 'virtualenv)
+                     python-shell-virtualenv-root)
+              (equal (process-get anaconda-mode-process 'connection)
+                     (pythonic-remote-connection))))))
 
 (defun anaconda-mode-bootstrap (&optional callback)
   "Run `anaconda-mode' server.
 CALLBACK function will be called when `anaconda-mode-port' will
 be bound."
   (setq anaconda-mode-process
-        (start-pythonic :process anaconda-mode-process-name
-                        :buffer anaconda-mode-process-buffer
-                        :filter (lambda (process output) (anaconda-mode-bootstrap-filter process output callback))
-                        :query-on-exit nil
-                        :args (list "-c"
-                                    anaconda-mode-server-command
-                                    (anaconda-mode-server-directory)
-                                    (if (pythonic-remote-p) "0.0.0.0" "127.0.0.1")
-                                    (or pythonic-environment ""))))
-  (process-put anaconda-mode-process 'server-directory (anaconda-mode-server-directory)))
+        (pythonic-start-process :process anaconda-mode-process-name
+                                :buffer anaconda-mode-process-buffer
+                                :query-on-exit nil
+                                :filter (lambda (process output)
+                                          (anaconda-mode-bootstrap-filter process output callback))
+                                :args (list "-c"
+                                            anaconda-mode-server-command
+                                            (anaconda-mode-server-directory)
+                                            (if (pythonic-remote-p) "0.0.0.0" "127.0.0.1")
+                                            (or python-shell-virtualenv-root ""))))
+  (process-put anaconda-mode-process 'interpreter python-shell-interpreter)
+  (process-put anaconda-mode-process 'virtualenv python-shell-virtualenv-root)
+  (process-put anaconda-mode-process 'connection (pythonic-remote-connection)))
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.
@@ -399,17 +405,7 @@ number position, column number position and file path."
                (line . ,(line-number-at-pos (point)))
                (column . ,(- (point) (line-beginning-position)))
                (path . ,(when (buffer-file-name)
-                          (if (pythonic-remote-p)
-                              (and
-                               (tramp-tramp-file-p (buffer-file-name))
-                               (equal (tramp-file-name-host
-                                       (tramp-dissect-file-name
-                                        (pythonic-tramp-connection)))
-                                      (tramp-file-name-host
-                                       (tramp-dissect-file-name
-                                        (buffer-file-name))))
-                               (pythonic-file-name (buffer-file-name)))
-                            (buffer-file-name))))))))
+                          (pythonic-local-file-name (buffer-file-name))))))))
 
 (defun anaconda-mode-create-response-handler (command callback)
   "Create server response handler based on COMMAND and CALLBACK function.
@@ -450,15 +446,14 @@ submitted."
                         (apply 'message error-template (delq nil (list error-message error-data))))
                     (with-current-buffer anaconda-mode-request-buffer
                       (let ((result (cdr (assoc 'result response))))
-                        (when (pythonic-remote-p)
-                          (if (member command '("goto_definitions" "goto_assignments" "usages"))
-                              (mapc (lambda (x)
-                                      (aset x 0 (concat (pythonic-tramp-connection) (aref x 0))))
-                                    result)
-                            (when (string= command "company_complete")
-                              (mapc (lambda (x)
-                                      (aset x 3 (concat (pythonic-tramp-connection) (aref x 3))))
-                                    result))))
+                        (if (member command '("goto_definitions" "goto_assignments" "usages"))
+                            (mapc (lambda (x)
+                                    (aset x 0 (pythonic-real-file-name (aref x 0))))
+                                  result)
+                          (when (string= command "company_complete")
+                            (mapc (lambda (x)
+                                    (aset x 3 (pythonic-real-file-name (aref x 3))))
+                                  result)))
                         ;; Terminate `apply' call with empty list so response
                         ;; will be treated as single argument.
                         (apply callback result nil)))))))
