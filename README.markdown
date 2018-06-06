@@ -58,7 +58,7 @@ You can automatically enable `anaconda-mode` in all python buffers
 with following code in your configuration:
 
 ```lisp
-    (add-hook 'python-mode-hook 'anaconda-mode)
+(add-hook 'python-mode-hook 'anaconda-mode)
 ```
 
 #### ElDoc
@@ -68,7 +68,7 @@ you need is to enable `anaconda-eldoc-mode` in addition to the
 previous setup.
 
 ```lisp
-    (add-hook 'python-mode-hook 'anaconda-eldoc-mode)
+(add-hook 'python-mode-hook 'anaconda-eldoc-mode)
 ```
 
 ## Usage
@@ -108,8 +108,8 @@ project dependencies somewhere on your machine, you can add them as
 well.
 
 ```lisp
-    (add-to-list 'python-shell-extra-pythonpaths "/path/to/the/project")
-    (add-to-list 'python-shell-extra-pythonpaths "/path/to/the/dependency")
+(add-to-list 'python-shell-extra-pythonpaths "/path/to/the/project")
+(add-to-list 'python-shell-extra-pythonpaths "/path/to/the/dependency")
 ```
 
 #### Virtual environment
@@ -134,22 +134,20 @@ completion candidates.
 It's possible to use anaconda-mode on a remote server when you connect
 to it using tramp.  Anaconda-mode can search for completion candidates
 and all other stuff on remote server while you're running Emacs
-locally.  First of all open interesting remote file.
+locally.  Just open an interesting remote file.
 
     C-x C-f /ssh:remote_host:project/__init__.py RET
 
 After tramp successfully connects and you see actual buffer content,
-activate the remote virtual environment.
+completion and definitions search should work as usual.  You can even
+use virtual environment from remote host.
 
     M-x pythoninc-activate RET /ssh:remote_host:/home/user/venv RET
 
-Now any anaconda-mode command will use `/home/user/venv/bin/python`
-interpreter running on `remote_host` over ssh.  If you don't use the
-virtual environment remotely then you have an option to specify the
-remote interpreter directly.
+Or specify another remote interpreter
 
 ```lisp
-    (setq python-shell-interpreter "/ssh:remote_host:/usr/bin/python")
+(setq python-shell-interpreter "/usr/bin/python")
 ```
 
 It is important to remember that `remote_host` must be a real host
@@ -168,13 +166,14 @@ public ssh key to the vagrant box.
 
     ssh-copy-id vagrant@localhost -p 2222
 
-Then activate your project environment installed inside vagrant.
-
-    M-x pythonic-activate RET /ssh:vagrant@localhost#2222:/vagrant/polls/venv RET
-
 Now open your project inside the vagrant box.
 
     C-x C-f /ssh:vagrant@localhost#2222:/vagrant/polls/views.py
+
+Optionally you can activate your project environment, if installed
+inside vagrant.
+
+    M-x pythonic-activate RET /ssh:vagrant@localhost#2222:/vagrant/polls/venv RET
 
 #### Docker
 
@@ -194,7 +193,7 @@ After that, you can set Python interpreter to one installed inside
 container
 
 ```lisp
-    (setq python-shell-interpreter "/docker:root@django_web_1:/usr/local/bin/python")
+(setq python-shell-interpreter "/usr/local/bin/python")
 ```
 
 Now you can open some file inside the project running inside a
