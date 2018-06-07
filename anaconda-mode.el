@@ -26,6 +26,7 @@
 
 ;;; Code:
 
+(require 'ansi-color)
 (require 'pythonic)
 (require 'tramp)
 (require 'xref)
@@ -335,40 +336,40 @@ called when `anaconda-mode-port' will be bound."
     (with-current-buffer (process-buffer process)
       (save-excursion
         (goto-char (process-mark process))
-        (insert output)
+        (insert (ansi-color-apply output))
         (set-marker (process-mark process) (point)))))
-  (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
-    (setq anaconda-mode-port (string-to-number (cadr it)))
-    (set-process-filter process nil)
-    (cond ((pythonic-remote-docker-p)
-           (let* ((container-raw-description (with-output-to-string
-                                               (with-current-buffer
-                                                   standard-output
-                                                 (call-process "docker" nil t nil "inspect" (pythonic-remote-host)))))
-                  (container-description (let ((json-array-type 'list))
-                                           (json-read-from-string container-raw-description)))
-                  (container-ip (cdr (assoc 'IPAddress
-                                            (cdadr (assoc 'Networks
-                                                          (cdr (assoc 'NetworkSettings
-                                                                      (car container-description)))))))))
-             (setq anaconda-mode-socat-process
-                   (start-process anaconda-mode-socat-process-name
-                                  anaconda-mode-socat-process-buffer
-                                  "socat"
-                                  (format "TCP4-LISTEN:%d" anaconda-mode-port)
-                                  (format "TCP4:%s:%d" container-ip anaconda-mode-port)))
-             (set-process-query-on-exit-flag anaconda-mode-socat-process nil)))
-          ((pythonic-remote-vagrant-p)
-           (setq anaconda-mode-ssh-process
-                 (start-process anaconda-mode-ssh-process-name
-                                anaconda-mode-ssh-process-buffer
-                                "ssh" "-nNT"
-                                (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
-                                "-p" (number-to-string (pythonic-remote-port))
-                                "-L" (format "%s:%s:%s" anaconda-mode-port (pythonic-remote-host) anaconda-mode-port)))
-           (set-process-query-on-exit-flag anaconda-mode-ssh-process nil)))
-    (when callback
-      (funcall callback))))
+  (unless (anaconda-mode-bound-p)
+    (--when-let (s-match "anaconda_mode port \\([0-9]+\\)" output)
+      (setq anaconda-mode-port (string-to-number (cadr it)))
+      (cond ((pythonic-remote-docker-p)
+             (let* ((container-raw-description (with-output-to-string
+                                                 (with-current-buffer
+                                                     standard-output
+                                                   (call-process "docker" nil t nil "inspect" (pythonic-remote-host)))))
+                    (container-description (let ((json-array-type 'list))
+                                             (json-read-from-string container-raw-description)))
+                    (container-ip (cdr (assoc 'IPAddress
+                                              (cdadr (assoc 'Networks
+                                                            (cdr (assoc 'NetworkSettings
+                                                                        (car container-description)))))))))
+               (setq anaconda-mode-socat-process
+                     (start-process anaconda-mode-socat-process-name
+                                    anaconda-mode-socat-process-buffer
+                                    "socat"
+                                    (format "TCP4-LISTEN:%d" anaconda-mode-port)
+                                    (format "TCP4:%s:%d" container-ip anaconda-mode-port)))
+               (set-process-query-on-exit-flag anaconda-mode-socat-process nil)))
+            ((pythonic-remote-vagrant-p)
+             (setq anaconda-mode-ssh-process
+                   (start-process anaconda-mode-ssh-process-name
+                                  anaconda-mode-ssh-process-buffer
+                                  "ssh" "-nNT"
+                                  (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
+                                  "-p" (number-to-string (pythonic-remote-port))
+                                  "-L" (format "%s:%s:%s" anaconda-mode-port (pythonic-remote-host) anaconda-mode-port)))
+             (set-process-query-on-exit-flag anaconda-mode-ssh-process nil)))
+      (when callback
+        (funcall callback)))))
 
 
 ;;; Interaction.
