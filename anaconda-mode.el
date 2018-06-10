@@ -146,11 +146,16 @@ def script_method(f):
 def process_definitions(f):
     @functools.wraps(f)
     def wrapper(script):
+        definitions = f(script)
+        if len(definitions) == 1 and not definitions[0].module_path:
+            return '%s is defined in %s compiled module' % (
+                definitions[0].name, definitions[0].module_name)
         return [[definition.module_path,
                  definition.line,
                  definition.column,
                  definition.get_line_code().strip()]
-                for definition in f(script)]
+                for definition in definitions
+                if definition.module_path] or None
     return wrapper
 
 @script_method
@@ -447,14 +452,15 @@ submitted."
                         (apply 'message error-template (delq nil (list error-message error-data))))
                     (with-current-buffer anaconda-mode-request-buffer
                       (let ((result (cdr (assoc 'result response))))
-                        (if (member command '("goto_definitions" "goto_assignments" "usages"))
-                            (mapc (lambda (x)
-                                    (aset x 0 (pythonic-real-file-name (aref x 0))))
-                                  result)
-                          (when (string= command "company_complete")
-                            (mapc (lambda (x)
-                                    (aset x 3 (pythonic-real-file-name (aref x 3))))
-                                  result)))
+                        (when (vectorp result)
+                          (if (member command '("goto_definitions" "goto_assignments" "usages"))
+                              (mapc (lambda (x)
+                                      (aset x 0 (pythonic-real-file-name (aref x 0))))
+                                    result)
+                            (when (string= command "company_complete")
+                              (mapc (lambda (x)
+                                      (aset x 3 (pythonic-real-file-name (aref x 3))))
+                                    result))))
                         ;; Terminate `apply' call with empty list so response
                         ;; will be treated as single argument.
                         (apply callback result nil)))))))
@@ -583,23 +589,26 @@ submitted."
 (defun anaconda-mode-find-references ()
   "Find references for thing at point."
   (interactive)
-  (anaconda-mode-call "usages"
-                      (lambda (result)
-                        (anaconda-mode-show-xrefs result nil "No references found"))))
+  (anaconda-mode-call
+   "usages"
+   (lambda (result)
+     (anaconda-mode-show-xrefs result nil "No references found"))))
 
 (defun anaconda-mode-find-references-other-window ()
   "Find references for thing at point."
   (interactive)
-  (anaconda-mode-call "usages"
-                      (lambda (result)
-                        (anaconda-mode-show-xrefs result 'window "No references found"))))
+  (anaconda-mode-call
+   "usages"
+   (lambda (result)
+     (anaconda-mode-show-xrefs result 'window "No references found"))))
 
 (defun anaconda-mode-find-references-other-frame ()
   "Find references for thing at point."
   (interactive)
-  (anaconda-mode-call "usages"
-                      (lambda (result)
-                        (anaconda-mode-show-xrefs result 'frame "No references found"))))
+  (anaconda-mode-call
+   "usages"
+   (lambda (result)
+     (anaconda-mode-show-xrefs result 'frame "No references found"))))
 
 
 ;;; Xref.
@@ -608,7 +617,9 @@ submitted."
   "Show xref from RESULT using DISPLAY-ACTION.
 Show ERROR-MESSAGE if result is empty."
   (if result
-      (xref--show-xrefs (anaconda-mode-make-xrefs result) display-action)
+      (if (stringp result)
+          (message result)
+        (xref--show-xrefs (anaconda-mode-make-xrefs result) display-action))
     (message error-message)))
 
 (defun anaconda-mode-make-xrefs (result)
