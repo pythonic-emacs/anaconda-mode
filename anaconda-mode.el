@@ -452,15 +452,6 @@ submitted."
                         (apply 'message error-template (delq nil (list error-message error-data))))
                     (with-current-buffer anaconda-mode-request-buffer
                       (let ((result (cdr (assoc 'result response))))
-                        (when (vectorp result)
-                          (if (member command '("goto_definitions" "goto_assignments" "usages"))
-                              (mapc (lambda (x)
-                                      (aset x 0 (pythonic-real-file-name (aref x 0))))
-                                    result)
-                            (when (string= command "company_complete")
-                              (mapc (lambda (x)
-                                      (aset x 3 (pythonic-real-file-name (aref x 3))))
-                                    result))))
                         ;; Terminate `apply' call with empty list so response
                         ;; will be treated as single argument.
                         (apply callback result nil)))))))
@@ -627,7 +618,7 @@ Show ERROR-MESSAGE if result is empty."
   (--map
    (xref-make
     (aref it 3)
-    (xref-make-file-location (aref it 0) (aref it 1) (aref it 2)))
+    (xref-make-file-location (pythonic-real-file-name (aref it 0)) (aref it 1) (aref it 2)))
    result))
 
 
