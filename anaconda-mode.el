@@ -310,8 +310,18 @@ be bound."
                      python-shell-interpreter)
               (equal (process-get anaconda-mode-process 'virtualenv)
                      python-shell-virtualenv-root)
-              (equal (process-get anaconda-mode-process 'connection)
-                     (pythonic-remote-connection))))))
+              (equal (process-get anaconda-mode-process 'remote-p)
+                     (pythonic-remote-p))
+              (if (pythonic-local-p)
+                  t
+                (equal (process-get anaconda-mode-process 'remote-method)
+                       (pythonic-remote-method))
+                (equal (process-get anaconda-mode-process 'remote-user)
+                       (pythonic-remote-user))
+                (equal (process-get anaconda-mode-process 'remote-host)
+                       (pythonic-remote-host))
+                (equal (process-get anaconda-mode-process 'remote-port)
+                       (pythonic-remote-port)))))))
 
 (defun anaconda-mode-bootstrap (&optional callback)
   "Run `anaconda-mode' server.
@@ -330,7 +340,12 @@ be bound."
                                             (or python-shell-virtualenv-root ""))))
   (process-put anaconda-mode-process 'interpreter python-shell-interpreter)
   (process-put anaconda-mode-process 'virtualenv python-shell-virtualenv-root)
-  (process-put anaconda-mode-process 'connection (pythonic-remote-connection)))
+  (when (pythonic-remote-p)
+    (process-put anaconda-mode-process 'remote-p t)
+    (process-put anaconda-mode-process 'remote-method (pythonic-remote-method))
+    (process-put anaconda-mode-process 'remote-user (pythonic-remote-user))
+    (process-put anaconda-mode-process 'remote-host (pythonic-remote-host))
+    (process-put anaconda-mode-process 'remote-port (pythonic-remote-port))))
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.
@@ -411,7 +426,7 @@ number position, column number position and file path."
                (line . ,(line-number-at-pos (point)))
                (column . ,(- (point) (line-beginning-position)))
                (path . ,(when (buffer-file-name)
-                          (pythonic-local-file-name (buffer-file-name))))))))
+                          (pythonic-python-readable-file-name (buffer-file-name))))))))
 
 (defun anaconda-mode-create-response-handler (command callback)
   "Create server response handler based on COMMAND and CALLBACK function.
@@ -618,7 +633,7 @@ Show ERROR-MESSAGE if result is empty."
   (--map
    (xref-make
     (aref it 3)
-    (xref-make-file-location (pythonic-real-file-name (aref it 0)) (aref it 1) (aref it 2)))
+    (xref-make-file-location (pythonic-emacs-readable-file-name (aref it 0)) (aref it 1) (aref it 2)))
    result))
 
 
