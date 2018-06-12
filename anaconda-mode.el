@@ -333,11 +333,12 @@ be bound."
                                 :query-on-exit nil
                                 :filter (lambda (process output)
                                           (anaconda-mode-bootstrap-filter process output callback))
-                                :args (list "-c"
-                                            anaconda-mode-server-command
-                                            (anaconda-mode-server-directory)
-                                            (if (pythonic-remote-p) "0.0.0.0" "127.0.0.1")
-                                            (or python-shell-virtualenv-root ""))))
+                                :sentinel (lambda (process event))
+                                :args `("-c"
+                                        ,anaconda-mode-server-command
+                                        ,(anaconda-mode-server-directory)
+                                        ,(if (pythonic-remote-p) "0.0.0.0" "127.0.0.1")
+                                        ,(or python-shell-virtualenv-root ""))))
   (process-put anaconda-mode-process 'interpreter python-shell-interpreter)
   (process-put anaconda-mode-process 'virtualenv python-shell-virtualenv-root)
   (when (pythonic-remote-p)
