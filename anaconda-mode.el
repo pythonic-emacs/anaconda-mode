@@ -333,7 +333,7 @@ be bound."
                                 :query-on-exit nil
                                 :filter (lambda (process output)
                                           (anaconda-mode-bootstrap-filter process output callback))
-                                :sentinel (lambda (process event))
+                                :sentinel (lambda (_process _event))
                                 :args `("-c"
                                         ,anaconda-mode-server-command
                                         ,(anaconda-mode-server-directory)
@@ -429,7 +429,7 @@ number position, column number position and file path."
                (path . ,(when (buffer-file-name)
                           (pythonic-python-readable-file-name (buffer-file-name))))))))
 
-(defun anaconda-mode-create-response-handler (command callback)
+(defun anaconda-mode-create-response-handler (_command callback)
   "Create server response handler based on COMMAND and CALLBACK function.
 COMMAND argument will be used for response skip message.
 Response can be skipped if point was moved sense request was
@@ -525,8 +525,8 @@ submitted."
     (with-current-buffer buf
       (view-mode -1)
       (erase-buffer)
-      (--map
-       (progn
+      (mapc
+       (lambda (it)
          (insert (propertize (aref it 0) 'face 'bold))
          (insert "\n")
          (insert (s-trim-right (aref it 1)))
