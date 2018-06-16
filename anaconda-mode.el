@@ -410,7 +410,7 @@ number position, column number position and file path."
         (url-request-data (anaconda-mode-jsonrpc-request command)))
     (url-retrieve
      (format "http://%s:%s" (anaconda-mode-host) anaconda-mode-port)
-     (anaconda-mode-create-response-handler command callback)
+     (anaconda-mode-create-response-handler callback)
      nil
      t)))
 
@@ -429,11 +429,8 @@ number position, column number position and file path."
                (path . ,(when (buffer-file-name)
                           (pythonic-python-readable-file-name (buffer-file-name))))))))
 
-(defun anaconda-mode-create-response-handler (_command callback)
-  "Create server response handler based on COMMAND and CALLBACK function.
-COMMAND argument will be used for response skip message.
-Response can be skipped if point was moved sense request was
-submitted."
+(defun anaconda-mode-create-response-handler (callback)
+  "Create server response handler based on CALLBACK function."
   (let ((anaconda-mode-request-point (point))
         (anaconda-mode-request-buffer (current-buffer))
         (anaconda-mode-request-window (selected-window))
