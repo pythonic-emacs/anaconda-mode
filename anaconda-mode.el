@@ -250,6 +250,8 @@ service_factory.service_factory(app, server_address, 0, 'anaconda_mode port {por
     "127.0.0.1")
    ((pythonic-remote-p)
     (pythonic-remote-host))
+   ((s-equals-p system-type "darwin")
+    "localhost")
    (t
     "127.0.0.1")))
 
