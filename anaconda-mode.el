@@ -56,6 +56,11 @@
   :group 'anaconda-mode
   :type 'sexp)
 
+(defcustom anaconda-mode-localhost-address "127.0.0.1"
+  "Address used by `anaconda-mode' to resolve localhost."
+  :group 'anaconda-mode
+  :type 'string)
+
 
 ;;; Server.
 
@@ -247,13 +252,11 @@ service_factory.service_factory(app, server_address, 0, 'anaconda_mode port {por
   "Target host with `anaconda-mode' server."
   (cond
    ((pythonic-remote-docker-p)
-    "127.0.0.1")
+    anaconda-mode-localhost-address)
    ((pythonic-remote-p)
     (pythonic-remote-host))
-   ((s-equals-p system-type "darwin")
-    "localhost")
    (t
-    "127.0.0.1")))
+    anaconda-mode-localhost-address)))
 
 (defun anaconda-mode-port ()
   "Port for `anaconda-mode' connection."
@@ -339,7 +342,9 @@ be bound."
                                 :args `("-c"
                                         ,anaconda-mode-server-command
                                         ,(anaconda-mode-server-directory)
-                                        ,(if (pythonic-remote-p) "0.0.0.0" "127.0.0.1")
+                                        ,(if (pythonic-remote-p)
+                                             "0.0.0.0"
+                                           anaconda-mode-localhost-address)
                                         ,(or python-shell-virtualenv-root ""))))
   (process-put anaconda-mode-process 'interpreter python-shell-interpreter)
   (process-put anaconda-mode-process 'virtualenv python-shell-virtualenv-root)

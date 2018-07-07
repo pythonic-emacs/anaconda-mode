@@ -205,6 +205,16 @@ If you try to find the definition of the Django module imported in
 this buffer, `anaconda-mode` will jump to the package installed inside
 this Docker container.
 
+## FAQ
+
+If you see constant response reading error, try to change localhost
+address from default `127.0.0.1` to `localhost`.  This is likely to
+fix problems on Mac OS.
+
+```lisp
+(setq anaconda-mode-localhost-address "localhost")
+```
+
 ## Bug Reports
 
 Please attach `*anaconda-mode*`, `*anaconda-response*` and
