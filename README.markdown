@@ -63,9 +63,10 @@ with following code in your configuration:
 
 #### ElDoc
 
-`anaconda-eldoc-mode` provide document function to `eldoc-mode`.  All
-you need is to enable `anaconda-eldoc-mode` in addition to the
-previous setup.
+`anaconda-eldoc-mode` provide document function to `eldoc-mode` so
+when your point is between the parenthesis of a function call, its
+parameters are shown in the echo area. All You need is to enable
+`anaconda-eldoc-mode` in addition to the previous setup.
 
 ```lisp
 (add-hook 'python-mode-hook 'anaconda-eldoc-mode)
