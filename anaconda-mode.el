@@ -388,7 +388,7 @@ called when `anaconda-mode-port' will be bound."
                                     (format "TCP4-LISTEN:%d" (anaconda-mode-port))
                                     (format "TCP4:%s:%d" container-ip (anaconda-mode-port))))
                (set-process-query-on-exit-flag anaconda-mode-socat-process nil)))
-            ((pythonic-remote-vagrant-p)
+            ((pythonic-remote-ssh-p)
              (setq anaconda-mode-ssh-process
                    (start-process anaconda-mode-ssh-process-name
                                   anaconda-mode-ssh-process-buffer
