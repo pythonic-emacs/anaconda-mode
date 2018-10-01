@@ -334,7 +334,7 @@ CALLBACK function will be called when `anaconda-mode-port' will
 be bound."
   (setq anaconda-mode-process
         (pythonic-start-process :process anaconda-mode-process-name
-                                :buffer anaconda-mode-process-buffer
+                                :buffer (get-buffer-create anaconda-mode-process-buffer)
                                 :query-on-exit nil
                                 :filter (lambda (process output)
                                           (anaconda-mode-bootstrap-filter process output callback))
