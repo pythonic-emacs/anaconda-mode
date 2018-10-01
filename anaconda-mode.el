@@ -315,8 +315,8 @@ be bound."
                      python-shell-interpreter)
               (equal (process-get anaconda-mode-process 'virtualenv)
                      python-shell-virtualenv-root)
-              (equal (not (process-get anaconda-mode-process 'remote-p))
-                     (not (pythonic-remote-p)))
+              (equal (process-get anaconda-mode-process 'remote-p)
+                     (pythonic-remote-p))
               (if (pythonic-local-p)
                   t
                 (equal (process-get anaconda-mode-process 'remote-method)
