@@ -4,7 +4,7 @@
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
-;; Version: 0.1.12
+;; Version: 0.1.13
 ;; Package-Requires: ((emacs "25") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -64,7 +64,7 @@
 
 ;;; Server.
 
-(defvar anaconda-mode-server-version "0.1.12"
+(defvar anaconda-mode-server-version "0.1.13"
   "Server version needed to run `anaconda-mode'.")
 
 (defvar anaconda-mode-server-command "
@@ -104,7 +104,7 @@ instrument_installation()
 try:
     import jedi
 except ImportError:
-    missing_dependencies.append('jedi>=0.12')
+    missing_dependencies.append('jedi>=0.13.0')
 
 try:
     import service_factory
@@ -129,9 +129,7 @@ if missing_dependencies:
 import jedi
 import service_factory
 
-assert jedi.__version__, 'Jedi version should be >= 0.12.0, current version: %s' % (
-    jedi.__version__,
-)
+assert jedi.__version__ >= '0.13.0', 'Jedi version should be >= 0.13.0, current version: %s' % (jedi.__version__,)
 
 if virtual_environment:
     virtual_environment = jedi.create_environment(virtual_environment, safe=False)
