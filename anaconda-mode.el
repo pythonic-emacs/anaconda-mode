@@ -101,10 +101,19 @@ missing_dependencies = []
 
 instrument_installation()
 
+required_jedi_version = '0.13.0'
+jedi_deps_string = 'jedi>=%s' % (required_jedi_version,)
+jedi_needs_reload = False
 try:
     import jedi
 except ImportError:
-    missing_dependencies.append('jedi>=0.13.0')
+    missing_dependencies.append(jedi_deps_string)
+else:
+    # Jedi might be installed globally, and it might not be of the required version
+    # It could happen if, for example, ipython is installed globally
+    if jedi.__version__ < required_jedi_version:
+        jedi_needs_reload = True
+        missing_dependencies.append(jedi_deps_string)
 
 try:
     import service_factory
@@ -126,10 +135,14 @@ if missing_dependencies:
 
 # Setup server.
 
-import jedi
+if jedi_needs_reload:
+    import importlib
+    importlib.reload(jedi)
+else:
+    import jedi
 import service_factory
 
-assert jedi.__version__ >= '0.13.0', 'Jedi version should be >= 0.13.0, current version: %s' % (jedi.__version__,)
+assert jedi.__version__ >= required_jedi_version, 'Jedi version should be >= %s, current version: %s' % (required_jedi_version, jedi.__version__,)
 
 if virtual_environment:
     virtual_environment = jedi.create_environment(virtual_environment, safe=False)
