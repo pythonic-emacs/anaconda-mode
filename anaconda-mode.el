@@ -91,38 +91,29 @@ if not os.path.exists(server_directory):
 
 # Installation check.
 
-def instrument_installation():
-    for path in os.listdir(server_directory):
-        path = os.path.join(server_directory, path)
-        if path.endswith('.egg') and os.path.isdir(path) and path not in sys.path:
-            sys.path.insert(0, path)
+jedi_dep = ('jedi', '0.13.0')
+service_factory_dep = ('service_factory', '0.1.5')
 
 missing_dependencies = []
 
+def instrument_installation():
+    for package in (jedi_dep, service_factory_dep):
+        package_is_installed = False
+        for path in os.listdir(server_directory):
+            path = os.path.join(server_directory, path)
+            if path.endswith('.egg') and os.path.isdir(path):
+                if path not in sys.path:
+                    sys.path.insert(0, path)
+                if package[0] in path:
+                    package_is_installed = True
+        if not package_is_installed:
+            missing_dependencies.append('>='.join(package))
+
 instrument_installation()
-
-required_jedi_version = '0.13.0'
-jedi_deps_string = 'jedi>=%s' % (required_jedi_version,)
-jedi_needs_reload = False
-try:
-    import jedi
-except ImportError:
-    missing_dependencies.append(jedi_deps_string)
-else:
-    # Jedi might be installed globally, and it might not be of the required version
-    # It could happen if, for example, ipython is installed globally
-    if jedi.__version__ < required_jedi_version:
-        jedi_needs_reload = True
-        missing_dependencies.append(jedi_deps_string)
-
-try:
-    import service_factory
-except ImportError:
-    missing_dependencies.append('service_factory>=0.1.5')
 
 # Installation.
 
-if missing_dependencies:
+def install_deps():
     import site
     import setuptools.command.easy_install
     site.addsitedir(server_directory)
@@ -133,16 +124,30 @@ if missing_dependencies:
     setuptools.command.easy_install.main(cmd)
     instrument_installation()
 
+if missing_dependencies:
+    install_deps()
+
+missing_dependencies.clear()
+
+try:
+    import jedi
+except ImportError:
+    missing_dependencies.append('>='.join(jedi_dep))
+
+try:
+    import service_factory
+except ImportError:
+    missing_dependencies.append('>='.join(service_factory_dep))
+
+# Try one more time in case if anaconda installation gets broken somehow
+if missing_dependencies:
+    install_deps()
+    import jedi
+    import service_factory
+
 # Setup server.
 
-if jedi_needs_reload:
-    import importlib
-    importlib.reload(jedi)
-else:
-    import jedi
-import service_factory
-
-assert jedi.__version__ >= required_jedi_version, 'Jedi version should be >= %s, current version: %s' % (required_jedi_version, jedi.__version__,)
+assert jedi.__version__ >= jedi_dep[1], 'Jedi version should be >= %s, current version: %s' % (jedi_dep[1], jedi.__version__,)
 
 if virtual_environment:
     virtual_environment = jedi.create_environment(virtual_environment, safe=False)
