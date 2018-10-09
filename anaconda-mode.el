@@ -127,7 +127,7 @@ def install_deps():
 if missing_dependencies:
     install_deps()
 
-missing_dependencies.clear()
+del missing_dependencies[:]
 
 try:
     import jedi
