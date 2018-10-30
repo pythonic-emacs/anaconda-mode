@@ -535,13 +535,13 @@ number position, column number position and file path."
 
 (defun anaconda-mode-show-doc-callback (result)
   "Process view doc RESULT."
-  (if result
+  (if (> (length result) 0)
       (pop-to-buffer
        (anaconda-mode-documentation-view result))
     (message "No documentation available")))
 
 (defun anaconda-mode-documentation-view (result)
-  "Show documentation view for rpc RESULT."
+  "Show documentation view for rpc RESULT, and return buffer."
   (let ((buf (get-buffer-create "*Anaconda*")))
     (with-current-buffer buf
       (view-mode -1)
@@ -555,6 +555,9 @@ number position, column number position and file path."
        result)
       (view-mode 1)
       (goto-char (point-min))
+      (local-set-key "q" 'quit-window)
+      (when (fboundp 'evil-local-set-key)
+        (evil-local-set-key 'normal "q" 'quit-window))
       buf)))
 
 
