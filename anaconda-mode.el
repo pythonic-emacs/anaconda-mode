@@ -555,9 +555,6 @@ number position, column number position and file path."
        result)
       (view-mode 1)
       (goto-char (point-min))
-      (local-set-key "q" 'quit-window)
-      (when (fboundp 'evil-local-set-key)
-        (evil-local-set-key 'normal "q" 'quit-window))
       buf)))
 
 
