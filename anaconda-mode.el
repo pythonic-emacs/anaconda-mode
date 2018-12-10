@@ -714,7 +714,8 @@ Show ERROR-MESSAGE if result is empty."
 
 \\{anaconda-mode-map}"
   :lighter anaconda-mode-lighter
-  :keymap anaconda-mode-map)
+  :keymap anaconda-mode-map
+  (setq-local url-http-attempt-keepalives nil))
 
 ;;;###autoload
 (define-minor-mode anaconda-eldoc-mode
