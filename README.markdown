@@ -143,7 +143,7 @@ After tramp successfully connects and you see actual buffer content,
 completion and definitions search should work as usual.  You can even
 use virtual environment from remote host.
 
-    M-x pythoninc-activate RET /ssh:remote_host:/home/user/venv RET
+    M-x pythonic-activate RET /ssh:remote_host:/home/user/venv RET
 
 Or specify another remote interpreter
 
