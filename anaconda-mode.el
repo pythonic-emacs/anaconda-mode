@@ -157,11 +157,16 @@ else:
 # Define JSON-RPC application.
 
 import functools
+import threading
 
 def script_method(f):
     @functools.wraps(f)
     def wrapper(source, line, column, path):
-        return f(jedi.Script(source, line, column, path, environment=virtual_environment))
+        timer = threading.Timer(30.0, sys.exit)
+        timer.start()
+        result = f(jedi.Script(source, line, column, path, environment=virtual_environment))
+        timer.cancel()
+        return result
     return wrapper
 
 def process_definitions(f):
