@@ -414,9 +414,11 @@ called when `anaconda-mode-port' will be bound."
                    (start-process anaconda-mode-ssh-process-name
                                   anaconda-mode-ssh-process-buffer
                                   "ssh" "-nNT"
+                                  "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
                                   (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
-                                  "-p" (number-to-string (pythonic-remote-port))
-                                  "-L" (format "%s:%s:%s" (anaconda-mode-port) (pythonic-remote-host) (anaconda-mode-port))))
+                                  "-p" (number-to-string (if (pythonic-remote-port) (pythonic-remote-port) 22))
+                                  (pythonic-remote-host)
+                                  ))
              (set-process-query-on-exit-flag anaconda-mode-ssh-process nil)))
       (when callback
         (funcall callback)))))
@@ -438,7 +440,7 @@ number position, column number position and file path."
   (let ((url-request-method "POST")
         (url-request-data (anaconda-mode-jsonrpc-request command)))
     (url-retrieve
-     (format "http://%s:%s" (anaconda-mode-host) (anaconda-mode-port))
+     (format "http://localhost:%s" (anaconda-mode-port))
      (anaconda-mode-create-response-handler callback)
      nil
      t)))
