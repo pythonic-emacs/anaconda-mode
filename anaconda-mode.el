@@ -377,6 +377,26 @@ be bound."
     (process-put anaconda-mode-process 'remote-host (pythonic-remote-host))
     (process-put anaconda-mode-process 'remote-port (pythonic-remote-port))))
 
+(defun anaconda-jump-proxy-string ()
+  "Create -J option for SSH tunnel."
+  (setq dfn (tramp-dissect-file-name (pythonic-aliased-path default-directory)))
+  (when (tramp-file-name-hop dfn)
+    (setq hop-list (split-string (tramp-file-name-hop dfn) "|"))
+    (delete "" hop-list)
+    (setq result "-J ")
+    (dolist (elt hop-list result)
+      (setq ts (tramp-dissect-file-name (concat "/" elt ":/dummy.file")))
+      (message (format "TS: %s" ts))
+      (setq result (concat result
+                           (format "%s@%s:%s,"
+                                   (tramp-file-name-user ts)
+                                   (tramp-file-name-host ts)
+                                   (if (tramp-file-name-port-or-default ts) (tramp-file-name-port-or-default ts) 22)
+                                   )
+                           )))
+    (substring result 0 -1))
+  )
+
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.
 Connect to the `anaconda-mode' server.  CALLBACK function will be
@@ -410,15 +430,37 @@ called when `anaconda-mode-port' will be bound."
                                     (format "TCP4:%s:%d" container-ip (anaconda-mode-port))))
                (set-process-query-on-exit-flag anaconda-mode-socat-process nil)))
             ((pythonic-remote-ssh-p)
+             (message (format "Pythonic Remote SSH: %s" (pythonic-remote-ssh-p)))
+             (message (format "Pythonic User: %s" (pythonic-remote-user)))
+             (message (format "Pythonic Host: %s" (pythonic-remote-host)))
+             (message (format "Pythonic Port: %s" (pythonic-remote-port)))
+             (message (format "Anaconda Port: %s" (anaconda-mode-port)))
+             (setq jump (anaconda-jump-proxy-string))
+             (message (format "jump proxy: %s" jump))
              (setq anaconda-mode-ssh-process
-                   (start-process anaconda-mode-ssh-process-name
-                                  anaconda-mode-ssh-process-buffer
-                                  "ssh" "-nNT"
-                                  "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
-                                  (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
-                                  "-p" (number-to-string (if (pythonic-remote-port) (pythonic-remote-port) 22))
-                                  (pythonic-remote-host)
-                                  ))
+                   (if jump
+                       (start-process anaconda-mode-ssh-process-name
+                                           anaconda-mode-ssh-process-buffer
+                                           "ssh" jump "-nNT"
+                                           "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
+                                           (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
+                                           "-p" (number-to-string (if (pythonic-remote-port) (pythonic-remote-port) 22))
+                                           (pythonic-remote-host)
+                                           )
+                     (start-process anaconda-mode-ssh-process-name
+                                    anaconda-mode-ssh-process-buffer
+                                    "ssh" "-nNT"
+                                    "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
+                                    (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
+                                    "-p" (number-to-string (if (pythonic-remote-port) (pythonic-remote-port) 22))
+                                    (pythonic-remote-host)
+                                    )))
+             (sleep-for 1)
+             (message (format "2 Pythonic Remote SSH: %s" (pythonic-remote-ssh-p)))
+             (message (format "2 Pythonic User: %s" (pythonic-remote-user)))
+             (message (format "2 Pythonic Host: %s" (pythonic-remote-host)))
+             (message (format "2 Pythonic Port: %s" (pythonic-remote-port)))
+             (message (format "2 Anaconda Port: %s" (anaconda-mode-port)))
              (set-process-query-on-exit-flag anaconda-mode-ssh-process nil)))
       (when callback
         (funcall callback)))))
