@@ -445,7 +445,6 @@ called when `anaconda-mode-port' will be bound."
                                            "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
                                            (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
                                            "-p" (number-to-string (if (pythonic-remote-port) (pythonic-remote-port) 22))
-                                           (pythonic-remote-host)
                                            )
                      (start-process anaconda-mode-ssh-process-name
                                     anaconda-mode-ssh-process-buffer
@@ -453,7 +452,6 @@ called when `anaconda-mode-port' will be bound."
                                     "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
                                     (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
                                     "-p" (number-to-string (if (pythonic-remote-port) (pythonic-remote-port) 22))
-                                    (pythonic-remote-host)
                                     )))
              (sleep-for 1)
              (message (format "2 Pythonic Remote SSH: %s" (pythonic-remote-ssh-p)))
