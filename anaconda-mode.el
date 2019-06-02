@@ -379,22 +379,28 @@ be bound."
 
 (defun anaconda-jump-proxy-string ()
   "Create -J option for SSH tunnel."
-  (setq dfn (tramp-dissect-file-name (pythonic-aliased-path default-directory)))
-  (when (tramp-file-name-hop dfn)
-    (setq hop-list (split-string (tramp-file-name-hop dfn) "|"))
-    (delete "" hop-list)
-    (setq result "-J ")
-    (dolist (elt hop-list result)
-      (setq ts (tramp-dissect-file-name (concat "/" elt ":/dummy.file")))
-      (message (format "TS: %s" ts))
-      (setq result (concat result
-                           (format "%s@%s:%s,"
-                                   (tramp-file-name-user ts)
-                                   (tramp-file-name-host ts)
-                                   (if (tramp-file-name-port-or-default ts) (tramp-file-name-port-or-default ts) 22)
-                                   )
-                           )))
-    (substring result 0 -1))
+  (let ((dfn
+         (tramp-dissect-file-name (pythonic-aliased-path default-directory)))
+        )
+    (when (tramp-file-name-hop dfn)
+      (let ((hop-list (split-string (tramp-file-name-hop dfn) "|"))
+            (result "-J "))
+        (delete "" hop-list) ;; remove empty string after final pipe
+        (dolist (elt hop-list result)
+          (let ((ts (tramp-dissect-file-name (concat "/" elt ":/dummy.file"))))
+            (message (format "TS: %s" ts))
+            (setq result (concat result
+                                 (format "%s@%s:%s,"
+                                         (tramp-file-name-user ts)
+                                         (tramp-file-name-host ts)
+                                         (or (tramp-file-name-port-or-default ts) 22)
+                                         )
+                                 )
+                  ) ;; result
+            )) ;; dolist
+        (substring result 0 -1)) ;; let hop-list
+      ) ;;when
+    ) ;; let dfn
   )
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
@@ -444,16 +450,16 @@ called when `anaconda-mode-port' will be bound."
                                            "ssh" jump "-nNT"
                                            "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
                                            (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
-                                           "-p" (number-to-string (if (pythonic-remote-port) (pythonic-remote-port) 22))
+                                           "-p" (number-to-string (or (pythonic-remote-port) 22))
                                            )
                      (start-process anaconda-mode-ssh-process-name
                                     anaconda-mode-ssh-process-buffer
                                     "ssh" "-nNT"
                                     "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
                                     (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
-                                    "-p" (number-to-string (if (pythonic-remote-port) (pythonic-remote-port) 22))
+                                    "-p" (number-to-string (or (pythonic-remote-port) 22))
                                     )))
-             (sleep-for 1)
+             (sleep-for 2) ;; prevent race condition between tunnel setup and first use
              (message (format "2 Pythonic Remote SSH: %s" (pythonic-remote-ssh-p)))
              (message (format "2 Pythonic User: %s" (pythonic-remote-user)))
              (message (format "2 Pythonic Host: %s" (pythonic-remote-host)))
