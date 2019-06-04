@@ -61,6 +61,11 @@
   :group 'anaconda-mode
   :type 'string)
 
+(defcustom anaconda-mode-tunnel-setup-sleep 2
+  "Time in seconds `anaconda-mode' waits after tunnel creation before first RPC call."
+  :group 'anaconda-mode
+  :type 'integer)
+
 
 ;;; Server.
 
@@ -392,7 +397,7 @@ be bound."
                                  (format "%s@%s:%s,"
                                          (tramp-file-name-user ts)
                                          (tramp-file-name-host ts)
-                                         (or (tramp-file-name-port-or-default ts) 22)))))) ;; dolist
+                                         (or (tramp-file-name-port-or-default ts) 22))))))
         (substring result 0 -1)))))
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
@@ -444,7 +449,8 @@ called when `anaconda-mode-port' will be bound."
                                       "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
                                       (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
                                       "-p" (number-to-string (or (pythonic-remote-port) 22)))))
-               (sleep-for 2) ;; prevent race condition between tunnel setup and first use
+               ;; prevent race condition between tunnel setup and first use
+               (sleep-for anaconda-mode-tunnel-setup-sleep)
                (set-process-query-on-exit-flag anaconda-mode-ssh-process nil))))
       (when callback
         (funcall callback)))))
