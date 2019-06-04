@@ -398,6 +398,7 @@ be bound."
                                          (tramp-file-name-user ts)
                                          (tramp-file-name-host ts)
                                          (or (tramp-file-name-port-or-default ts) 22))))))
+        ;; Remove final comma
         (substring result 0 -1)))))
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
