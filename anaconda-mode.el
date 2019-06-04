@@ -380,27 +380,20 @@ be bound."
 (defun anaconda-jump-proxy-string ()
   "Create -J option string for SSH tunnel."
   (let ((dfn
-         (tramp-dissect-file-name (pythonic-aliased-path default-directory)))
-        )
+         (tramp-dissect-file-name (pythonic-aliased-path default-directory))))
     (when (tramp-file-name-hop dfn)
       (let ((hop-list (split-string (tramp-file-name-hop dfn) "|"))
             (result "-J "))
         (delete "" hop-list) ;; remove empty string after final pipe
         (dolist (elt hop-list result)
+          ;; tramp-dissect-file-name expects a filename so give it dummy.file
           (let ((ts (tramp-dissect-file-name (concat "/" elt ":/dummy.file"))))
             (setq result (concat result
                                  (format "%s@%s:%s,"
                                          (tramp-file-name-user ts)
                                          (tramp-file-name-host ts)
-                                         (or (tramp-file-name-port-or-default ts) 22)
-                                         )
-                                 )
-                  ) ;; result
-            )) ;; dolist
-        (substring result 0 -1)) ;; let hop-list
-      ) ;;when
-    ) ;; let dfn
-  )
+                                         (or (tramp-file-name-port-or-default ts) 22)))))) ;; dolist
+        (substring result 0 -1)))))
 
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.
@@ -444,19 +437,15 @@ called when `anaconda-mode-port' will be bound."
                                         "ssh" jump "-nNT"
                                         "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
                                         (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
-                                        "-p" (number-to-string (or (pythonic-remote-port) 22))
-                                        )
+                                        "-p" (number-to-string (or (pythonic-remote-port) 22)))
                        (start-process anaconda-mode-ssh-process-name
                                       anaconda-mode-ssh-process-buffer
                                       "ssh" "-nNT"
                                       "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
                                       (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
-                                      "-p" (number-to-string (or (pythonic-remote-port) 22))
-                                      )))
+                                      "-p" (number-to-string (or (pythonic-remote-port) 22)))))
                (sleep-for 2) ;; prevent race condition between tunnel setup and first use
-               (set-process-query-on-exit-flag anaconda-mode-ssh-process nil)
-               )
-             ))
+               (set-process-query-on-exit-flag anaconda-mode-ssh-process nil))))
       (when callback
         (funcall callback)))))
 
