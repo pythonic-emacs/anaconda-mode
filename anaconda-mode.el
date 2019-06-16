@@ -61,11 +61,6 @@
   :group 'anaconda-mode
   :type 'string)
 
-(defcustom anaconda-mode-tunnel-setup-sleep 2
-  "Time in seconds `anaconda-mode' waits after tunnel creation before first RPC call."
-  :group 'anaconda-mode
-  :type 'integer)
-
 
 ;;; Server.
 
@@ -382,25 +377,6 @@ be bound."
     (process-put anaconda-mode-process 'remote-host (pythonic-remote-host))
     (process-put anaconda-mode-process 'remote-port (pythonic-remote-port))))
 
-(defun anaconda-jump-proxy-string ()
-  "Create -J option string for SSH tunnel."
-  (let ((dfn
-         (tramp-dissect-file-name (pythonic-aliased-path default-directory))))
-    (when (tramp-file-name-hop dfn)
-      (let ((hop-list (split-string (tramp-file-name-hop dfn) "|"))
-            (result "-J "))
-        (delete "" hop-list) ;; remove empty string after final pipe
-        (dolist (elt hop-list result)
-          ;; tramp-dissect-file-name expects a filename so give it dummy.file
-          (let ((ts (tramp-dissect-file-name (concat "/" elt ":/dummy.file"))))
-            (setq result (concat result
-                                 (format "%s@%s:%s,"
-                                         (tramp-file-name-user ts)
-                                         (tramp-file-name-host ts)
-                                         (or (tramp-file-name-port-or-default ts) 22))))))
-        ;; Remove final comma
-        (substring result 0 -1)))))
-
 (defun anaconda-mode-bootstrap-filter (process output &optional callback)
   "Set `anaconda-mode-port' from PROCESS OUTPUT.
 Connect to the `anaconda-mode' server.  CALLBACK function will be
@@ -434,25 +410,14 @@ called when `anaconda-mode-port' will be bound."
                                     (format "TCP4:%s:%d" container-ip (anaconda-mode-port))))
                (set-process-query-on-exit-flag anaconda-mode-socat-process nil)))
             ((pythonic-remote-ssh-p)
-             (let ((jump (anaconda-jump-proxy-string)))
-               (message (format "Anaconda Jump Proxy: %s" jump))
-               (setq anaconda-mode-ssh-process
-                     (if jump
-                         (start-process anaconda-mode-ssh-process-name
-                                        anaconda-mode-ssh-process-buffer
-                                        "ssh" jump "-nNT"
-                                        "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
-                                        (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
-                                        "-p" (number-to-string (or (pythonic-remote-port) 22)))
-                       (start-process anaconda-mode-ssh-process-name
-                                      anaconda-mode-ssh-process-buffer
-                                      "ssh" "-nNT"
-                                      "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
-                                      (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
-                                      "-p" (number-to-string (or (pythonic-remote-port) 22)))))
-               ;; prevent race condition between tunnel setup and first use
-               (sleep-for anaconda-mode-tunnel-setup-sleep)
-               (set-process-query-on-exit-flag anaconda-mode-ssh-process nil))))
+             (setq anaconda-mode-ssh-process
+                   (start-process anaconda-mode-ssh-process-name
+                                  anaconda-mode-ssh-process-buffer
+                                  "ssh" "-nNT"
+                                  (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
+                                  "-p" (number-to-string (pythonic-remote-port))
+                                  "-L" (format "%s:%s:%s" (anaconda-mode-port) (pythonic-remote-host) (anaconda-mode-port))))
+             (set-process-query-on-exit-flag anaconda-mode-ssh-process nil)))
       (when callback
         (funcall callback)))))
 
@@ -473,7 +438,7 @@ number position, column number position and file path."
   (let ((url-request-method "POST")
         (url-request-data (anaconda-mode-jsonrpc-request command)))
     (url-retrieve
-     (format "http://localhost:%s" (anaconda-mode-port))
+     (format "http://%s:%s" (anaconda-mode-host) (anaconda-mode-port))
      (anaconda-mode-create-response-handler callback)
      nil
      t)))
