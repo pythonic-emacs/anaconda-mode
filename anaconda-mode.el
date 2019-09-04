@@ -72,6 +72,11 @@
   :group 'anaconda-mode
   :type 'string)
 
+(defcustom anaconda-mode-use-posframe-show-doc nil
+  "If the value is not nil, use posframe to show eldoc."
+  :group 'anaconda-mode
+  :type 'boolean)
+
 
 ;;; Server.
 
@@ -561,7 +566,9 @@ number position, column number position and file path."
 (defun anaconda-mode-show-doc-callback (result)
   "Process view doc RESULT."
   (if (> (length result) 0)
-      (anaconda-mode-documentation-posframe-view result)
+      (if anaconda-mode-use-posframe-show-doc
+          (anaconda-mode-documentation-posframe-view result)
+        (pop-to-buffer (anaconda-mode-documentation-view result)))
     (message "No documentation available")))
 
 (defun anaconda-mode-documentation-view (result)
