@@ -62,6 +62,16 @@
   :group 'anaconda-mode
   :type 'string)
 
+(defcustom anaconda-mode-doc-frame-background (face-attribute 'default :background)
+  "Doc frame background color, default color is current theme's background."
+  :group 'anaconda-mode
+  :type 'string)
+
+(defcustom anaconda-mode-doc-frame-foreground (face-attribute 'default :foreground)
+  "Doc frame foreground color, default color is current theme's foreground."
+  :group 'anaconda-mode
+  :type 'string)
+
 
 ;;; Server.
 
@@ -572,7 +582,7 @@ number position, column number position and file path."
       buf)))
 
 (defun anaconda-mode-documentation-posframe-view (result)
-  "Show documentation view in posframe for rpc RESULT, and return buffer."
+  "Show documentation view in posframe for rpc RESULT."
   (let ((buf (get-buffer-create anaconda-mode-doc-frame-name)))
     (with-current-buffer buf
       (erase-buffer)
@@ -588,8 +598,8 @@ number position, column number position and file path."
       (posframe-show anaconda-mode-doc-frame-name
                      :position (point)
                      :internal-border-width 10
-                     :background-color "#994d33"
-                     :foreground-color "#ffffff")
+                     :background-color anaconda-mode-doc-frame-background
+                     :foreground-color anaconda-mode-doc-frame-foreground)
       (add-hook 'post-command-hook 'anaconda-mode-hide-frame)
       (setq anaconda-mode-frame-last-point (point))
       (setq anaconda-mode-frame-last-scroll-offset (window-start)))
@@ -602,8 +612,7 @@ number position, column number position and file path."
       (unless (and
                (equal (point) anaconda-mode-frame-last-point)
                (equal (window-start) anaconda-mode-frame-last-scroll-offset))
-        (posframe-delete anaconda-mode-doc-frame-name)
-        (kill-buffer anaconda-mode-doc-frame-name)))))
+        (posframe-hide anaconda-mode-doc-frame-name)))))
 
 
 ;;; Find definitions.
