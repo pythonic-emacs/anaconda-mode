@@ -652,7 +652,16 @@ Show ERROR-MESSAGE if result is empty."
   (if result
       (if (stringp result)
           (message result)
-        (xref--show-xrefs (anaconda-mode-make-xrefs result) display-action))
+        (let ((xrefs (anaconda-mode-make-xrefs result)))
+          (if (not (cdr xrefs))
+              (progn
+                (xref-push-marker-stack)
+                (xref--pop-to-location (cl-first xrefs)
+                                       (assoc-default 'display-action display-action)))
+            (xref--show-xrefs (if (functionp 'xref--create-fetcher)
+                                  (-const xrefs)
+                                xrefs)
+                              display-action))))
     (message error-message)))
 
 (defun anaconda-mode-make-xrefs (result)
