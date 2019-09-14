@@ -656,8 +656,11 @@ Show ERROR-MESSAGE if result is empty."
           (if (not (cdr xrefs))
               (progn
                 (xref-push-marker-stack)
-                (xref--pop-to-location (cl-first xrefs)
-                                       (assoc-default 'display-action display-action)))
+                (funcall (if (fboundp 'xref-pop-to-location)
+                             'xref-pop-to-location
+                           'xref--pop-to-location)
+                         (cl-first xrefs)
+                         (assoc-default 'display-action display-action)))
             (xref--show-xrefs (if (functionp 'xref--create-fetcher)
                                   (-const xrefs)
                                 xrefs)
