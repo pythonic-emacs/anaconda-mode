@@ -5,7 +5,7 @@
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.13
-;; Package-Requires: ((emacs "25") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2") (posframe "0.1.0"))
+;; Package-Requires: ((emacs "25") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -35,7 +35,6 @@
 (require 'url)
 (require 's)
 (require 'f)
-(require 'posframe)
 
 (defgroup anaconda-mode nil
   "Code navigation, documentation lookup and completion for Python."
@@ -566,7 +565,9 @@ number position, column number position and file path."
 (defun anaconda-mode-show-doc-callback (result)
   "Process view doc RESULT."
   (if (> (length result) 0)
-      (if anaconda-mode-use-posframe-show-doc
+      (if (and anaconda-mode-use-posframe-show-doc
+               (require 'posframe nil 'noerror)
+               (posframe-workable-p))
           (anaconda-mode-documentation-posframe-view result)
         (pop-to-buffer (anaconda-mode-documentation-view result)))
     (message "No documentation available")))
@@ -590,36 +591,32 @@ number position, column number position and file path."
 
 (defun anaconda-mode-documentation-posframe-view (result)
   "Show documentation view in posframe for rpc RESULT."
-  (let ((buf (get-buffer-create anaconda-mode-doc-frame-name)))
-    (with-current-buffer buf
-      (erase-buffer)
-      (mapc
-       (lambda (it)
-         (insert (propertize (aref it 0) 'face 'bold))
-         (insert "\n")
-         (insert (s-trim-left (aref it 1)))
-         (insert "\n\n"))
-       result)
-      buf)
-    (when (posframe-workable-p)
-      (posframe-show anaconda-mode-doc-frame-name
-                     :position (point)
-                     :internal-border-width 10
-                     :background-color anaconda-mode-doc-frame-background
-                     :foreground-color anaconda-mode-doc-frame-foreground)
-      (add-hook 'post-command-hook 'anaconda-mode-hide-frame)
-      (setq anaconda-mode-frame-last-point (point))
-      (setq anaconda-mode-frame-last-scroll-offset (window-start)))
-    ))
+  (with-current-buffer (get-buffer-create anaconda-mode-doc-frame-name)
+    (erase-buffer)
+    (mapc
+     (lambda (it)
+       (insert (propertize (aref it 0) 'face 'bold))
+       (insert "\n")
+       (insert (s-trim-left (aref it 1)))
+       (insert "\n\n"))
+     result))
+  (posframe-show anaconda-mode-doc-frame-name
+                 :position (point)
+                 :internal-border-width 10
+                 :background-color anaconda-mode-doc-frame-background
+                 :foreground-color anaconda-mode-doc-frame-foreground)
+  (add-hook 'post-command-hook 'anaconda-mode-hide-frame)
+  (setq anaconda-mode-frame-last-point (point))
+  (setq anaconda-mode-frame-last-scroll-offset (window-start)))
 
 (defun anaconda-mode-hide-frame ()
   "Hide posframe when window scroll or move point."
   (ignore-errors
     (when (get-buffer anaconda-mode-doc-frame-name)
-      (unless (and
-               (equal (point) anaconda-mode-frame-last-point)
-               (equal (window-start) anaconda-mode-frame-last-scroll-offset))
-        (posframe-hide anaconda-mode-doc-frame-name)))))
+      (unless (and (equal (point) anaconda-mode-frame-last-point)
+                   (equal (window-start) anaconda-mode-frame-last-scroll-offset))
+        (posframe-hide anaconda-mode-doc-frame-name)
+        (remove-hook 'post-command-hook 'anaconda-mode-hide-frame)))))
 
 
 ;;; Find definitions.
