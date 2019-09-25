@@ -1,8 +1,3 @@
-# MAINTAINER WANTED
-
-* https://twitter.com/proofit404/status/1171919301789593601
-* https://www.reddit.com/r/emacs/comments/d34qk7/im_looking_for_maintainers_for_anacondamode/
-
 # <img align="right" src="static/logo.png"> Anaconda mode [![MELPA](https://melpa.org/packages/anaconda-mode-badge.svg)](https://melpa.org/#/anaconda-mode) [![MELPA Stable](https://stable.melpa.org/packages/anaconda-mode-badge.svg)](https://stable.melpa.org/#/anaconda-mode)
 
 Code navigation, documentation lookup and completion for Python.
