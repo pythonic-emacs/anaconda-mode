@@ -577,7 +577,7 @@ number position, column number position and file path."
                (require 'posframe nil 'noerror)
                (posframe-workable-p))
           (anaconda-mode-documentation-posframe-view result)
-        (pop-to-buffer (anaconda-mode-documentation-view result)))
+        (pop-to-buffer (anaconda-mode-documentation-view result) t))
     (message "No documentation available")))
 
 (defun anaconda-mode-documentation-view (result)
