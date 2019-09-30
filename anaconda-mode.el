@@ -32,6 +32,7 @@
 (require 'xref)
 (require 'json)
 (require 'dash)
+(require 'dash-functional)
 (require 'url)
 (require 's)
 (require 'f)
@@ -75,6 +76,13 @@
   "If the value is not nil, use posframe to show eldoc."
   :group 'anaconda-mode
   :type 'boolean)
+
+
+;;; Compatibility
+
+;; Functions from posframe which is an optional dependency
+(declare-function posframe-workable-p "posframe")
+(declare-function posframe-hide "posframe")
 
 
 ;;; Server.
