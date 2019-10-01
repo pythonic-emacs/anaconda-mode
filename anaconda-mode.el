@@ -5,7 +5,7 @@
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.13
-;; Package-Requires: ((emacs "25") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
+;; Package-Requires: ((emacs "25.1") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -36,44 +36,37 @@
 (require 's)
 (require 'f)
 
-(defgroup anaconda-mode nil
+(defgroup anaconda nil
   "Code navigation, documentation lookup and completion for Python."
   :group 'programming)
 
 (defcustom anaconda-mode-installation-directory
-  "~/.emacs.d/anaconda-mode"
+  (locate-user-emacs-file "anaconda-mode")
   "Installation directory for `anaconda-mode' server."
-  :group 'anaconda-mode
   :type 'directory)
 
 (defcustom anaconda-mode-eldoc-as-single-line nil
   "If not nil, trim eldoc string to frame width."
-  :group 'anaconda-mode
   :type 'boolean)
 
 (defcustom anaconda-mode-lighter " Anaconda"
   "Text displayed in the mode line when `anaconda-mode’ is active."
-  :group 'anaconda-mode
   :type 'sexp)
 
 (defcustom anaconda-mode-localhost-address "127.0.0.1"
   "Address used by `anaconda-mode' to resolve localhost."
-  :group 'anaconda-mode
   :type 'string)
 
 (defcustom anaconda-mode-doc-frame-background (face-attribute 'default :background)
   "Doc frame background color, default color is current theme's background."
-  :group 'anaconda-mode
   :type 'string)
 
 (defcustom anaconda-mode-doc-frame-foreground (face-attribute 'default :foreground)
   "Doc frame foreground color, default color is current theme's foreground."
-  :group 'anaconda-mode
   :type 'string)
 
 (defcustom anaconda-mode-use-posframe-show-doc nil
   "If the value is not nil, use posframe to show eldoc."
-  :group 'anaconda-mode
   :type 'boolean)
 
 
@@ -82,6 +75,7 @@
 ;; Functions from posframe which is an optional dependency
 (declare-function posframe-workable-p "posframe")
 (declare-function posframe-hide "posframe")
+(declare-function posframe-show "posframe")
 
 
 ;;; Server.
