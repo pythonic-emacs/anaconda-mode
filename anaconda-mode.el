@@ -717,7 +717,7 @@ Show ERROR-MESSAGE if result is empty."
                              'xref-pop-to-location
                            'xref--pop-to-location)
                          (cl-first xrefs)
-                         (assoc-default 'display-action display-action)))
+                         display-action))
             (xref--show-xrefs (if (functionp 'xref--create-fetcher)
                                   (lambda (&rest _) xrefs)
                                 xrefs)
