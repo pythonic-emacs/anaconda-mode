@@ -101,6 +101,7 @@ virtual_environment = sys.argv[-1]
 import os
 
 server_directory = os.path.expanduser(server_directory)
+virtual_environment = os.path.expanduser(virtual_environment)
 
 if not os.path.exists(server_directory):
     os.makedirs(server_directory)
