@@ -5,7 +5,7 @@
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
 ;; Version: 0.1.13
-;; Package-Requires: ((emacs "25") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
+;; Package-Requires: ((emacs "25.1") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -36,39 +36,52 @@
 (require 's)
 (require 'f)
 
-(defgroup anaconda-mode nil
+(defgroup anaconda nil
   "Code navigation, documentation lookup and completion for Python."
   :group 'programming)
 
 (defcustom anaconda-mode-installation-directory
-  "~/.emacs.d/anaconda-mode"
+  (locate-user-emacs-file "anaconda-mode")
   "Installation directory for `anaconda-mode' server."
-  :group 'anaconda-mode
   :type 'directory)
 
 (defcustom anaconda-mode-eldoc-as-single-line nil
   "If not nil, trim eldoc string to frame width."
-  :group 'anaconda-mode
   :type 'boolean)
 
 (defcustom anaconda-mode-lighter " Anaconda"
   "Text displayed in the mode line when `anaconda-mode’ is active."
-  :group 'anaconda-mode
   :type 'sexp)
 
 (defcustom anaconda-mode-localhost-address "127.0.0.1"
   "Address used by `anaconda-mode' to resolve localhost."
-  :group 'anaconda-mode
   :type 'string)
+
+(defcustom anaconda-mode-doc-frame-background (face-attribute 'default :background)
+  "Doc frame background color, default color is current theme's background."
+  :type 'string)
+
+(defcustom anaconda-mode-doc-frame-foreground (face-attribute 'default :foreground)
+  "Doc frame foreground color, default color is current theme's foreground."
+  :type 'string)
+
+(defcustom anaconda-mode-use-posframe-show-doc nil
+  "If the value is not nil, use posframe to show eldoc."
+  :type 'boolean)
 
 (defcustom anaconda-mode-tunnel-setup-sleep 2
   "Time in seconds `anaconda-mode' waits after tunnel creation before first RPC call."
   :group 'anaconda-mode
   :type 'integer)
 
-
-;;; Server.
+;;; Compatibility
 
+;; Functions from posframe which is an optional dependency
+(declare-function posframe-workable-p "posframe")
+(declare-function posframe-hide "posframe")
+(declare-function posframe-show "posframe")
+
+;;; Server.
 (defvar anaconda-mode-server-version "0.1.13"
   "Server version needed to run `anaconda-mode'.")
 
@@ -90,6 +103,7 @@ virtual_environment = sys.argv[-1]
 import os
 
 server_directory = os.path.expanduser(server_directory)
+virtual_environment = os.path.expanduser(virtual_environment)
 
 if not os.path.exists(server_directory):
     os.makedirs(server_directory)
@@ -268,6 +282,15 @@ service_factory.service_factory(app, server_address, 0, 'anaconda_mode port {por
 
 (defvar anaconda-mode-ssh-process nil
   "Currently running `anaconda-mode' ssh port forward companion process.")
+
+(defvar anaconda-mode-doc-frame-name "*Anaconda Posframe*"
+  "The posframe to show anaconda documentation.")
+
+(defvar anaconda-mode-frame-last-point 0
+  "The last point of anaconda doc view frame, use for hide frame after move point.")
+
+(defvar anaconda-mode-frame-last-scroll-offset 0
+  "The last scroll offset when show doc view frame, use for hide frame after window scroll.")
 
 (defun anaconda-mode-server-directory ()
   "Anaconda mode installation directory."
@@ -576,8 +599,11 @@ number position, column number position and file path."
 (defun anaconda-mode-show-doc-callback (result)
   "Process view doc RESULT."
   (if (> (length result) 0)
-      (pop-to-buffer
-       (anaconda-mode-documentation-view result))
+      (if (and anaconda-mode-use-posframe-show-doc
+               (require 'posframe nil 'noerror)
+               (posframe-workable-p))
+          (anaconda-mode-documentation-posframe-view result)
+        (pop-to-buffer (anaconda-mode-documentation-view result) t))
     (message "No documentation available")))
 
 (defun anaconda-mode-documentation-view (result)
@@ -596,6 +622,35 @@ number position, column number position and file path."
       (view-mode 1)
       (goto-char (point-min))
       buf)))
+
+(defun anaconda-mode-documentation-posframe-view (result)
+  "Show documentation view in posframe for rpc RESULT."
+  (with-current-buffer (get-buffer-create anaconda-mode-doc-frame-name)
+    (erase-buffer)
+    (mapc
+     (lambda (it)
+       (insert (propertize (aref it 0) 'face 'bold))
+       (insert "\n")
+       (insert (s-trim-left (aref it 1)))
+       (insert "\n\n"))
+     result))
+  (posframe-show anaconda-mode-doc-frame-name
+                 :position (point)
+                 :internal-border-width 10
+                 :background-color anaconda-mode-doc-frame-background
+                 :foreground-color anaconda-mode-doc-frame-foreground)
+  (add-hook 'post-command-hook 'anaconda-mode-hide-frame)
+  (setq anaconda-mode-frame-last-point (point))
+  (setq anaconda-mode-frame-last-scroll-offset (window-start)))
+
+(defun anaconda-mode-hide-frame ()
+  "Hide posframe when window scroll or move point."
+  (ignore-errors
+    (when (get-buffer anaconda-mode-doc-frame-name)
+      (unless (and (equal (point) anaconda-mode-frame-last-point)
+                   (equal (window-start) anaconda-mode-frame-last-scroll-offset))
+        (posframe-hide anaconda-mode-doc-frame-name)
+        (remove-hook 'post-command-hook 'anaconda-mode-hide-frame)))))
 
 
 ;;; Find definitions.
@@ -687,7 +742,19 @@ Show ERROR-MESSAGE if result is empty."
   (if result
       (if (stringp result)
           (message result)
-        (xref--show-xrefs (anaconda-mode-make-xrefs result) display-action))
+        (let ((xrefs (anaconda-mode-make-xrefs result)))
+          (if (not (cdr xrefs))
+              (progn
+                (xref-push-marker-stack)
+                (funcall (if (fboundp 'xref-pop-to-location)
+                             'xref-pop-to-location
+                           'xref--pop-to-location)
+                         (cl-first xrefs)
+                         display-action))
+            (xref--show-xrefs (if (functionp 'xref--create-fetcher)
+                                  (lambda (&rest _) xrefs)
+                                xrefs)
+                              display-action))))
     (message error-message)))
 
 (defun anaconda-mode-make-xrefs (result)
