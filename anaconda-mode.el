@@ -496,7 +496,7 @@ number position, column number position and file path."
   (let ((url-request-method "POST")
         (url-request-data (anaconda-mode-jsonrpc-request command)))
     (url-retrieve
-     (format "http://%s:%s" (anaconda-mode-localhost-address) (anaconda-mode-port))
+     (format "http://%s:%s" anaconda-mode-localhost-address (anaconda-mode-port))
      (anaconda-mode-create-response-handler callback)
      nil
      t)))
