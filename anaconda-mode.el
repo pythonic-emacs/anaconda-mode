@@ -548,7 +548,9 @@ number position, column number position and file path."
                       (let* ((error-structure (cdr (assoc 'error response)))
                              (error-message (cdr (assoc 'message error-structure)))
                              (error-data (cdr (assoc 'data error-structure)))
-                             (error-template (if error-data "%s: %s" "%s")))
+                             (error-template (concat (if error-data "%s: %s" "%s")
+                                                     " - see " anaconda-mode-process-buffer
+                                                     " for more information.")))
                         (apply 'message error-template (delq nil (list error-message error-data))))
                     (with-current-buffer anaconda-mode-request-buffer
                       (let ((result (cdr (assoc 'result response))))
