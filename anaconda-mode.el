@@ -74,7 +74,6 @@
   :group 'anaconda-mode
   :type 'integer)
 
-
 ;;; Compatibility
 
 ;; Functions from posframe which is an optional dependency
@@ -82,9 +81,7 @@
 (declare-function posframe-hide "posframe")
 (declare-function posframe-show "posframe")
 
-
 ;;; Server.
-
 (defvar anaconda-mode-server-version "0.1.13"
   "Server version needed to run `anaconda-mode'.")
 
@@ -499,7 +496,7 @@ number position, column number position and file path."
   (let ((url-request-method "POST")
         (url-request-data (anaconda-mode-jsonrpc-request command)))
     (url-retrieve
-     (format "http://localhost:%s" (anaconda-mode-port))
+     (format "http://%s:%s" anaconda-mode-localhost-address (anaconda-mode-port))
      (anaconda-mode-create-response-handler callback)
      nil
      t)))
