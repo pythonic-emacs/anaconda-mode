@@ -71,7 +71,6 @@
 
 (defcustom anaconda-mode-tunnel-setup-sleep 2
   "Time in seconds `anaconda-mode' waits after tunnel creation before first RPC call."
-  :group 'anaconda-mode
   :type 'integer)
 
 ;;; Compatibility
