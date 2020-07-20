@@ -376,12 +376,27 @@ be bound."
                 (equal (process-get anaconda-mode-process 'remote-port)
                        (pythonic-remote-port)))))))
 
+(defun anaconda-mode-get-server-process-cwd ()
+  "Get the working directory for starting the anaconda server process.
+
+The current working directory ends up being on sys.path, which may
+result in conflicts with stdlib modules.
+
+When running python from the local machine, we start the server
+process from `anaconda-mode-installation-directory'.
+This function creates that directory if it doesn't exist yet."
+  (when (pythonic-local-p)
+    (unless (file-directory-p anaconda-mode-installation-directory)
+      (make-directory anaconda-mode-installation-directory t))
+    anaconda-mode-installation-directory))
+
 (defun anaconda-mode-bootstrap (&optional callback)
   "Run `anaconda-mode' server.
 CALLBACK function will be called when `anaconda-mode-port' will
 be bound."
   (setq anaconda-mode-process
         (pythonic-start-process :process anaconda-mode-process-name
+                                :cwd (anaconda-mode-get-server-process-cwd)
                                 :buffer (get-buffer-create anaconda-mode-process-buffer)
                                 :query-on-exit nil
                                 :filter (lambda (process output)
