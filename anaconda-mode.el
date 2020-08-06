@@ -485,7 +485,10 @@ called when `anaconda-mode-port' will be bound."
                                       anaconda-mode-ssh-process-buffer
                                       "ssh" "-nNT"
                                       "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
-                                      (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
+                                      (if (pythonic-remote-user)
+                                          (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
+                                        ;; Asssume remote host is an ssh alias
+                                        (pythonic-remote-host))
                                       "-p" (number-to-string (or (pythonic-remote-port) 22)))))
                ;; prevent race condition between tunnel setup and first use
                (sleep-for anaconda-mode-tunnel-setup-sleep)
