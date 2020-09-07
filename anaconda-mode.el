@@ -73,6 +73,10 @@
   "Time in seconds `anaconda-mode' waits after tunnel creation before first RPC call."
   :type 'integer)
 
+(defcustom anaconda-mode-sync-request-timeout 2
+  "Time in seconds `anaconda-mode' waits for a synchronous response."
+  :type 'integer)
+
 ;;; Compatibility
 
 ;; Functions from posframe which is an optional dependency
@@ -501,9 +505,24 @@ called when `anaconda-mode-port' will be bound."
 
 (defun anaconda-mode-call (command callback)
   "Make remote procedure call for COMMAND.
-Apply CALLBACK to it result."
+Apply CALLBACK to the result asynchronously."
   (anaconda-mode-start
    (lambda () (anaconda-mode-jsonrpc command callback))))
+
+(defun anaconda-mode-call-sync (command callback)
+  "Make remote procedure call for COMMAND.
+Apply CALLBACK to the result synchronously."
+  (let ((start-time (current-time))
+        (result 'pending))
+    (anaconda-mode-call
+     command
+     (lambda (r) (setq result r)))
+    (while (eq result 'pending)
+      (accept-process-output nil 0.01)
+      (when (> (cadr (time-subtract (current-time) start-time))
+               anaconda-mode-sync-request-timeout)
+        (error "%s request timed out" command)))
+    (funcall callback result)))
 
 (defun anaconda-mode-jsonrpc (command callback)
   "Perform JSONRPC call for COMMAND.
@@ -755,6 +774,42 @@ number position, column number position and file path."
 
 ;;; Xref.
 
+(defun anaconda-mode-xref-backend ()
+  "Integrate `anaconda-mode' with xref."
+  'anaconda)
+
+(cl-defmethod xref-backend-definitions ((_backend (eql anaconda)) _identifier)
+  "Find definitions for thing at point."
+  (anaconda-mode-call-sync
+   "goto_definitions"
+   (lambda (result)
+     (if result
+         (if (stringp result)
+             (progn
+               (message result)
+               nil)
+           (anaconda-mode-make-xrefs result))))))
+
+(cl-defmethod xref-backend-references ((_backend (eql anaconda)) _identifier)
+  "Find references for thing at point."
+  (anaconda-mode-call-sync
+   "usages"
+   (lambda (result)
+     (if result
+         (if (stringp result)
+             (progn
+               (message result)
+               nil)
+           (anaconda-mode-make-xrefs result))))))
+
+(cl-defmethod xref-backend-apropos ((_backend (eql anaconda)) _pattern)
+  "Not implemented."
+  nil)
+
+(cl-defmethod xref-backend-identifier-completion-table ((_backend (eql anaconda)))
+  "Not implemented."
+  nil)
+
 (defun anaconda-mode-show-xrefs (result display-action error-message)
   "Show xref from RESULT using DISPLAY-ACTION.
 Show ERROR-MESSAGE if result is empty."
@@ -841,7 +896,10 @@ Show ERROR-MESSAGE if result is empty."
 \\{anaconda-mode-map}"
   :lighter anaconda-mode-lighter
   :keymap anaconda-mode-map
-  (setq-local url-http-attempt-keepalives nil))
+  (setq-local url-http-attempt-keepalives nil)
+  (if anaconda-mode
+      (add-hook 'xref-backend-functions #'anaconda-mode-xref-backend nil t)
+    (remove-hook 'xref-backend-functions #'anaconda-mode-xref-backend t)))
 
 ;;;###autoload
 (define-minor-mode anaconda-eldoc-mode
