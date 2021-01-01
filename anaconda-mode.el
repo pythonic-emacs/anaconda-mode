@@ -4,7 +4,7 @@
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
-;; Version: 0.1.13
+;; Version: 0.1.14
 ;; Package-Requires: ((emacs "25.1") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -85,15 +85,16 @@
 (declare-function posframe-show "posframe")
 
 ;;; Server.
-(defvar anaconda-mode-server-version "0.1.13"
+(defvar anaconda-mode-server-version "0.1.14"
   "Server version needed to run `anaconda-mode'.")
 
 (defvar anaconda-mode-server-command "
 from __future__ import print_function
+import sys
+import os
+from distutils.version import LooseVersion
 
 # CLI arguments.
-
-import sys
 
 assert len(sys.argv) > 3, 'CLI arguments: %s' % sys.argv
 
@@ -103,18 +104,22 @@ virtual_environment = sys.argv[-1]
 
 # Ensure directory.
 
-import os
-
 server_directory = os.path.expanduser(server_directory)
 virtual_environment = os.path.expanduser(virtual_environment)
 
-if not os.path.exists(server_directory):
-    os.makedirs(server_directory)
-
 # Installation check.
 
-jedi_dep = ('jedi', '0.13.0')
-service_factory_dep = ('service_factory', '0.1.5')
+# jedi versions >= 0.18 don't support Python 2
+if sys.version_info[0] < 3:
+    jedi_dep = ('jedi', '0.17.2')
+    server_directory += '-py2'
+else:
+    jedi_dep = ('jedi', '0.18.0')
+    server_directory += '-py3'
+service_factory_dep = ('service_factory', '0.1.6')
+
+if not os.path.exists(server_directory):
+    os.makedirs(server_directory)
 
 missing_dependencies = []
 
@@ -129,7 +134,7 @@ def instrument_installation():
                 if package[0] in path:
                     package_is_installed = True
         if not package_is_installed:
-            missing_dependencies.append('>='.join(package))
+            missing_dependencies.append('=='.join(package))
 
 instrument_installation()
 
@@ -154,7 +159,7 @@ del missing_dependencies[:]
 try:
     import jedi
 except ImportError:
-    missing_dependencies.append('>='.join(jedi_dep))
+    missing_dependencies.append('=='.join(jedi_dep))
 
 try:
     import service_factory
@@ -169,7 +174,7 @@ if missing_dependencies:
 
 # Setup server.
 
-assert jedi.__version__ >= jedi_dep[1], 'Jedi version should be >= %s, current version: %s' % (jedi_dep[1], jedi.__version__,)
+assert LooseVersion(jedi.__version__) >= LooseVersion(jedi_dep[1]), 'Jedi version should be >= %s, current version: %s' % (jedi_dep[1], jedi.__version__)
 
 if virtual_environment:
     virtual_environment = jedi.create_environment(virtual_environment, safe=False)
@@ -186,19 +191,19 @@ def script_method(f):
     def wrapper(source, line, column, path):
         timer = threading.Timer(30.0, sys.exit)
         timer.start()
-        result = f(jedi.Script(source, line, column, path, environment=virtual_environment))
+        result = f(jedi.Script(source, path=path, environment=virtual_environment), line, column)
         timer.cancel()
         return result
     return wrapper
 
 def process_definitions(f):
     @functools.wraps(f)
-    def wrapper(script):
-        definitions = f(script)
+    def wrapper(script, line, column):
+        definitions = f(script, line, column)
         if len(definitions) == 1 and not definitions[0].module_path:
             return '%s is defined in %s compiled module' % (
                 definitions[0].name, definitions[0].module_name)
-        return [[definition.module_path,
+        return [[str(definition.module_path),
                  definition.line,
                  definition.column,
                  definition.get_line_code().strip()]
@@ -207,42 +212,42 @@ def process_definitions(f):
     return wrapper
 
 @script_method
-def complete(script):
+def complete(script, line, column):
     return [[definition.name, definition.type]
-            for definition in script.completions()]
+            for definition in script.complete(line, column)]
 
 @script_method
-def company_complete(script):
+def company_complete(script, line, column):
     return [[definition.name,
              definition.type,
              definition.docstring(),
-             definition.module_path,
+             str(definition.module_path),
              definition.line]
-            for definition in script.completions()]
+            for definition in script.complete(line, column)]
 
 @script_method
-def show_doc(script):
+def show_doc(script, line, column):
     return [[definition.module_name, definition.docstring()]
-            for definition in script.goto_definitions()]
+            for definition in script.infer(line, column)]
 
 @script_method
 @process_definitions
-def goto_definitions(script):
-    return script.goto_definitions()
+def infer(script, line, column):
+    return script.infer(line, column)
 
 @script_method
 @process_definitions
-def goto_assignments(script):
-    return script.goto_assignments()
+def goto(script, line, column):
+    return script.goto(line, column)
 
 @script_method
 @process_definitions
-def usages(script):
-    return script.usages()
+def get_references(script, line, column):
+    return script.get_references(line, column)
 
 @script_method
-def eldoc(script):
-    signatures = script.call_signatures()
+def eldoc(script, line, column):
+    signatures = script.get_signatures(line, column)
     if len(signatures) == 1:
         signature = signatures[0]
         return [signature.name,
@@ -251,10 +256,12 @@ def eldoc(script):
 
 # Run.
 
-app = [complete, company_complete, show_doc, goto_definitions, goto_assignments, usages, eldoc]
+app = [complete, company_complete, show_doc, infer, goto, get_references, eldoc]
 
 service_factory.service_factory(app, server_address, 0, 'anaconda_mode port {port}')
-" "Run `anaconda-mode' server.")
+"
+  "Run `anaconda-mode' server.")
+
 
 (defvar anaconda-mode-process-name "anaconda-mode"
   "Process name for `anaconda-mode' processes.")
@@ -697,7 +704,7 @@ number position, column number position and file path."
   "Find definitions for thing at point."
   (interactive)
   (anaconda-mode-call
-   "goto_definitions"
+   "infer"
    (lambda (result)
      (anaconda-mode-show-xrefs result nil "No definitions found"))))
 
@@ -705,7 +712,7 @@ number position, column number position and file path."
   "Find definitions for thing at point."
   (interactive)
   (anaconda-mode-call
-   "goto_definitions"
+   "infer"
    (lambda (result)
      (anaconda-mode-show-xrefs result 'window "No definitions found"))))
 
@@ -713,7 +720,7 @@ number position, column number position and file path."
   "Find definitions for thing at point."
   (interactive)
   (anaconda-mode-call
-   "goto_definitions"
+   "infer"
    (lambda (result)
      (anaconda-mode-show-xrefs result 'frame "No definitions found"))))
 
@@ -724,7 +731,7 @@ number position, column number position and file path."
   "Find assignments for thing at point."
   (interactive)
   (anaconda-mode-call
-   "goto_assignments"
+   "goto"
    (lambda (result)
      (anaconda-mode-show-xrefs result nil "No assignments found"))))
 
@@ -732,7 +739,7 @@ number position, column number position and file path."
   "Find assignments for thing at point."
   (interactive)
   (anaconda-mode-call
-   "goto_assignments"
+   "goto"
    (lambda (result)
      (anaconda-mode-show-xrefs result 'window "No assignments found"))))
 
@@ -740,7 +747,7 @@ number position, column number position and file path."
   "Find assignments for thing at point."
   (interactive)
   (anaconda-mode-call
-   "goto_assignments"
+   "goto"
    (lambda (result)
      (anaconda-mode-show-xrefs result 'frame "No assignments found"))))
 
@@ -751,7 +758,7 @@ number position, column number position and file path."
   "Find references for thing at point."
   (interactive)
   (anaconda-mode-call
-   "usages"
+   "get_references"
    (lambda (result)
      (anaconda-mode-show-xrefs result nil "No references found"))))
 
@@ -759,7 +766,7 @@ number position, column number position and file path."
   "Find references for thing at point."
   (interactive)
   (anaconda-mode-call
-   "usages"
+   "get_references"
    (lambda (result)
      (anaconda-mode-show-xrefs result 'window "No references found"))))
 
@@ -767,7 +774,7 @@ number position, column number position and file path."
   "Find references for thing at point."
   (interactive)
   (anaconda-mode-call
-   "usages"
+   "get_references"
    (lambda (result)
      (anaconda-mode-show-xrefs result 'frame "No references found"))))
 
@@ -781,7 +788,7 @@ number position, column number position and file path."
 (cl-defmethod xref-backend-definitions ((_backend (eql anaconda)) _identifier)
   "Find definitions for thing at point."
   (anaconda-mode-call-sync
-   "goto_definitions"
+   "infer"
    (lambda (result)
      (if result
          (if (stringp result)
@@ -793,7 +800,7 @@ number position, column number position and file path."
 (cl-defmethod xref-backend-references ((_backend (eql anaconda)) _identifier)
   "Find references for thing at point."
   (anaconda-mode-call-sync
-   "usages"
+   "get_references"
    (lambda (result)
      (if result
          (if (stringp result)
