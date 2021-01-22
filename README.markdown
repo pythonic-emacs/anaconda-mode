@@ -49,7 +49,7 @@ details.
 
 `anaconda-mode` is included in the
 [Spacemacs](https://github.com/syl20bnr/spacemacs) distribution.  You
-can use it as well.  Look at the `python` language layer to see more
+can use it as well.  Look at the [python](https://develop.spacemacs.org/layers/+lang/python/README.html) language layer to see more
 details.
 
 ## Configuration
