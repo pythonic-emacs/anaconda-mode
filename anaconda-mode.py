@@ -19,8 +19,10 @@ virtual_environment = os.path.expanduser(virtual_environment)
 
 # Installation check.
 
+IS_PY2 = sys.version_info[0] == 2
+
 # jedi versions >= 0.18 don't support Python 2
-if sys.version_info[0] < 3:
+if IS_PY2:
     jedi_dep = ('jedi', '0.17.2')
     server_directory += '-py2'
 else:
@@ -50,19 +52,31 @@ instrument_installation()
 
 # Installation.
 
-def install_deps():
+def install_deps_setuptools():
     import site
     import setuptools.command.easy_install
     site.addsitedir(server_directory)
     cmd = ['--install-dir', server_directory,
            '--site-dirs', server_directory,
-           '--always-copy','--always-unzip']
+           '--always-copy', '--always-unzip']
     cmd.extend(missing_dependencies)
     setuptools.command.easy_install.main(cmd)
     instrument_installation()
 
+def install_deps_pip():
+    import site
+    import subprocess
+    site.addsitedir(server_directory)
+    cmd = [sys.executable, '-m', 'pip', 'install', '--target', server_directory]
+    cmd.extend(missing_dependencies)
+    subprocess.check_call(cmd)
+    instrument_installation()
+
 if missing_dependencies:
-    install_deps()
+    if IS_PY2:
+        install_deps_setuptools()
+    else:
+        install_deps_pip()
 
 del missing_dependencies[:]
 
@@ -78,7 +92,10 @@ except ImportError:
 
 # Try one more time in case if anaconda installation gets broken somehow
 if missing_dependencies:
-    install_deps()
+    if IS_PY2:
+        install_deps_setuptools()
+    else:
+        install_deps_pip()
     import jedi
     import service_factory
 
