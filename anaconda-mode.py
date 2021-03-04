@@ -2,6 +2,7 @@
 from __future__ import print_function
 import sys
 import os
+import site
 from distutils.version import LooseVersion
 
 # CLI arguments.
@@ -32,15 +33,25 @@ service_factory_dep = ('service_factory', '0.1.6')
 
 if not os.path.exists(server_directory):
     os.makedirs(server_directory)
+site.addsitedir(server_directory)
 
 missing_dependencies = []
+
+
+def is_package_dir(path):
+    if os.path.isdir(path):
+        if IS_PY2:
+            return path.endswith(".egg")
+        else:
+            return not (path.endswith(".dist-info") or path.endswith(".egg-info"))
+    return False
 
 def instrument_installation():
     for package in (jedi_dep, service_factory_dep):
         package_is_installed = False
         for path in os.listdir(server_directory):
             path = os.path.join(server_directory, path)
-            if path.endswith('.egg') and os.path.isdir(path):
+            if is_package_dir(path):
                 if path not in sys.path:
                     sys.path.insert(0, path)
                 if package[0] in path:
@@ -53,9 +64,7 @@ instrument_installation()
 # Installation.
 
 def install_deps_setuptools():
-    import site
     import setuptools.command.easy_install
-    site.addsitedir(server_directory)
     cmd = ['--install-dir', server_directory,
            '--site-dirs', server_directory,
            '--always-copy', '--always-unzip']
@@ -64,9 +73,7 @@ def install_deps_setuptools():
     instrument_installation()
 
 def install_deps_pip():
-    import site
     import subprocess
-    site.addsitedir(server_directory)
     cmd = [sys.executable, '-m', 'pip', 'install', '--target', server_directory]
     cmd.extend(missing_dependencies)
     subprocess.check_call(cmd)
@@ -186,4 +193,3 @@ def eldoc(script, line, column):
 app = [complete, company_complete, show_doc, infer, goto, get_references, eldoc]
 
 service_factory.service_factory(app, server_address, 0, 'anaconda_mode port {port}')
-
