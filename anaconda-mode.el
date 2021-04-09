@@ -444,7 +444,9 @@ number position, column number position and file path."
                       (let ((result (cdr (assoc 'result response))))
                         ;; Terminate `apply' call with empty list so response
                         ;; will be treated as single argument.
-                        (apply callback result nil)))))))
+                        (condition-case nil
+                               (apply callback result nil)
+                             (quit nil))))))))
           (kill-buffer http-buffer))))))
 
 
