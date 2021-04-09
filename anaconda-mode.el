@@ -405,50 +405,49 @@ number position, column number position and file path."
                           (pythonic-python-readable-file-name (buffer-file-name))))))))
 
 (defun anaconda-mode-create-response-handler (callback)
-    "Create server response handler based on CALLBACK function."
-    (let ((anaconda-mode-request-point (point))
-          (anaconda-mode-request-buffer (current-buffer))
-          (anaconda-mode-request-window (selected-window))
-          (anaconda-mode-request-tick (buffer-chars-modified-tick)))
-      (lambda (status)
-        (let ((http-buffer (current-buffer)))
-          (unwind-protect
-               (if (or (not (equal anaconda-mode-request-window (selected-window)))
-                       (with-current-buffer (window-buffer anaconda-mode-request-window)
-                         (or (not (equal anaconda-mode-request-buffer (current-buffer)))
-                             (not (equal anaconda-mode-request-point (point)))
-                             (not (equal anaconda-mode-request-tick (buffer-chars-modified-tick))))))
-                   nil
-                 (search-forward-regexp "\r?\n\r?\n" nil t)
-                 (let ((response (condition-case nil
-                                     (json-read)
-                                   ((json-readtable-error json-end-of-file end-of-file)
-                                    (let ((response (concat (format "# status: %s\n# point: %s\n" status (point))
-                                                            (buffer-string))))
-                                      (with-current-buffer (get-buffer-create anaconda-mode-response-buffer)
-                                        (erase-buffer)
-                                        (insert response)
-                                        (goto-char (point-min)))
-                                      nil)))))
-                   (if (null response)
-                       (message "Cannot read anaconda-mode server response")
-                     (if (assoc 'error response)
-                         (let* ((error-structure (cdr (assoc 'error response)))
-                                (error-message (cdr (assoc 'message error-structure)))
-                                (error-data (cdr (assoc 'data error-structure)))
-                                (error-template (concat (if error-data "%s: %s" "%s")
-                                                        " - see " anaconda-mode-process-buffer
-                                                        " for more information.")))
-                           (apply 'message error-template (delq nil (list error-message error-data))))
-                       (with-current-buffer anaconda-mode-request-buffer
-                         (let ((result (cdr (assoc 'result response))))
-                           ;; Terminate `apply' call with empty list so response
-                           ;; will be treated as single argument.
-                           (condition-case nil
+  "Create server response handler based on CALLBACK function."
+  (let ((anaconda-mode-request-point (point))
+        (anaconda-mode-request-buffer (current-buffer))
+        (anaconda-mode-request-window (selected-window))
+        (anaconda-mode-request-tick (buffer-chars-modified-tick)))
+    (lambda (status)
+      (let ((http-buffer (current-buffer)))
+        (unwind-protect
+            (if (or (not (equal anaconda-mode-request-window (selected-window)))
+                    (with-current-buffer (window-buffer anaconda-mode-request-window)
+                      (or (not (equal anaconda-mode-request-buffer (current-buffer)))
+                          (not (equal anaconda-mode-request-point (point)))
+                          (not (equal anaconda-mode-request-tick (buffer-chars-modified-tick))))))
+                nil
+              (search-forward-regexp "\r?\n\r?\n" nil t)
+              (let ((response (condition-case nil
+                                  (json-read)
+                                ((json-readtable-error json-end-of-file end-of-file)
+                                 (let ((response (concat (format "# status: %s\n# point: %s\n" status (point))
+                                                         (buffer-string))))
+                                   (with-current-buffer (get-buffer-create anaconda-mode-response-buffer)
+                                     (erase-buffer)
+                                     (insert response)
+                                     (goto-char (point-min)))
+                                   nil)))))
+                (if (null response)
+                    (message "Cannot read anaconda-mode server response")
+                  (if (assoc 'error response)
+                      (let* ((error-structure (cdr (assoc 'error response)))
+                             (error-message (cdr (assoc 'message error-structure)))
+                             (error-data (cdr (assoc 'data error-structure)))
+                             (error-template (concat (if error-data "%s: %s" "%s")
+                                                     " - see " anaconda-mode-process-buffer
+                                                     " for more information.")))
+                        (apply 'message error-template (delq nil (list error-message error-data))))
+                    (with-current-buffer anaconda-mode-request-buffer
+                      (let ((result (cdr (assoc 'result response))))
+                        ;; Terminate `apply' call with empty list so response
+                        ;; will be treated as single argument.
+                        (condition-case nil
                                (apply callback result nil)
-                             ;; avoid freezing on quit
                              (quit nil))))))))
-            (kill-buffer http-buffer))))))
+          (kill-buffer http-buffer))))))
 
 
 ;;; Code completion.
