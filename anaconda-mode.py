@@ -2,7 +2,6 @@
 from __future__ import print_function
 import sys
 import os
-import site
 from distutils.version import LooseVersion
 
 # CLI arguments.
@@ -33,7 +32,7 @@ service_factory_dep = ('service_factory', '0.1.6')
 
 if not os.path.exists(server_directory):
     os.makedirs(server_directory)
-site.addsitedir(server_directory)
+sys.path.insert(1, server_directory)
 
 missing_dependencies = []
 
