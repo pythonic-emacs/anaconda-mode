@@ -26,7 +26,7 @@ if IS_PY2:
     jedi_dep = ('jedi', '0.17.2')
     server_directory += '-py2'
 else:
-    jedi_dep = ('jedi', '0.18.0')
+    jedi_dep = ('jedi', '0.18.1')
     server_directory += '-py3'
 service_factory_dep = ('service_factory', '0.1.6')
 
