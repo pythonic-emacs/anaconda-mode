@@ -337,15 +337,18 @@ called when `anaconda-mode-port' will be bound."
                                         "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
                                         (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
                                         "-p" (number-to-string (or (pythonic-remote-port) 22)))
-                       (start-process anaconda-mode-ssh-process-name
-                                      anaconda-mode-ssh-process-buffer
-                                      "ssh" "-nNT"
-                                      "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
-                                      (if (pythonic-remote-user)
-                                          (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
-                                        ;; Asssume remote host is an ssh alias
-                                        (pythonic-remote-host))
-                                      "-p" (number-to-string (or (pythonic-remote-port) 22)))))
+                       (apply 'start-process
+                              anaconda-mode-ssh-process-name
+                              anaconda-mode-ssh-process-buffer
+                              "ssh" "-nNT"
+                              "-L" (format "%s:localhost:%s" (anaconda-mode-port) (anaconda-mode-port))
+                              (if (pythonic-remote-user)
+                                  (format "%s@%s" (pythonic-remote-user) (pythonic-remote-host))
+                                ;; Asssume remote host is an ssh alias
+                                (pythonic-remote-host))
+                              ;; Pass in port only if it exists (might be included in ssh alias)
+                              (when-let ((port (pythonic-remote-port)))
+                                '("-p" (number-to-string port))))))
                ;; prevent race condition between tunnel setup and first use
                (sleep-for anaconda-mode-tunnel-setup-sleep)
                (set-process-query-on-exit-flag anaconda-mode-ssh-process nil))))
