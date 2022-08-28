@@ -1,4 +1,3 @@
-
 from __future__ import print_function
 import sys
 import os
@@ -71,10 +70,19 @@ def install_deps_setuptools():
     instrument_installation()
 
 def install_deps_pip():
+    import pathlib
+    import shutil
     import subprocess
-    cmd = [sys.executable, '-m', 'pip', 'install', '--target', server_directory]
+    import tempfile
+    import venv
+    temp_dir = pathlib.Path(tempfile.mkdtemp())
+    venv.create(temp_dir, with_pip=True)
+    cmd = [temp_dir / 'bin' / 'pip', 'install', '--target', server_directory]
     cmd.extend(missing_dependencies)
-    subprocess.check_call(cmd)
+    try:
+        subprocess.check_call(cmd)
+    finally:
+        shutil.rmtree(temp_dir)
     instrument_installation()
 
 if missing_dependencies:
