@@ -2,7 +2,6 @@
 from __future__ import print_function
 import sys
 import os
-from distutils.version import LooseVersion
 
 # CLI arguments.
 
@@ -105,9 +104,21 @@ if missing_dependencies:
     import jedi
     import service_factory
 
-# Setup server.
 
-assert LooseVersion(jedi.__version__) >= LooseVersion(jedi_dep[1]), 'Jedi version should be >= %s, current version: %s' % (jedi_dep[1], jedi.__version__)
+# Setup server.
+def jedi_dep_is_satistied():
+    dep = jedi_dep[1].split('.')
+    jed = jedi.__version__.split('.')
+    for (d, j) in zip(dep, jed):
+        if int(d) < int(j):
+            return True
+        elif int(d) > int(j):
+            return False
+    return True
+
+
+assert jedi_dep_is_satistied(), 'Jedi version should be >= %s, current version: %s' % (jedi_dep[1], jedi.__version__)
+
 
 if virtual_environment:
     virtual_environment = jedi.create_environment(virtual_environment, safe=False)
