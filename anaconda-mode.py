@@ -106,7 +106,7 @@ if missing_dependencies:
 
 
 # Setup server.
-def jedi_dep_is_satistied():
+def is_jedi_dep_satistied():
     dep = jedi_dep[1].split('.')
     jed = jedi.__version__.split('.')
     for (d, j) in zip(dep, jed):
@@ -114,10 +114,10 @@ def jedi_dep_is_satistied():
             return True
         elif int(d) > int(j):
             return False
-    return True
+    return (len(dep) <= len(jed))
 
 
-assert jedi_dep_is_satistied(), 'Jedi version should be >= %s, current version: %s' % (jedi_dep[1], jedi.__version__)
+assert is_jedi_dep_satistied(), 'Jedi version should be >= %s, current version: %s' % (jedi_dep[1], jedi.__version__)
 
 
 if virtual_environment:
