@@ -77,6 +77,13 @@
   "Time in seconds `anaconda-mode' waits for a synchronous response."
   :type 'integer)
 
+; create a defcustom that only allows for 'never, 'always, or 'remote
+(defcustom anaconda-mode-disable-rpc 'never
+  "Disable RPC calls to the `anaconda-mode' server when remote."
+  :type '(choice (const :tag "Never" never)
+                 (const :tag "Always" always)
+                 (const :tag "Remote" remote)))
+
 ;;; Compatibility
 
 ;; Functions from posframe which is an optional dependency
@@ -361,8 +368,11 @@ called when `anaconda-mode-port' will be bound."
 (defun anaconda-mode-call (command callback)
   "Make remote procedure call for COMMAND.
 Apply CALLBACK to the result asynchronously."
-  (anaconda-mode-start
-   (lambda () (anaconda-mode-jsonrpc command callback))))
+  (unless (or (eq anaconda-mode-disable-rpc 'always)
+              (and (eq anaconda-mode-disable-rpc 'remote)
+                   (pythonic-remote-p)))
+    (anaconda-mode-start
+     (lambda () (anaconda-mode-jsonrpc command callback)))))
 
 (defun anaconda-mode-call-sync (command callback)
   "Make remote procedure call for COMMAND.
