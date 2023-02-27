@@ -777,13 +777,14 @@ Show ERROR-MESSAGE if result is empty."
 
 (defun turn-on-anaconda-eldoc-mode ()
   "Turn on `anaconda-eldoc-mode'."
-  (make-local-variable 'eldoc-documentation-function)
-  (setq-local eldoc-documentation-function 'anaconda-mode-eldoc-function)
+  (add-hook 'eldoc-documentation-functions
+            'anaconda-mode-eldoc-function nil 't)
   (eldoc-mode +1))
 
 (defun turn-off-anaconda-eldoc-mode ()
   "Turn off `anaconda-eldoc-mode'."
-  (kill-local-variable 'eldoc-documentation-function)
+  (remove-hook 'eldoc-documentation-functions
+               'anaconda-mode-eldoc-function 't)
   (eldoc-mode -1))
 
 (provide 'anaconda-mode)
