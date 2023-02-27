@@ -709,15 +709,14 @@ Show ERROR-MESSAGE if result is empty."
 
 ;;; Eldoc.
 
-(defun anaconda-mode-eldoc-function ()
+(defun anaconda-mode-eldoc-function (callback &rest _ignored)
   "Show eldoc for context at point."
-  (anaconda-mode-call "eldoc" 'anaconda-mode-eldoc-callback)
+  (anaconda-mode-call
+   "eldoc"
+   (lambda (x)
+     (funcall callback (anaconda-mode-eldoc-format x))))
   ;; Don't show response buffer name as ElDoc message.
   nil)
-
-(defun anaconda-mode-eldoc-callback (result)
-  "Display eldoc from server RESULT."
-  (eldoc-message (anaconda-mode-eldoc-format result)))
 
 (defun anaconda-mode-eldoc-format (result)
   "Format eldoc string from RESULT."
