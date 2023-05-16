@@ -28,6 +28,7 @@
 
 (require 'ansi-color)
 (require 'pythonic)
+(require 'cl-lib)
 (require 'tramp)
 (require 'xref)
 (require 'json)
@@ -721,12 +722,13 @@ Show ERROR-MESSAGE if result is empty."
 (defun anaconda-mode-eldoc-format (result)
   "Format eldoc string from RESULT."
   (when result
-    (let ((doc (seq-map (lambda (s)
-			  (anaconda-mode-eldoc-format-definition
-			   (aref s 0)
-			   (aref s 1)
-			   (aref s 2)))
-			result)))
+    (let ((doc (cl-map 'list
+		       (lambda (s)
+			 (anaconda-mode-eldoc-format-definition
+			  (aref s 0)
+			  (aref s 1)
+			  (aref s 2)))
+		       result)))
       (if anaconda-mode-eldoc-as-single-line
 	  (let ((d (mapconcat #'identity doc ", ")))
             (substring d 0 (min (frame-width) (length d))))
