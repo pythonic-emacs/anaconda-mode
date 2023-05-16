@@ -192,11 +192,11 @@ def get_references(script, line, column):
 @script_method
 def eldoc(script, line, column):
     signatures = script.get_signatures(line, column)
-    if len(signatures) == 1:
-        signature = signatures[0]
-        return [signature.name,
-                signature.index,
-                [param.description[6:] for param in signature.params]]
+    if len(signatures) >= 1:
+        return [(s.name,
+                 s.index,
+                 [param.description[6:] for param in s.params])
+                for s in signatures]
 
 # Run.
 

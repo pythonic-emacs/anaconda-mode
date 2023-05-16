@@ -721,13 +721,16 @@ Show ERROR-MESSAGE if result is empty."
 (defun anaconda-mode-eldoc-format (result)
   "Format eldoc string from RESULT."
   (when result
-    (let ((doc (anaconda-mode-eldoc-format-definition
-                (aref result 0)
-                (aref result 1)
-                (aref result 2))))
+    (let ((doc (seq-map (lambda (s)
+			  (anaconda-mode-eldoc-format-definition
+			   (aref s 0)
+			   (aref s 1)
+			   (aref s 2)))
+			result)))
       (if anaconda-mode-eldoc-as-single-line
-          (substring doc 0 (min (frame-width) (length doc)))
-        doc))))
+	  (let ((d (mapconcat #'identity doc ", ")))
+            (substring d 0 (min (frame-width) (length d))))
+        (mapconcat #'identity doc "\n")))))
 
 (defun anaconda-mode-eldoc-format-definition (name index params)
   "Format function definition from NAME, INDEX and PARAMS."
