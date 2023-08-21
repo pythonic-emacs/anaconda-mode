@@ -3,6 +3,8 @@
 *.pyc
 *~
 .cask/
+.eask/
+/dist
 .cache/
 .coverage
 .tox/
