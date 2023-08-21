@@ -6,3 +6,9 @@ install:
 
 update:
 	cask update
+
+ci:
+	eask clean all
+	eask package
+	eask install
+	eask compile
