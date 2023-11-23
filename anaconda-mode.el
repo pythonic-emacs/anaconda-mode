@@ -4,7 +4,7 @@
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; URL: https://github.com/proofit404/anaconda-mode
-;; Version: 0.1.15
+;; Version: 0.1.16
 ;; Package-Requires: ((emacs "25.1") (pythonic "0.1.0") (dash "2.6.0") (s "1.9") (f "0.16.2"))
 ;; Keywords: convenience anaconda
 
@@ -94,7 +94,7 @@
 (declare-function posframe-show "posframe")
 
 ;;; Server.
-(defvar anaconda-mode-server-version "0.1.15"
+(defvar anaconda-mode-server-version "0.1.16"
   "Server version needed to run `anaconda-mode'.")
 
 (defvar anaconda-mode-process-name "anaconda-mode"
