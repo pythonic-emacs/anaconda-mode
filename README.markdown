@@ -22,7 +22,7 @@ Anaconda mode provides the following features
 
 ## Supported Python Versions
 
-2.7, 3.4 - 3.12
+2.7, 3.4 - 3.13
 
 ## Installation
 
