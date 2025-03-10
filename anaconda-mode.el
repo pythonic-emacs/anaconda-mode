@@ -784,14 +784,14 @@ Show ERROR-MESSAGE if result is empty."
 (defun turn-on-anaconda-eldoc-mode ()
   "Turn on `anaconda-eldoc-mode'."
   (add-hook 'eldoc-documentation-functions
-            'anaconda-mode-eldoc-function nil 't)
-  (eldoc-mode +1))
+            #'anaconda-mode-eldoc-function nil 't)
+  (unless (bound-and-true-p eldoc-mode)
+    (eldoc-mode +1)))
 
 (defun turn-off-anaconda-eldoc-mode ()
   "Turn off `anaconda-eldoc-mode'."
   (remove-hook 'eldoc-documentation-functions
-               'anaconda-mode-eldoc-function 't)
-  (eldoc-mode -1))
+               #'anaconda-mode-eldoc-function 't))
 
 (provide 'anaconda-mode)
 
