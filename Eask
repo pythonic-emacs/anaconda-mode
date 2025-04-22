@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "anaconda-mode"
          "0.1.15"
          "Code navigation, documentation lookup and completion for Python")
