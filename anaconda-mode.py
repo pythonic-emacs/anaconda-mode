@@ -77,7 +77,8 @@ def install_deps_pip():
     import venv
     temp_dir = pathlib.Path(tempfile.mkdtemp())
     venv.create(temp_dir, with_pip=True)
-    cmd = [temp_dir / 'bin' / 'pip', 'install', '--target', server_directory]
+    binname = 'Scripts' if sys.platform == 'win32' else 'bin'
+    cmd = [temp_dir / binname / 'pip', 'install', '--target', server_directory]
     cmd.extend(missing_dependencies)
     try:
         subprocess.check_call(cmd)
